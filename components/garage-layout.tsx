@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 
 type ParkingSpot = {
@@ -34,36 +35,36 @@ export default function GarageLayout() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-800 flex justify-center items-center p-6">
-      <div className="relative w-full max-w-6xl grid grid-cols-12 gap-2 bg-gray-900 p-4 rounded-lg">
-        {/* Exit */}
-        <div className="col-span-12 text-center text-red-500 font-bold mb-4">
-          EXIT
-        </div>
+    <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
+      {/* Utgang */}
+      <div className="col-span-12 text-center mb-4">
+        <h1 className="text-xl font-bold text-red-600">UTGANG</h1>
+      </div>
 
-        {/* Parkeringsplasser */}
-        <div className="col-span-5 grid grid-cols-2 gap-4">
-          {parkingSpots.map((spot) => (
-            <div
-              key={spot.id}
-              className={`h-20 flex justify-center items-center text-white font-bold cursor-pointer rounded ${
-                spot.isOccupied ? "bg-red-600" : "bg-green-600"
-              }`}
-              onClick={() => toggleSpot(spot.id)}
-            >
-              Parkering {spot.spotNumber}
-            </div>
-          ))}
-        </div>
-
-        {/* Kjørefelt */}
-        <div className="col-span-2 flex items-center justify-center bg-gray-800" />
-
-        {/* Inngang */}
-        <div className="col-span-5 flex flex-col justify-center items-center">
-          <div className="h-40 w-full bg-gray-700 flex items-center justify-center text-white font-bold text-center rounded">
-            TRAPP
+      {/*  Parkeringsplasser */}
+      <div className="col-span-5 grid grid-cols-2 gap-4">
+        {parkingSpots.map((spot) => (
+          <div
+            key={spot.id}
+            className={`h-20 flex justify-center items-center text-white font-bold cursor-pointer rounded ${
+              spot.isOccupied ? "bg-red-600" : "bg-green-600"
+            }`}
+            onClick={() => toggleSpot(spot.id)}
+          >
+            {spot.spotNumber}
           </div>
+        ))}
+      </div>
+
+      {/* Kjørefelt */}
+      <div className="col-span-2 flex items-center justify-center bg-gray-200">
+        <p className="text-gray-800 font-bold rotate-90">Kjørefelt</p>
+      </div>
+
+      {/* Trapp */}
+      <div className="col-span-5 flex items-center justify-center ml-6">
+        <div className="h-40 w-full bg-gray-800 text-white font-bold flex items-center justify-center rounded">
+          TRAPP
         </div>
       </div>
     </div>
