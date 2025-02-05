@@ -71,8 +71,8 @@ export function Navbar() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="font-bold text-red-600"
                 onClick={handleSignOut}
+                className="font-bold text-red-600 hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white cursor-pointer transition-colors"
               >
                 Sign Out
               </DropdownMenuItem>

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function SettingsPage() {
 
         const { data: userDetails, error: detailsError } = await supabase
           .from("users")
-          .select("license_plate")
+          .select("license_plate, phone_number")
           .eq("id", userData.user.id)
           .single();
 
@@ -35,8 +36,9 @@ export default function SettingsPage() {
           return;
         }
 
-        if (userDetails?.license_plate) {
-          setLicensePlate(userDetails.license_plate);
+        if (userDetails) {
+          setLicensePlate(userDetails.license_plate || "");
+          setPhoneNumber(userDetails.phone_number || "");
         }
       }
     };
@@ -58,7 +60,7 @@ export default function SettingsPage() {
       if (userId) {
         const { error: dbError } = await supabase
           .from("users")
-          .update({ license_plate: licensePlate })
+          .update({ license_plate: licensePlate, phone_number: phoneNumber })
           .eq("id", userId);
 
         if (dbError) {
@@ -86,6 +88,15 @@ export default function SettingsPage() {
               value={licensePlate}
               onChange={(e) => setLicensePlate(e.target.value)}
               placeholder={licensePlate || "Your car's license plate"}
+            />
+          </div>
+          <div>
+            <Label>Phone Number</Label>
+            <Input
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder={phoneNumber || "Your  plate"}
             />
           </div>
           <div>

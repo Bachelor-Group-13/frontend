@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/utils/supabase/client";
 
 export default function AuthPage() {
@@ -17,70 +18,110 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [alert, setAlert] = useState<{
+    type: "default" | "destructive";
+    title: string;
+    description: string;
+  } | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Is sign up flow triggered:", isSignUp);
+    if (isSignUp) {
+      if (!email || !password || !licensePlate || !phoneNumber) {
+        setAlert({
+          type: "destructive",
+          title: "Missing Fields",
+          description: "All fields are required for sign-up.",
+        });
+        return;
+      }
 
-    if (!email || !password || (isSignUp && !licensePlate)) {
-      alert("All fields are required");
-      return;
-    }
+      if (password.length < 6) {
+        setAlert({
+          type: "destructive",
+          title: "Invalid Password",
+          description: "Password must be at least 6 characters long.",
+        });
+        return;
+      }
 
-    if (password.length < 6) {
-      alert("Password must be at least 6 characters long");
-      return;
-    }
-
-    try {
-      if (isSignUp) {
+      try {
         console.log("Sign up flow triggered");
-        console.log("Signing up with:", { email, password });
-
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
 
-        console.log("Sign-up response:", { data, error });
-
         if (error) {
-          console.error("Sign up error:", error);
-          throw error;
+          setAlert({
+            type: "destructive",
+            title: "Sign Up Failed",
+            description: error.message,
+          });
+          return;
         }
 
         if (data.user) {
-          console.log("Inserting user:", {
-            id: data.user.id,
-            email,
-            license_plate: licensePlate,
-          });
-
           const { error: dbError } = await supabase.from("users").insert([
             {
               id: data.user.id,
               email,
               license_plate: licensePlate,
+              phone_number: phoneNumber,
             },
           ]);
 
           if (dbError) {
-            console.error("Database insert error", dbError);
-            throw dbError;
+            setAlert({
+              type: "destructive",
+              title: "Database Error",
+              description: dbError.message,
+            });
+            return;
           }
 
-          alert("Account created successfully. Please sign in.");
+          setAlert({
+            type: "default",
+            title: "Success",
+            description: "Account created successfully. Please sign in.",
+          });
           setIsSignUp(false);
         }
-      } else {
+      } catch (error: any) {
+        setAlert({
+          type: "destructive",
+          title: "Error",
+          description: error.message || "An unknown error occurred.",
+        });
+      }
+    } else {
+      if (!email || !password) {
+        setAlert({
+          type: "destructive",
+          title: "Missing Fields",
+          description: "Email and password are required for sign-in.",
+        });
+        return;
+      }
+
+      try {
         console.log("Sign in flow triggered");
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+
+        if (error) {
+          setAlert({
+            type: "destructive",
+            title: "Sign In Failed",
+            description: error.message,
+          });
+          return;
+        }
 
         const { data: session } = await supabase.auth.getSession();
         if (session) {
@@ -88,10 +129,13 @@ export default function AuthPage() {
         } else {
           throw new Error("Session not established");
         }
+      } catch (error: any) {
+        setAlert({
+          type: "destructive",
+          title: "Error",
+          description: error.message || "An unknown error occurred.",
+        });
       }
-    } catch (error: any) {
-      console.error("Error:", error);
-      alert(error.message);
     }
   };
 
@@ -112,6 +156,14 @@ export default function AuthPage() {
           </p>
         </CardHeader>
         <CardContent>
+          {alert && (
+            <div className="mb-4">
+              <Alert variant={alert.type}>
+                <AlertTitle>{alert.title}</AlertTitle>
+                <AlertDescription>{alert.description}</AlertDescription>
+              </Alert>
+            </div>
+          )}
           <Tabs
             defaultValue="signin"
             onValueChange={(value) => setIsSignUp(value === "signup")}
@@ -198,6 +250,16 @@ export default function AuthPage() {
                       value={licensePlate}
                       onChange={(e) => setLicensePlate(e.target.value)}
                       placeholder="Your car's license plate"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Phone Number </Label>
+                    <Input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="Your phone number"
                       required
                     />
                   </div>
