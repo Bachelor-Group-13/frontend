@@ -73,7 +73,6 @@ export default function GarageLayout() {
           return;
         }
 
-        // Safely cast the reservations to the updated type
         const typedReservations = reservations as unknown as Reservation[];
 
         const spots = Array.from({ length: 14 }, (_, i) => {
@@ -150,12 +149,12 @@ export default function GarageLayout() {
 
   return (
     <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
-      {/* Exit */}
+      {/* Utgang */}
       <div className="col-span-12 text-center mb-4">
         <h1 className="text-xl font-bold text-red-600">UTGANG</h1>
       </div>
 
-      {/* Parking Spots */}
+      {/* Parkingsplasser */}
       <div className="col-span-6 grid grid-cols-2 gap-4">
         {parkingSpots.map((spot) => (
           <HoverCard key={spot.id}>
@@ -187,8 +186,6 @@ export default function GarageLayout() {
           </HoverCard>
         ))}
       </div>
-
-      {/* Reservation Dialog */}
       {selectedSpot && (
         <AlertDialog
           open={!!selectedSpot}
@@ -225,12 +222,12 @@ export default function GarageLayout() {
         </AlertDialog>
       )}
 
-      {/* Driveway */}
+      {/* Kjørefelt */}
       <div className="col-span-2 flex items-center justify-center bg-gray-200">
         <p className="text-gray-800 font-bold rotate-90">Kjørefelt</p>
       </div>
 
-      {/* Stairway / Entrance */}
+      {/* Trapp / Inngang */}
       <div className="col-span-4 flex items-center justify-center">
         <div className="h-40 w-full bg-gray-800 text-white font-bold flex items-center justify-center rounded">
           TRAPP / INNGANG
