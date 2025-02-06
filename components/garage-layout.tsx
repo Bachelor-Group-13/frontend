@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/utils/supabase/client";
 import {
   HoverCard,
@@ -30,14 +30,14 @@ type ParkingSpot = {
   } | null;
 };
 
-type Reservation = {
+type ReservationResponse = {
   spot_number: string;
   user_id: string;
-  users: {
+  reserved_by: {
     license_plate: string | null;
     email: string | null;
     phone_number: string | null;
-  }[];
+  };
 };
 
 export default function GarageLayout() {
@@ -45,65 +45,72 @@ export default function GarageLayout() {
   const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
 
-  useEffect(() => {
-    const fetchUserAndReservations = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData?.user) {
-        const { data: userDetails } = await supabase
-          .from("users")
-          .select("license_plate, email, phone_number")
-          .eq("id", userData.user.id)
-          .single();
+  const fetchUserAndReservations = useCallback(async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData?.user) {
+      const { data: userDetails } = await supabase
+        .from("users")
+        .select("license_plate, email, phone_number")
+        .eq("id", userData.user.id)
+        .single();
 
-        if (userDetails) {
-          setUser({ id: userData.user.id, ...userDetails });
-        }
-
-        const { data: reservations } = await supabase
-          .from("reservations")
-          .select(
-            "spot_number, user_id, users(license_plate, email, phone_number)",
-          )
-          .eq("reservation_date", new Date().toISOString().split("T")[0]);
-
-        console.log("Fetched reservations:", reservations);
-
-        if (!reservations) {
-          console.error("Failed to fetch reservations");
-          return;
-        }
-
-        const typedReservations = reservations as unknown as Reservation[];
-
-        const spots = Array.from({ length: 14 }, (_, i) => {
-          const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
-            65 + (i % 2),
-          )}`;
-          const reservation = typedReservations.find(
-            (res) => res.spot_number === spotNumber,
-          );
-
-          return {
-            id: i + 1,
-            spotNumber,
-            isOccupied: !!reservation,
-            occupiedBy: reservation?.users?.[0]
-              ? {
-                  license_plate: reservation.users[0].license_plate,
-                  email: reservation.users[0].email,
-                  phone_number: reservation.users[0].phone_number,
-                  user_id: reservation.user_id,
-                }
-              : null,
-          };
-        });
-
-        setParkingSpots(spots);
+      if (userDetails) {
+        setUser({ id: userData.user.id, ...userDetails });
       }
-    };
 
-    fetchUserAndReservations();
+      const { data: reservations } = await supabase
+        .from("reservations")
+        .select(
+          `
+          spot_number,
+          user_id,
+          reserved_by:users (
+            license_plate,
+            email,
+            phone_number
+          )
+        `,
+        )
+        .eq("reservation_date", new Date().toISOString().split("T")[0]);
+
+      if (!reservations) {
+        console.error("Failed to fetch reservations");
+        return;
+      }
+
+      const typedReservations =
+        reservations as unknown as ReservationResponse[];
+
+      const spots = Array.from({ length: 14 }, (_, i) => {
+        const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
+          65 + (i % 2),
+        )}`;
+        const reservation = typedReservations.find(
+          (res) => res.spot_number === spotNumber,
+        );
+
+        return {
+          id: i + 1,
+          spotNumber,
+          isOccupied: !!reservation,
+          occupiedBy: reservation
+            ? {
+                license_plate: reservation.reserved_by.license_plate,
+                email: reservation.reserved_by.email,
+                phone_number: reservation.reserved_by.phone_number,
+                user_id: reservation.user_id,
+              }
+            : null,
+        };
+      });
+
+      setParkingSpots(spots);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchUserAndReservations();
+  }, [fetchUserAndReservations]);
 
   const handleReservation = async (actionType: "reserve" | "unreserve") => {
     if (!selectedSpot || !user) return;
@@ -118,13 +125,7 @@ export default function GarageLayout() {
       ]);
 
       if (!error) {
-        setParkingSpots((prev) =>
-          prev.map((spot) =>
-            spot.spotNumber === selectedSpot.spotNumber
-              ? { ...spot, isOccupied: true, occupiedBy: user }
-              : spot,
-          ),
-        );
+        await fetchUserAndReservations();
       }
     } else if (actionType === "unreserve") {
       const { error } = await supabase
@@ -134,13 +135,7 @@ export default function GarageLayout() {
         .eq("user_id", user.id);
 
       if (!error) {
-        setParkingSpots((prev) =>
-          prev.map((spot) =>
-            spot.spotNumber === selectedSpot.spotNumber
-              ? { ...spot, isOccupied: false, occupiedBy: null }
-              : spot,
-          ),
-        );
+        await fetchUserAndReservations();
       }
     }
 
@@ -186,6 +181,7 @@ export default function GarageLayout() {
           </HoverCard>
         ))}
       </div>
+
       {selectedSpot && (
         <AlertDialog
           open={!!selectedSpot}
@@ -228,7 +224,7 @@ export default function GarageLayout() {
       </div>
 
       {/* Trapp / Inngang */}
-      <div className="col-span-4 flex items-center justify-center">
+      <div className="col-span-4 flex items-center justify-center ml-7">
         <div className="h-40 w-full bg-gray-800 text-white font-bold flex items-center justify-center rounded">
           TRAPP / INNGANG
         </div>
