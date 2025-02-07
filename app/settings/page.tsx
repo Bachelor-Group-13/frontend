@@ -6,13 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const router = useRouter();
+
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [showPasswordMismatchAlert, setShowPasswordMismatchAlert] =
+    useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -20,7 +39,8 @@ export default function SettingsPage() {
         await supabase.auth.getUser();
 
       if (userError) {
-        console.error("Error fetching user:", userError.message);
+        setErrorMessage(userError.message);
+        setShowErrorAlert(true);
         return;
       }
 
@@ -34,7 +54,8 @@ export default function SettingsPage() {
           .single();
 
         if (detailsError) {
-          console.error("Error fetching user details:", detailsError.message);
+          setErrorMessage(detailsError.message);
+          setShowErrorAlert(true);
           return;
         }
 
@@ -50,6 +71,11 @@ export default function SettingsPage() {
 
   const handleUpdate = async () => {
     try {
+      if (password && password !== confirmPassword) {
+        setShowPasswordMismatchAlert(true);
+        return;
+      }
+
       if (password) {
         const { error: passwordError } = await supabase.auth.updateUser({
           password,
@@ -70,11 +96,14 @@ export default function SettingsPage() {
         }
       }
 
-      alert("Profile updated successfully");
+      setShowSuccessAlert(true);
+      setPassword("");
+      setConfirmPassword("");
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      alert(errorMessage);
+      setErrorMessage(
+        error instanceof Error ? error.message : "An unknown error occurred",
+      );
+      setShowErrorAlert(true);
     }
   };
 
@@ -109,18 +138,101 @@ export default function SettingsPage() {
           </div>
           <div>
             <Label>New Password</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter new password"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-3 flex items-center"
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <Label>Confirm New Password</Label>
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-3 flex items-center"
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
           </div>
           <Button onClick={handleUpdate} className="w-full bg-gray-800">
             Update Profile
           </Button>
         </div>
       </div>
+
+      <AlertDialog open={showSuccessAlert} onOpenChange={setShowSuccessAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Success</AlertDialogTitle>
+            <AlertDialogDescription>
+              Profile updated successfully
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setShowSuccessAlert(false);
+                router.push("/garage");
+              }}
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showErrorAlert} onOpenChange={setShowErrorAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Error</AlertDialogTitle>
+            <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowErrorAlert(false)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={showPasswordMismatchAlert}
+        onOpenChange={setShowPasswordMismatchAlert}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Password Mismatch</AlertDialogTitle>
+            <AlertDialogDescription>
+              Passwords do not match. Please try again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setShowPasswordMismatchAlert(false)}
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

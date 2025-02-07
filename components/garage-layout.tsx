@@ -44,6 +44,7 @@ export default function GarageLayout() {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
+  const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
 
   const fetchUserAndReservations = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -115,6 +116,14 @@ export default function GarageLayout() {
   const handleReservation = async (actionType: "reserve" | "unreserve") => {
     if (!selectedSpot || !user) return;
 
+    if (actionType === "unreserve") {
+      if (selectedSpot.occupiedBy?.user_id !== user.id) {
+        setShowUnauthorizedAlert(true);
+        setSelectedSpot(null);
+        return;
+      }
+    }
+
     if (actionType === "reserve") {
       const { error } = await supabase.from("reservations").insert([
         {
@@ -145,7 +154,7 @@ export default function GarageLayout() {
   return (
     <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
       {/* Utgang */}
-      <div className="hidden md:col-span-12 text-center mb-4">
+      <div className="hidden md:col-span-12 md:block text-center mb-4">
         <h1 className="text-xl font-bold text-red-600">UTGANG</h1>
       </div>
 
@@ -182,6 +191,7 @@ export default function GarageLayout() {
         ))}
       </div>
 
+      {/* Reservation Dialog */}
       {selectedSpot && (
         <AlertDialog
           open={!!selectedSpot}
@@ -190,33 +200,63 @@ export default function GarageLayout() {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {selectedSpot.isOccupied
+                {selectedSpot.isOccupied &&
+                selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
-                  : `Reserve Spot ${selectedSpot.spotNumber}?`}
+                  : selectedSpot.isOccupied
+                    ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
+                    : `Reserve Spot ${selectedSpot.spotNumber}?`}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {selectedSpot.isOccupied
+                {selectedSpot.isOccupied &&
+                selectedSpot.occupiedBy?.user_id === user?.id
                   ? "Do you want to make this spot available again?"
-                  : "Do you want to reserve this spot for the rest of the day?"}
+                  : selectedSpot.isOccupied
+                    ? "This spot is currently reserved by someone else."
+                    : "Do you want to reserve this spot for the rest of the day?"}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setSelectedSpot(null)}>
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() =>
-                  handleReservation(
-                    selectedSpot.isOccupied ? "unreserve" : "reserve",
-                  )
-                }
-              >
-                {selectedSpot.isOccupied ? "Unreserve" : "Reserve"}
-              </AlertDialogAction>
+              {(!selectedSpot.isOccupied ||
+                selectedSpot.occupiedBy?.user_id === user?.id) && (
+                <AlertDialogAction
+                  onClick={() =>
+                    handleReservation(
+                      selectedSpot.isOccupied ? "unreserve" : "reserve",
+                    )
+                  }
+                >
+                  {selectedSpot.isOccupied ? "Unreserve" : "Reserve"}
+                </AlertDialogAction>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       )}
+
+      {/* Unauthorized Alert Dialog */}
+      <AlertDialog
+        open={showUnauthorizedAlert}
+        onOpenChange={setShowUnauthorizedAlert}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unauthorized Action</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can only unreserve parking spots that you have reserved
+              yourself.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowUnauthorizedAlert(false)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Kjørefelt */}
       <div className="hidden md:col-span-2 md:flex items-center justify-center bg-gray-200">
