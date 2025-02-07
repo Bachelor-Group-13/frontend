@@ -145,12 +145,12 @@ export default function GarageLayout() {
   return (
     <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
       {/* Utgang */}
-      <div className="col-span-12 text-center mb-4">
+      <div className="hidden md:col-span-12 text-center mb-4">
         <h1 className="text-xl font-bold text-red-600">UTGANG</h1>
       </div>
 
       {/* Parkingsplasser */}
-      <div className="col-span-6 grid grid-cols-2 gap-4">
+      <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
         {parkingSpots.map((spot) => (
           <HoverCard key={spot.id}>
             <HoverCardTrigger asChild>
@@ -219,12 +219,12 @@ export default function GarageLayout() {
       )}
 
       {/* Kjørefelt */}
-      <div className="col-span-2 flex items-center justify-center bg-gray-200">
+      <div className="hidden md:col-span-2 md:flex items-center justify-center bg-gray-200">
         <p className="text-gray-800 font-bold rotate-90">Kjørefelt</p>
       </div>
 
       {/* Trapp / Inngang */}
-      <div className="col-span-4 flex items-center justify-center ml-7">
+      <div className="hidden md:col-span-4 md:flex items-center justify-center ml-7">
         <div className="h-40 w-full bg-gray-800 text-white font-bold flex items-center justify-center rounded">
           TRAPP / INNGANG
         </div>

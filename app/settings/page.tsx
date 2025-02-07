@@ -5,6 +5,8 @@ import { supabase } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function SettingsPage() {
   const [password, setPassword] = useState("");
@@ -79,7 +81,13 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-6">
       <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-4">User Settings</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">User Settings</h1>
+          <Link href="/garage">
+            <ArrowLeft className="h-5 w-5 text-gray-800 cursor-pointer" />
+          </Link>
+        </div>
+
         <div className="space-y-4">
           <div>
             <Label>License Plate</Label>
@@ -96,7 +104,7 @@ export default function SettingsPage() {
               type="tel"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder={phoneNumber || "Your  plate"}
+              placeholder={phoneNumber || "Your phone number"}
             />
           </div>
           <div>
