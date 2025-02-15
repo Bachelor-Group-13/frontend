@@ -144,10 +144,11 @@ export default function AuthPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold">Inneparkert</CardTitle>
             <Link href="/">
               <ArrowLeft className="h-5 w-5" />
             </Link>
+            <CardTitle className="text-2xl font-bold">Inneparkert</CardTitle>
+            <div />
           </div>
           <p className="text-gray-600">
             {isSignUp
@@ -251,6 +252,9 @@ export default function AuthPage() {
                       onChange={(e) => setLicensePlate(e.target.value)}
                       placeholder="Your car's license plate"
                       required
+                      minLength={7}
+                      maxLength={7}
+                      autoCapitalize="on"
                     />
                   </div>
                   <div>
@@ -261,6 +265,8 @@ export default function AuthPage() {
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       placeholder="Your phone number"
                       required
+                      maxLength={8}
+                      minLength={8}
                     />
                   </div>
                   <Button type="submit" className="w-full bg-gray-800">

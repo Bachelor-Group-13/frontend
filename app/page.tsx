@@ -8,7 +8,8 @@ export default function LandingPage() {
         <h1 className="text-4xl font-bold font-mono text-gray-800 mb-4">
           Inneparkert
         </h1>
-        <p className="text-gray-800 mb-6">Twoday Parking Garage</p>
+        <div className="p-2" />
+
         <Link href="/auth">
           <Button className="w-full bg-gray-800 hover:bg-gray-500 text-white">
             Get Started

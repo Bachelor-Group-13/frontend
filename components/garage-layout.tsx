@@ -191,7 +191,7 @@ export default function GarageLayout() {
         ))}
       </div>
 
-      {/* Reservation Dialog */}
+      {/* Reservasjon */}
       {selectedSpot && (
         <AlertDialog
           open={!!selectedSpot}
@@ -237,7 +237,7 @@ export default function GarageLayout() {
         </AlertDialog>
       )}
 
-      {/* Unauthorized Alert Dialog */}
+      {/* Unauthorized */}
       <AlertDialog
         open={showUnauthorizedAlert}
         onOpenChange={setShowUnauthorizedAlert}
