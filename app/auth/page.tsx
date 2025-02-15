@@ -69,7 +69,7 @@ export default function AuthPage() {
             {
               id: data.user.id,
               email,
-              license_plate: licensePlate,
+              license_plate: licensePlate.toUpperCase(),
               phone_number: phoneNumber,
             },
           ]);
@@ -137,6 +137,10 @@ export default function AuthPage() {
         });
       }
     }
+  };
+
+  const handleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLicensePlate(e.target.value.toUpperCase());
   };
 
   return (
@@ -249,12 +253,12 @@ export default function AuthPage() {
                     <Input
                       type="text"
                       value={licensePlate}
-                      onChange={(e) => setLicensePlate(e.target.value)}
+                      onChange={handleLicensePlateChange}
                       placeholder="Your car's license plate"
                       required
                       minLength={7}
                       maxLength={7}
-                      autoCapitalize="on"
+                      autoCapitalize="characters"
                     />
                   </div>
                   <div>
