@@ -224,26 +224,6 @@ export default function GarageLayout() {
         ))}
       </div>
 
-      {/* License Plate Upload and Info */}
-      <div className="col-span-12 md:col-span-4">
-        <LicensePlateUpload
-          onLicensePlateDetected={handleLicensePlateDetected}
-        />
-        {detectedLicensePlate && (
-          <div className="mt-4">
-            <p>Detected License Plate: {detectedLicensePlate}</p>
-            {licensePlateInfo ? (
-              <div>
-                <p>Email: {licensePlateInfo.email}</p>
-                <p>Phone: {licensePlateInfo.phone_number}</p>
-              </div>
-            ) : (
-              <p>No user found with that license plate.</p>
-            )}
-          </div>
-        )}
-      </div>
-
       {/* Reservasjon */}
       {selectedSpot && (
         <AlertDialog
@@ -321,6 +301,25 @@ export default function GarageLayout() {
         <div className="h-40 w-full bg-gray-800 text-white font-bold flex items-center justify-center rounded">
           TRAPP / INNGANG
         </div>
+      </div>
+      {/* License Plate Upload and Info */}
+      <div className="col-span-12 mt-4">
+        <LicensePlateUpload
+          onLicensePlateDetected={handleLicensePlateDetected}
+        />
+        {detectedLicensePlate && (
+          <div className="mt-4">
+            <p>Detected License Plate: {detectedLicensePlate}</p>
+            {licensePlateInfo ? (
+              <div>
+                <p>Email: {licensePlateInfo.email}</p>
+                <p>Phone: {licensePlateInfo.phone_number}</p>
+              </div>
+            ) : (
+              <p>No user found with that license plate.</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
