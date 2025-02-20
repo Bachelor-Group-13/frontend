@@ -17,7 +17,9 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import LicensePlateUpload from "@/components/license-plate-upload";
+import { useRouter } from "next/navigation";
+import { Button } from "./ui/button";
+import { Camera } from "lucide-react";
 
 type ParkingSpot = {
   id: number;
@@ -46,10 +48,8 @@ export default function GarageLayout() {
   const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
-  const [detectedLicensePlate, setDetectedLicensePlate] = useState<
-    string | null
-  >(null);
-  const [licensePlateInfo, setLicensePlateInfo] = useState<any>(null);
+
+  const router = useRouter();
 
   const fetchUserAndReservations = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -156,39 +156,23 @@ export default function GarageLayout() {
     setSelectedSpot(null);
   };
 
-  const handleLicensePlateDetected = (licensePlate: string) => {
-    const cleanedLicensePlate = licensePlate.replace(/\s/g, "");
-    setDetectedLicensePlate(cleanedLicensePlate);
-    fetchLicensePlateInfo(cleanedLicensePlate);
-  };
-
-  const fetchLicensePlateInfo = async (licensePlate: string) => {
-    console.log("Fetching user info for license plate:", licensePlate);
-    const { data, error } = await supabase
-      .from("users")
-      .select("email, phone_number")
-      .eq("license_plate", licensePlate);
-
-    console.log("Supabase query result:", { data, error });
-    if (error) {
-      console.error("Error fetching user info:", error);
-      setLicensePlateInfo(null);
-      return;
-    }
-
-    if (data && data.length > 0) {
-      setLicensePlateInfo(data[0]);
-    } else {
-      setLicensePlateInfo(null);
-      console.log("No user found with that license plate");
-    }
+  const navigateToLicensePlateRecognition = () => {
+    router.push("/license-plate");
   };
 
   return (
     <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
-      {/* Utgang */}
-      <div className="hidden md:col-span-12 md:block text-center mb-4">
-        <h1 className="text-xl font-bold text-red-600">UTGANG</h1>
+      {/* Header */}
+      <div className="mb-4 md:col-span-12 flex items-center justify-between">
+        <div />
+        <h1 className="text-xl font-bold text-red-600 ml-4">Parkeringhus</h1>
+        <Button
+          className="bg-gray-800"
+          onClick={navigateToLicensePlateRecognition}
+        >
+          <Camera className="mr-2 h-4 w-4" />
+          Recognize License Plate
+        </Button>
       </div>
 
       {/* Parkingsplasser */}
@@ -271,6 +255,7 @@ export default function GarageLayout() {
       )}
 
       {/* Unauthorized */}
+
       <AlertDialog
         open={showUnauthorizedAlert}
         onOpenChange={setShowUnauthorizedAlert}
@@ -301,25 +286,6 @@ export default function GarageLayout() {
         <div className="h-40 w-full bg-gray-800 text-white font-bold flex items-center justify-center rounded">
           TRAPP / INNGANG
         </div>
-      </div>
-      {/* License Plate Upload and Info */}
-      <div className="col-span-12 mt-4">
-        <LicensePlateUpload
-          onLicensePlateDetected={handleLicensePlateDetected}
-        />
-        {detectedLicensePlate && (
-          <div className="mt-4">
-            <p>Detected License Plate: {detectedLicensePlate}</p>
-            {licensePlateInfo ? (
-              <div>
-                <p>Email: {licensePlateInfo.email}</p>
-                <p>Phone: {licensePlateInfo.phone_number}</p>
-              </div>
-            ) : (
-              <p>No user found with that license plate.</p>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -76,7 +76,6 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         onChange={handleImageChange}
         disabled={loading}
       />
-
       {previewURL && (
         <img
           src={previewURL}
@@ -84,7 +83,6 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
           style={{ maxWidth: "200px", marginTop: "10px" }}
         />
       )}
-
       <Button
         onClick={handleSubmit}
         disabled={loading || !image}
