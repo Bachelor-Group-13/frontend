@@ -17,6 +17,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import LicensePlateUpload from "@/components/license-plate-upload";
 
 type ParkingSpot = {
   id: number;
@@ -45,6 +46,10 @@ export default function GarageLayout() {
   const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
+  const [detectedLicensePlate, setDetectedLicensePlate] = useState<
+    string | null
+  >(null);
+  const [licensePlateInfo, setLicensePlateInfo] = useState<any>(null);
 
   const fetchUserAndReservations = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -63,14 +68,14 @@ export default function GarageLayout() {
         .from("reservations")
         .select(
           `
-          spot_number,
-          user_id,
-          reserved_by:users (
-            license_plate,
-            email,
-            phone_number
-          )
-        `,
+           spot_number,
+           user_id,
+           reserved_by:users (
+             license_plate,
+             email,
+             phone_number
+           )
+         `,
         )
         .eq("reservation_date", new Date().toISOString().split("T")[0]);
 
@@ -151,6 +156,34 @@ export default function GarageLayout() {
     setSelectedSpot(null);
   };
 
+  const handleLicensePlateDetected = (licensePlate: string) => {
+    const cleanedLicensePlate = licensePlate.replace(/\s/g, "");
+    setDetectedLicensePlate(cleanedLicensePlate);
+    fetchLicensePlateInfo(cleanedLicensePlate);
+  };
+
+  const fetchLicensePlateInfo = async (licensePlate: string) => {
+    console.log("Fetching user info for license plate:", licensePlate);
+    const { data, error } = await supabase
+      .from("users")
+      .select("email, phone_number")
+      .eq("license_plate", licensePlate);
+
+    console.log("Supabase query result:", { data, error });
+    if (error) {
+      console.error("Error fetching user info:", error);
+      setLicensePlateInfo(null);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      setLicensePlateInfo(data[0]);
+    } else {
+      setLicensePlateInfo(null);
+      console.log("No user found with that license plate");
+    }
+  };
+
   return (
     <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
       {/* Utgang */}
@@ -189,6 +222,26 @@ export default function GarageLayout() {
             </HoverCardContent>
           </HoverCard>
         ))}
+      </div>
+
+      {/* License Plate Upload and Info */}
+      <div className="col-span-12 md:col-span-4">
+        <LicensePlateUpload
+          onLicensePlateDetected={handleLicensePlateDetected}
+        />
+        {detectedLicensePlate && (
+          <div className="mt-4">
+            <p>Detected License Plate: {detectedLicensePlate}</p>
+            {licensePlateInfo ? (
+              <div>
+                <p>Email: {licensePlateInfo.email}</p>
+                <p>Phone: {licensePlateInfo.phone_number}</p>
+              </div>
+            ) : (
+              <p>No user found with that license plate.</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Reservasjon */}
