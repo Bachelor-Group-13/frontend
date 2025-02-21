@@ -1,8 +1,17 @@
 # Inneparkert demo applikasjon
 
-### Run application
+https://pnpm.io/installation
+
+Install pnpm:
+
 ```
-  pnpm add
+  npm install -g pnpm@latest-10
+```
+
+### Run application
+
+```
+  pnpm install
 ```
 
 ```
