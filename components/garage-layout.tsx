@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { Camera } from "lucide-react";
 
+// Defines the type for parking spot
 type ParkingSpot = {
   id: number;
   spotNumber: string;
@@ -33,6 +34,7 @@ type ParkingSpot = {
   } | null;
 };
 
+// Defines the type for the reservation response
 type ReservationResponse = {
   spot_number: string;
   user_id: string;
@@ -43,7 +45,15 @@ type ReservationResponse = {
   };
 };
 
+/*
+ * GarageLayout component:
+ *
+ * This component displays the layout of the garage, including parking spots
+ * and their reservation status. It allows users to reserve or unreserve
+ * parking spots and integrates with supabase
+ */
 export default function GarageLayout() {
+  // State variables using the useState hook
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
@@ -51,7 +61,14 @@ export default function GarageLayout() {
 
   const router = useRouter();
 
+  /*
+   * fetchUserAndReservations function:
+   *
+   * Fetches the current users information and the list of reservations
+   * from supabase.
+   */
   const fetchUserAndReservations = useCallback(async () => {
+    // Fetches user authentication data from supabase
     const { data: userData } = await supabase.auth.getUser();
     if (userData?.user) {
       const { data: userDetails } = await supabase
@@ -64,6 +81,7 @@ export default function GarageLayout() {
         setUser({ id: userData.user.id, ...userDetails });
       }
 
+      // Fetches reservations for the current date from the reservations table
       const { data: reservations } = await supabase
         .from("reservations")
         .select(
@@ -87,6 +105,7 @@ export default function GarageLayout() {
       const typedReservations =
         reservations as unknown as ReservationResponse[];
 
+      // Array of parking spots with their reservation status
       const spots = Array.from({ length: 14 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
           65 + (i % 2),
@@ -114,13 +133,20 @@ export default function GarageLayout() {
     }
   }, []);
 
+  // useEffect hook to fetch user and reservation data
   useEffect(() => {
     fetchUserAndReservations();
   }, [fetchUserAndReservations]);
 
+  /*
+   * handleReservation function:
+   *
+   * Handles the reservation or unreservation of a parking spot
+   */
   const handleReservation = async (actionType: "reserve" | "unreserve") => {
     if (!selectedSpot || !user) return;
 
+    // Checks if the user is authorized to unreserve the selected spot
     if (actionType === "unreserve") {
       if (selectedSpot.occupiedBy?.user_id !== user.id) {
         setShowUnauthorizedAlert(true);
@@ -129,6 +155,7 @@ export default function GarageLayout() {
       }
     }
 
+    // Reserve the selected spot
     if (actionType === "reserve") {
       const { error } = await supabase.from("reservations").insert([
         {
@@ -139,9 +166,11 @@ export default function GarageLayout() {
       ]);
 
       if (!error) {
+        // Refreshes the list of reservations
         await fetchUserAndReservations();
       }
     } else if (actionType === "unreserve") {
+      // Unreserves the selected spot
       const { error } = await supabase
         .from("reservations")
         .delete()
@@ -156,6 +185,11 @@ export default function GarageLayout() {
     setSelectedSpot(null);
   };
 
+  /*
+   * navigateToLicensePlateRecognition function:
+   *
+   * Navigates the user to the license plate recognition page.
+   */
   const navigateToLicensePlateRecognition = () => {
     router.push("/license-plate");
   };

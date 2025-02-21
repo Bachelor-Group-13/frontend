@@ -10,14 +10,27 @@ interface LicensePlateUploadProps {
   onLicensePlateDetected: (licensePlate: string) => void;
 }
 
+/*
+ * LicensePlateUpload component:
+ *
+ * Provides a user interface for uploading an image
+ * containing a license plate. It sends the image to the recognition API, and
+ * calls the onLicensePlateDetected callback with the detected license plate number.
+ */
 const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   onLicensePlateDetected,
 }) => {
+  // State variabels using the useState hook
   const [image, setImage] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * handleImageChange function:
+   *
+   * Handles changes to the image input field
+   */
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -26,6 +39,11 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     }
   };
 
+  /**
+   * handleSubmit function:
+   *
+   * Handles the submission of the uploaded image to the API.
+   */
   const handleSubmit = async () => {
     if (!image) {
       setError("Please select an image.");
@@ -39,6 +57,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     formData.append("image", image);
 
     try {
+      // Sends the image to the API
       const response = await axios.post(
         "http://localhost:8080/license-plate",
         formData,
@@ -56,6 +75,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         setError("License plate not found.");
       }
     } catch (err: any) {
+      // Handles errors during the API request
       setError(
         err.response?.data?.error ||
           err.message ||

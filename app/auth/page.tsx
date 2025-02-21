@@ -12,7 +12,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/utils/supabase/client";
 
+/**
+ * Auth Page:
+ * This page allows users to either sign in or sign up.
+ * It includes integration with Supabase for user authentication.
+ */
 export default function AuthPage() {
+  // State variables
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -26,10 +32,18 @@ export default function AuthPage() {
   } | null>(null);
   const router = useRouter();
 
+  /*
+   * handleSubmit function:
+   * Handles form submission for both sign in and sign up.
+   * Validates the input fields, interacts with supabase and
+   * manages user sessions.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (isSignUp) {
+      // Sign up logic
+      // Checks if all required fields are filled
       if (!email || !password || !licensePlate || !phoneNumber) {
         setAlert({
           type: "destructive",
@@ -39,6 +53,7 @@ export default function AuthPage() {
         return;
       }
 
+      // Checks if the password meets the minimum length requirement
       if (password.length < 6) {
         setAlert({
           type: "destructive",
@@ -50,11 +65,13 @@ export default function AuthPage() {
 
       try {
         console.log("Sign up flow triggered");
+        // Uses supabase signup method to create user
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
 
+        // Handles sign up errors
         if (error) {
           setAlert({
             type: "destructive",
@@ -64,6 +81,7 @@ export default function AuthPage() {
           return;
         }
 
+        // If user created, insert additional user data into the users table
         if (data.user) {
           const { error: dbError } = await supabase.from("users").insert([
             {
@@ -74,6 +92,7 @@ export default function AuthPage() {
             },
           ]);
 
+          // Handles database insertion error
           if (dbError) {
             setAlert({
               type: "destructive",
@@ -83,6 +102,7 @@ export default function AuthPage() {
             return;
           }
 
+          // Success message and switches to sign in tab
           setAlert({
             type: "default",
             title: "Success",
@@ -98,6 +118,8 @@ export default function AuthPage() {
         });
       }
     } else {
+      // Sign in logic
+      // Checks if the required fields are filled
       if (!email || !password) {
         setAlert({
           type: "destructive",
@@ -109,11 +131,13 @@ export default function AuthPage() {
 
       try {
         console.log("Sign in flow triggered");
+        // Uses supabase method to sign in the user
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
+        // Handles errors during sign in
         if (error) {
           setAlert({
             type: "destructive",
@@ -123,6 +147,7 @@ export default function AuthPage() {
           return;
         }
 
+        // After sign in, retrieve session and redirect to garage page
         const { data: session } = await supabase.auth.getSession();
         if (session) {
           router.push("/garage");
@@ -130,6 +155,7 @@ export default function AuthPage() {
           throw new Error("Session not established");
         }
       } catch (error: any) {
+        // Handles unexpected errors during sign in process
         setAlert({
           type: "destructive",
           title: "Error",
@@ -139,6 +165,11 @@ export default function AuthPage() {
     }
   };
 
+  /**
+   * handleLicensePlateChange function:
+   *
+   * Handles changes to the license plate field, converting it to uppercase
+   */
   const handleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLicensePlate(e.target.value.toUpperCase());
   };

@@ -12,10 +12,19 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import Link from "next/link";
 
+/*
+ * Navbar component:
+ *
+ * Navigation bar with user authentication features,
+ * including sign out button and link to the settings page.
+ * It fetches users information from supabase and displays
+ * it in an avatar.
+ */
 export function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
 
+  // useEffect hook to fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -26,12 +35,25 @@ export function Navbar() {
     fetchUser();
   }, []);
 
+  /*
+   * handleSignOut function:
+   *
+   * Signs the user out of the application and redirects them to the
+   * landing page
+   *
+   */
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
       router.push("/");
     }
   };
+
+  /*
+   * getInitials function:
+   *
+   * Extracts the initials from the users email address.
+   */
   const getInitials = () => {
     if (user?.email) {
       const parts = user.email.split("@")[0].split(/[\W_]+/);

@@ -2,6 +2,13 @@ import Link from "next/link";
 import { Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+/*
+ * NotFound Page:
+ *
+ * This page is displayed when a user navigates to a page
+ * that does not exist. It displays a user friendly message and
+ * link back to home page
+ */
 export default function NotFound() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

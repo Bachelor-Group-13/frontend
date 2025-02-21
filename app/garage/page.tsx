@@ -1,6 +1,12 @@
 import GarageLayout from "@/components/garage-layout";
 import { Navbar } from "@/components/navbar";
 
+/**
+ * Garage Page:
+ *
+ * Main page for the garage section. It includes a navbar
+ * and the garage layout.
+ */
 export default function GaragePage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">

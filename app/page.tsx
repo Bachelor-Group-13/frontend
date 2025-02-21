@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+/*
+ * LandingPage:
+ *
+ * The landing page for the application.
+ * It has a button to navigate to the authentication page.
+ */
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-6">

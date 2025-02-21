@@ -18,23 +18,34 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+/*
+ * SettingsPage:
+ *
+ * User interface for users to update their profile
+ * settings, including license plate, phone number, and password.
+ * It fetches the users current information form Supabase and allows them
+ * to update it
+ */
 export default function SettingsPage() {
+  // State variables using useState hook
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
-  const router = useRouter();
-
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [showPasswordMismatchAlert, setShowPasswordMismatchAlert] =
     useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const router = useRouter();
+
+  // useEffect hook to fetch user data
   useEffect(() => {
     const fetchUser = async () => {
+      // Fetches user authentication data from supabase
       const { data: userData, error: userError } =
         await supabase.auth.getUser();
 
@@ -47,6 +58,7 @@ export default function SettingsPage() {
       if (userData?.user) {
         setUserId(userData.user.id);
 
+        // Fetches user details from the users table in supabase
         const { data: userDetails, error: detailsError } = await supabase
           .from("users")
           .select("license_plate, phone_number")
@@ -69,13 +81,22 @@ export default function SettingsPage() {
     fetchUser();
   }, []);
 
+  /*
+   * handleUpdate function:
+   *
+   * Handles the update of user settings. It validates
+   * the input fields and interacts with supabase to update the users
+   * information.
+   */
   const handleUpdate = async () => {
     try {
+      // Checks if the password and confirm password match
       if (password && password !== confirmPassword) {
         setShowPasswordMismatchAlert(true);
         return;
       }
 
+      // Updates the users password if a new password is provided
       if (password) {
         const { error: passwordError } = await supabase.auth.updateUser({
           password,
@@ -85,6 +106,7 @@ export default function SettingsPage() {
         }
       }
 
+      // Updates the users license plate and phone number in the users table
       if (userId) {
         const { error: dbError } = await supabase
           .from("users")
@@ -100,6 +122,7 @@ export default function SettingsPage() {
       setPassword("");
       setConfirmPassword("");
     } catch (error: unknown) {
+      // Handles errors during the update process
       setErrorMessage(
         error instanceof Error ? error.message : "An unknown error occurred",
       );
