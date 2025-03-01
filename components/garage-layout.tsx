@@ -52,7 +52,7 @@ type ReservationResponse = {
  * and their reservation status. It allows users to reserve or unreserve
  * parking spots and integrates with supabase
  */
-export default function GarageLayout() {
+export function GarageLayout() {
   // State variables using the useState hook
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -197,27 +197,31 @@ export default function GarageLayout() {
   return (
     <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
       {/* Header */}
-      <div className="mb-4 md:col-span-12 flex items-center justify-between">
-        <div />
-        <h1 className="text-xl font-bold text-red-600 ml-4">Parkeringhus</h1>
-        <Button
-          className="bg-gray-800"
-          onClick={navigateToLicensePlateRecognition}
-        >
-          <Camera className="mr-2 h-4 w-4" />
-          Recognize License Plate
-        </Button>
+      <div className="col-span-12 mb-4 flex flex-col items-center w-full md:flex-row md:justify-between">
+        <div className="md:w-1/3" />
+        <h1 className="text-xl font-bold text-red-600 mb-2 md:mb-0">
+          Parkeringhus
+        </h1>
+        <div className="md:w-1/3 md:flex md:justify-end">
+          <Button
+            className="bg-neutral-900 p-6"
+            onClick={navigateToLicensePlateRecognition}
+          >
+            <Camera className="mr-2 h-4 w-4" />
+            Scan License Plate
+          </Button>
+        </div>
       </div>
-
       {/* Parkingsplasser */}
       <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
         {parkingSpots.map((spot) => (
           <HoverCard key={spot.id}>
             <HoverCardTrigger asChild>
               <div
-                className={`h-24 flex justify-center items-center text-white font-bold cursor-pointer rounded ${
-                  spot.isOccupied ? "bg-red-600" : "bg-green-600"
-                }`}
+                className={`h-24 flex justify-center items-center text-white
+                          font-bold cursor-pointer rounded ${
+                            spot.isOccupied ? "bg-red-600" : "bg-green-600"
+                          }`}
                 onClick={() => setSelectedSpot(spot)}
               >
                 {spot.spotNumber}
@@ -311,13 +315,22 @@ export default function GarageLayout() {
       </AlertDialog>
 
       {/* Kjørefelt */}
-      <div className="hidden md:col-span-2 md:flex items-center justify-center bg-gray-200">
-        <p className="text-gray-800 font-bold rotate-90">Kjørefelt</p>
+      <div
+        className="hidden md:col-span-2 md:flex items-center justify-center
+        bg-gray-200"
+      >
+        <p className="text-neutral-900 font-bold rotate-90">Kjørefelt</p>
       </div>
 
       {/* Trapp / Inngang */}
-      <div className="hidden md:col-span-4 md:flex items-center justify-center ml-7">
-        <div className="h-40 w-full bg-gray-800 text-white font-bold flex items-center justify-center rounded">
+      <div
+        className="hidden md:col-span-4 md:flex items-center justify-center
+        ml-7"
+      >
+        <div
+          className="h-40 w-full bg-neutral-900 text-white font-bold flex
+          items-center justify-center rounded"
+        >
           TRAPP / INNGANG
         </div>
       </div>

@@ -135,7 +135,7 @@ export default function SettingsPage() {
       <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <Link href="/garage">
-            <ArrowLeft className="h-5 w-5 text-gray-800 cursor-pointer" />
+            <ArrowLeft className="h-5 w-5 text-neutral-900 cursor-pointer" />
           </Link>
           <h1 className="text-2xl font-bold">User Settings</h1>
           <div />
@@ -196,7 +196,7 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
-          <Button onClick={handleUpdate} className="w-full bg-gray-800">
+          <Button onClick={handleUpdate} className="w-full bg-neutral-900">
             Update Profile
           </Button>
         </div>

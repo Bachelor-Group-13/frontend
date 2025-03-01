@@ -159,7 +159,10 @@ export default function LicensePlatePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button onClick={() => setShowWebcam(!showWebcam)}>
+          <Button
+            className="bg-neutral-900"
+            onClick={() => setShowWebcam(!showWebcam)}
+          >
             {showWebcam ? "Hide Camera" : "Open Camera"}
           </Button>
 

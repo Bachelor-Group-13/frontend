@@ -68,7 +68,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-800 text-white">
+    <nav className="bg-neutral-900 text-white">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Link href="/" className="text-2xl font-bold font-mono">
           Inneparkert
