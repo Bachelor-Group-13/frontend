@@ -9,6 +9,10 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
+  if (request.nextUrl.pathname === "/" && session) {
+    return NextResponse.redirect(new URL("/garage", request.url));
+  }
+
   if (request.nextUrl.pathname.startsWith("/auth") && session) {
     return NextResponse.redirect(new URL("/garage", request.url));
   }
@@ -23,5 +27,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/auth", "/garage/:path*"],
+  matcher: ["/auth", "/garage/:path*", "/"],
 };
