@@ -144,7 +144,7 @@ export default function LicensePlatePage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen p-2 bg-gray-100">
-      <Card className="w-full p-2 max-w-md">
+      <Card className="w-full p-2 max-w-lg">
         <CardHeader>
           <div className="flex items-center justify-between">
             <Link href="/garage">

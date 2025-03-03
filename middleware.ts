@@ -1,16 +1,9 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerSupabaseClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-      },
-    },
-  );
+  const res = NextResponse.next();
+  const supabase = await createServerSupabaseClient();
 
   const {
     data: { session },
@@ -26,7 +19,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  return NextResponse.next();
+  return res;
 }
 
 export const config = {
