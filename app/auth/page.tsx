@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/utils/supabase/client";
+import { isValidLicensePlate } from "@/utils/helpers";
 
 /**
  * Auth Page:
@@ -30,6 +31,9 @@ export default function AuthPage() {
     title: string;
     description: string;
   } | null>(null);
+  const [licensePlateError, setLicensePlateError] = useState<string | null>(
+    null,
+  );
   const router = useRouter();
 
   /*
@@ -171,7 +175,15 @@ export default function AuthPage() {
    * Handles changes to the license plate field, converting it to uppercase
    */
   const handleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLicensePlate(e.target.value.toUpperCase());
+    const value = e.target.value.toUpperCase();
+    setLicensePlate(value);
+
+    // Validates the license plate format
+    if (!isValidLicensePlate(value) && value.length === 7) {
+      setLicensePlateError("Invalid license plate format");
+    } else {
+      setLicensePlateError(null);
+    }
   };
 
   return (
@@ -290,7 +302,13 @@ export default function AuthPage() {
                       minLength={7}
                       maxLength={7}
                       autoCapitalize="characters"
+                      className={licensePlateError ? "border-red-500" : ""}
                     />
+                    {licensePlateError && (
+                      <p className="text-red-500 text-sm">
+                        {licensePlateError}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label>Phone Number </Label>
@@ -304,7 +322,11 @@ export default function AuthPage() {
                       minLength={8}
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-gray-800">
+                  <Button
+                    type="submit"
+                    className="w-full bg-gray-800"
+                    disabled={licensePlateError !== null}
+                  >
                     Sign Up
                   </Button>
                 </div>

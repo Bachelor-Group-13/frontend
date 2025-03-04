@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { isValidLicensePlate } from "@/utils/helpers";
 
 /*
  * SettingsPage:
@@ -39,6 +40,9 @@ export default function SettingsPage() {
   const [showPasswordMismatchAlert, setShowPasswordMismatchAlert] =
     useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [licensePlateError, setLicensePlateError] = useState<string | null>(
+    null,
+  );
 
   const router = useRouter();
 
@@ -80,6 +84,18 @@ export default function SettingsPage() {
 
     fetchUser();
   }, []);
+
+  const handleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase();
+    setLicensePlate(value);
+
+    // Validate the license plate format
+    if (!isValidLicensePlate(value) && value.length === 7) {
+      setLicensePlateError("Invalid license plate format. Example: AB12345");
+    } else {
+      setLicensePlateError(null);
+    }
+  };
 
   /*
    * handleUpdate function:
@@ -147,9 +163,15 @@ export default function SettingsPage() {
             <Input
               type="text"
               value={licensePlate}
-              onChange={(e) => setLicensePlate(e.target.value)}
+              onChange={handleLicensePlateChange}
               placeholder={licensePlate || "Your car's license plate"}
+              className={licensePlateError ? "border-red-500" : ""}
+              minLength={7}
+              maxLength={7}
             />
+            {licensePlateError && (
+              <p className="text-red-500 text-sm">{licensePlateError}</p>
+            )}
           </div>
           <div>
             <Label>Phone Number</Label>
