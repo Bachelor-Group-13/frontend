@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { isValidLicensePlate } from "@/utils/helpers";
+import { handleLicensePlateChange, isValidLicensePlate } from "@/utils/helpers";
 
 /*
  * SettingsPage:
@@ -85,16 +85,15 @@ export default function SettingsPage() {
     fetchUser();
   }, []);
 
-  const handleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase();
-    setLicensePlate(value);
-
-    // Validate the license plate format
-    if (!isValidLicensePlate(value) && value.length === 7) {
-      setLicensePlateError("Invalid license plate format. Example: AB12345");
-    } else {
-      setLicensePlateError(null);
-    }
+  /**
+   * handleLicensePlateChange function:
+   *
+   * Updates the license plate state with the value from the input field.
+   */
+  const handleLicensePlateInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
 
   /*
@@ -163,7 +162,7 @@ export default function SettingsPage() {
             <Input
               type="text"
               value={licensePlate}
-              onChange={handleLicensePlateChange}
+              onChange={handleLicensePlateInputChange}
               placeholder={licensePlate || "Your car's license plate"}
               className={licensePlateError ? "border-red-500" : ""}
               minLength={7}

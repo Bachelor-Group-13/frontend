@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/utils/supabase/client";
-import { isValidLicensePlate } from "@/utils/helpers";
+import { handleLicensePlateChange, isValidLicensePlate } from "@/utils/helpers";
 
 /**
  * Auth Page:
@@ -172,18 +172,12 @@ export default function AuthPage() {
   /**
    * handleLicensePlateChange function:
    *
-   * Handles changes to the license plate field, converting it to uppercase
+   * Updates the license plate state with the value from the input field.
    */
-  const handleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase();
-    setLicensePlate(value);
-
-    // Validates the license plate format
-    if (!isValidLicensePlate(value) && value.length === 7) {
-      setLicensePlateError("Invalid license plate format");
-    } else {
-      setLicensePlateError(null);
-    }
+  const handleLicensePlateInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
 
   return (
@@ -296,7 +290,7 @@ export default function AuthPage() {
                     <Input
                       type="text"
                       value={licensePlate}
-                      onChange={handleLicensePlateChange}
+                      onChange={handleLicensePlateInputChange}
                       placeholder="Your car's license plate"
                       required
                       minLength={7}
