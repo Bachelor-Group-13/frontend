@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { handleLicensePlateChange, isValidLicensePlate } from "@/utils/helpers";
 
 /*
  * SettingsPage:
@@ -39,6 +40,9 @@ export default function SettingsPage() {
   const [showPasswordMismatchAlert, setShowPasswordMismatchAlert] =
     useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [licensePlateError, setLicensePlateError] = useState<string | null>(
+    null,
+  );
 
   const router = useRouter();
 
@@ -80,6 +84,17 @@ export default function SettingsPage() {
 
     fetchUser();
   }, []);
+
+  /**
+   * handleLicensePlateChange function:
+   *
+   * Updates the license plate state with the value from the input field.
+   */
+  const handleLicensePlateInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
+  };
 
   /*
    * handleUpdate function:
@@ -147,9 +162,15 @@ export default function SettingsPage() {
             <Input
               type="text"
               value={licensePlate}
-              onChange={(e) => setLicensePlate(e.target.value)}
+              onChange={handleLicensePlateInputChange}
               placeholder={licensePlate || "Your car's license plate"}
+              className={licensePlateError ? "border-red-500" : ""}
+              minLength={7}
+              maxLength={7}
             />
+            {licensePlateError && (
+              <p className="text-red-500 text-sm">{licensePlateError}</p>
+            )}
           </div>
           <div>
             <Label>Phone Number</Label>

@@ -1,27 +1,63 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { Navbar } from "@/components/navbar";
+import { createServerSupabaseClient } from "@/utils/supabase/server";
 
-/*
- * LandingPage:
- *
- * The landing page for the application.
- * It has a button to navigate to the authentication page.
- */
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const buttonText = session ? "Go to Garage" : "Get Started";
+
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-6">
-      <div className="max-w-xl w-full text-center bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-4xl font-bold font-mono text-gray-800 mb-4">
-          Inneparkert
-        </h1>
-        <div className="p-2" />
-
-        <Link href="/auth">
-          <Button className="w-full bg-gray-800 hover:bg-gray-500 text-white">
-            Get Started
-          </Button>
-        </Link>
-      </div>
+    <div
+      className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50
+      to-slate-100"
+    >
+      {/* Hero Section */}
+      <section
+        className="container mx-auto px-4 py-16 md:py-24 flex flex-col
+        md:flex-row items-center gap-8 md:gap-16"
+      >
+        <div className="flex-1 space-y-6">
+          <h1
+            className="text-4xl md:text-5xl font-bold tracking-tight
+            text-slate-900"
+          >
+            Never get parked in again
+          </h1>
+          <p className="text-xl text-slate-600 max-w-md">
+            Manage parking spaces, report blocked vehicles, and coordinate with
+            colleagues—all in one place.
+          </p>
+          <div className="flex gap-4">
+            <Link href={session ? "/garage" : "/auth"}>
+              {" "}
+              {/* Update Link */}
+              <Button size="lg" className="gap-2">
+                {buttonText} <ArrowRight className="h-4 w-4" />{" "}
+                {/* Use dynamic text */}
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div
+          className="flex-1 relative h-[300px] md:h-[400px] w-full
+          rounded-xl overflow-hidden shadow-xl"
+        >
+          <Image
+            src="/parking-lot3.jpg"
+            alt="Parking garage illustration"
+            className="object-cover"
+            fill
+            priority
+          />
+        </div>
+      </section>
     </div>
   );
 }
