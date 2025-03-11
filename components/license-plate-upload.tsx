@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface LicensePlateUploadProps {
-  onLicensePlateDetected: (licensePlate: string) => void;
+  onLicensePlatesDetected: (licensePlate: string[]) => void;
 }
 
 /*
@@ -18,7 +18,7 @@ interface LicensePlateUploadProps {
  * calls the onLicensePlateDetected callback with the detected license plate number.
  */
 const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
-  onLicensePlateDetected,
+  onLicensePlatesDetected,
 }) => {
   // State variabels using the useState hook
   const [image, setImage] = useState<File | null>(null);
@@ -27,8 +27,6 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * handleImageChange function:
-   *
    * Handles changes to the image input field
    */
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,8 +38,6 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   };
 
   /**
-   * handleSubmit function:
-   *
    * Handles the submission of the uploaded image to the API.
    */
   const handleSubmit = async () => {
@@ -69,10 +65,16 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         },
       );
 
-      if (response.data && response.data.license_plate) {
-        onLicensePlateDetected(response.data.license_plate);
+      // Look for "license_plates" array in the response
+      if (response.data && response.data.license_plates) {
+        const plates = response.data.license_plates as string[];
+        if (plates.length > 0) {
+          onLicensePlatesDetected(plates);
+        } else {
+          setError("No license plates found.");
+        }
       } else {
-        setError("License plate not found.");
+        setError("No license plates found.");
       }
     } catch (err: any) {
       // Handles errors during the API request
@@ -85,7 +87,6 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
       setLoading(false);
     }
   };
-
   return (
     <div>
       <Label htmlFor="image-upload">Upload License Plate Image</Label>

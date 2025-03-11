@@ -16,6 +16,15 @@ import Webcam from "react-webcam";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Type for storing plate + user info
+ */
+type PlateUserInfo = {
+  plate: string;
+  email?: string;
+  phone_number?: string;
+};
+
 /*
  * LicensePlatePage:
  *
@@ -25,60 +34,66 @@ import { Button } from "@/components/ui/button";
  */
 export default function LicensePlatePage() {
   // State variables using useState hook
-  const [detectedLicensePlate, setDetectedLicensePlate] = useState<
-    string | null
-  >(null);
-  const [licensePlateInfo, setLicensePlateInfo] = useState<any>(null);
+  const [platesInfo, setPlatesInfo] = useState<PlateUserInfo[]>([]);
   const [showWebcam, setShowWebcam] = useState(false);
-
   const webcamRef = useRef<Webcam>(null);
 
   /**
-   * handleLicensePlateDetected function:
-   *
+   * handleLicensePlateDetected:
    * Handles the detected license plate by removing whitespace
    * and fetching associated user information.
    */
-  const handleLicensePlateDetected = (licensePlate: string) => {
-    const cleanedLicensePlate = licensePlate.replace(/\s/g, "");
-    setDetectedLicensePlate(cleanedLicensePlate);
-    fetchLicensePlateInfo(cleanedLicensePlate);
+  const handleLicensePlatesDetected = async (plates: string[]) => {
+    const cleanedPlates = plates.map((p) => p.replace(/\s/g, ""));
+    const results = await Promise.all(
+      cleanedPlates.map(async (plate) => {
+        const userInfo = await fetchLicensePlateInfo(plate);
+        return userInfo
+          ? {
+              plate,
+              email: userInfo.email,
+              phone_number: userInfo.phone_number,
+            }
+          : { plate };
+      }),
+    );
+
+    setPlatesInfo(results);
   };
 
   /**
-   * fetchLicensePlateInfo function:
-   *
+   * fetchLicensePlateInfo:
    * Fetches user information from supabase based on the provided
    * license plate.
    */
-  const fetchLicensePlateInfo = async (licensePlate: string) => {
-    console.log("Fetching user info for license plate:", licensePlate);
-    // Queries the users table in supabase for matching license plate
-    const { data, error } = await supabase
-      .from("users")
-      .select("email, phone_number")
-      .eq("license_plate", licensePlate);
+  const fetchLicensePlateInfo = async (plate: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("email, phone_number")
+        .eq("license_plate", plate);
 
-    // Handles error fetching user info, resets user info on error
-    console.log("Supabase query result:", { data, error });
-    if (error) {
-      console.error("Error fetching user info:", error);
-      setLicensePlateInfo(null);
-      return;
-    }
+      if (error) {
+        console.error("Error fetching user info:", error);
+        return null;
+      }
 
-    // Sets user info if found, and resets if no user is found
-    if (data && data.length > 0) {
-      setLicensePlateInfo(data[0]);
-    } else {
-      setLicensePlateInfo(null);
-      console.log("No user found with that license plate");
+      if (data && data.length > 0) {
+        return {
+          email: data[0].email,
+          phone_number: data[0].phone_number,
+        };
+      } else {
+        return null;
+      }
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+      return null;
     }
   };
 
   /**
-   * capture function:
-   *
+   * capture:
    * Captures an image from the webcam and processes it to detect license plate
    */
   const capture = useCallback(async () => {
@@ -100,8 +115,7 @@ export default function LicensePlatePage() {
   }, [webcamRef]);
 
   /*
-   * handleWebcamImage function:
-   *
+   * handleWebcamImage:
    * Sends captured image to the recognition API and handles response
    */
   const handleWebcamImage = async (image: File) => {
@@ -121,7 +135,7 @@ export default function LicensePlatePage() {
       );
 
       if (response.data && response.data.license_plate) {
-        handleLicensePlateDetected(response.data.license_plate);
+        handleLicensePlatesDetected(response.data.license_plates);
       } else {
         console.error("License plate not found.");
       }
@@ -185,19 +199,24 @@ export default function LicensePlatePage() {
           )}
 
           <LicensePlateUpload
-            onLicensePlateDetected={handleLicensePlateDetected}
+            onLicensePlatesDetected={handleLicensePlatesDetected}
           />
-          {detectedLicensePlate && (
-            <div>
-              <p>Detected License Plate: {detectedLicensePlate}</p>
-              {licensePlateInfo ? (
-                <div>
-                  <p>Email: {licensePlateInfo.email}</p>
-                  <p>Phone: {licensePlateInfo.phone_number}</p>
+          {platesInfo.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <h3 className="font-bold">Detected Plates:</h3>
+              {platesInfo.map((p) => (
+                <div key={p.plate} className="border p-2 rounded">
+                  <p className="font-semibold">Plate: {p.plate}</p>
+                  {p.email && p.phone_number ? (
+                    <div>
+                      <p>Email: {p.email}</p>
+                      <p>Phone: {p.phone_number}</p>
+                    </div>
+                  ) : (
+                    <p>No user found for this plate.</p>
+                  )}
                 </div>
-              ) : (
-                <p>No user found with that license plate.</p>
-              )}
+              ))}
             </div>
           )}
         </CardContent>
