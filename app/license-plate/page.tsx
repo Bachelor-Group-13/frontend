@@ -15,15 +15,7 @@ import Link from "next/link";
 import Webcam from "react-webcam";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-
-/**
- * Type for storing plate + user info
- */
-type PlateUserInfo = {
-  plate: string;
-  email?: string;
-  phone_number?: string;
-};
+import { PlateUserInfo } from "@/lib/types";
 
 /*
  * LicensePlatePage:

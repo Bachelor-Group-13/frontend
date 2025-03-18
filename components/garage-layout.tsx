@@ -20,30 +20,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { Camera } from "lucide-react";
-
-// Defines the type for parking spot
-type ParkingSpot = {
-  id: number;
-  spotNumber: string;
-  isOccupied: boolean;
-  occupiedBy: {
-    license_plate: string | null;
-    email: string | null;
-    phone_number: string | null;
-    user_id: string | null;
-  } | null;
-};
-
-// Defines the type for the reservation response
-type ReservationResponse = {
-  spot_number: string;
-  user_id: string;
-  reserved_by: {
-    license_plate: string | null;
-    email: string | null;
-    phone_number: string | null;
-  };
-};
+import { ParkingSpot, ReservationResponse } from "@/lib/types";
 
 /*
  * GarageLayout component:
