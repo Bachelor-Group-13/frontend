@@ -5,6 +5,7 @@ export type ParkingSpot = {
   isOccupied: boolean;
   occupiedBy: {
     license_plate: string | null;
+    second_license_plate: string | null;
     email: string | null;
     phone_number: string | null;
     user_id: string | null;
@@ -17,6 +18,7 @@ export type ReservationResponse = {
   user_id: string;
   reserved_by: {
     license_plate: string | null;
+    second_license_plate: string | null;
     email: string | null;
     phone_number: string | null;
   };
