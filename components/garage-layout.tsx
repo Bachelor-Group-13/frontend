@@ -22,6 +22,7 @@ import { Button } from "./ui/button";
 import { Camera } from "lucide-react";
 import { ParkingSpot, ReservationResponse } from "@/lib/types";
 
+// TODO: Fix hover card to display selected license plate
 /*
  * GarageLayout component:
  *
@@ -35,6 +36,9 @@ export function GarageLayout() {
   const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
+  const [selectedLicensePlate, setSelectedLicensePlate] = useState<
+    string | null
+  >(null);
 
   const router = useRouter();
 
@@ -45,12 +49,14 @@ export function GarageLayout() {
    * from supabase.
    */
   const fetchUserAndReservations = useCallback(async () => {
+    console.log("Fetching reservations...");
+
     // Fetches user authentication data from supabase
     const { data: userData } = await supabase.auth.getUser();
     if (userData?.user) {
       const { data: userDetails } = await supabase
         .from("users")
-        .select("license_plate, email, phone_number")
+        .select("license_plate, second_license_plate, email, phone_number")
         .eq("id", userData.user.id)
         .single();
 
@@ -65,12 +71,12 @@ export function GarageLayout() {
           `
            spot_number,
            user_id,
+           license_plate,
            reserved_by:users (
-             license_plate,
              email,
              phone_number
            )
-         `,
+         `
         )
         .eq("reservation_date", new Date().toISOString().split("T")[0]);
 
@@ -85,10 +91,10 @@ export function GarageLayout() {
       // Array of parking spots with their reservation status
       const spots = Array.from({ length: 14 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
-          65 + (i % 2),
+          65 + (i % 2)
         )}`;
         const reservation = typedReservations.find(
-          (res) => res.spot_number === spotNumber,
+          (res) => res.spot_number === spotNumber
         );
 
         return {
@@ -97,7 +103,8 @@ export function GarageLayout() {
           isOccupied: !!reservation,
           occupiedBy: reservation
             ? {
-                license_plate: reservation.reserved_by.license_plate,
+                license_plate: reservation.license_plate,
+                second_license_plate: null,
                 email: reservation.reserved_by.email,
                 phone_number: reservation.reserved_by.phone_number,
                 user_id: reservation.user_id,
@@ -123,42 +130,67 @@ export function GarageLayout() {
   const handleReservation = async (actionType: "reserve" | "unreserve") => {
     if (!selectedSpot || !user) return;
 
+    console.log(`Attempting to ${actionType} spot ${selectedSpot.spotNumber}`);
+
     // Checks if the user is authorized to unreserve the selected spot
     if (actionType === "unreserve") {
       if (selectedSpot.occupiedBy?.user_id !== user.id) {
+        console.warn("Unauthorized action");
         setShowUnauthorizedAlert(true);
         setSelectedSpot(null);
         return;
       }
     }
 
+    let error = null;
+
     // Reserve the selected spot
     if (actionType === "reserve") {
-      const { error } = await supabase.from("reservations").insert([
-        {
-          spot_number: selectedSpot.spotNumber,
-          user_id: user.id,
-          reservation_date: new Date().toISOString().split("T")[0],
-        },
-      ]);
-
-      if (!error) {
-        // Refreshes the list of reservations
-        await fetchUserAndReservations();
+      if (!selectedLicensePlate) {
+        alert("Please select a license plate.");
+        return;
       }
+
+      console.log("Inserting reservation with:", {
+        spot_number: selectedSpot.spotNumber,
+        user_id: user.id,
+        license_plate: selectedLicensePlate,
+        reservation_date: new Date().toISOString().split("T")[0],
+      });
+
+      const { error: insertError } = await supabase
+        .from("reservations")
+        .insert([
+          {
+            spot_number: selectedSpot.spotNumber,
+            user_id: user.id,
+            license_plate: selectedLicensePlate,
+            reservation_date: new Date().toISOString().split("T")[0],
+          },
+        ]);
+
+      error = insertError;
     } else if (actionType === "unreserve") {
+      console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
+
       // Unreserves the selected spot
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from("reservations")
         .delete()
         .eq("spot_number", selectedSpot.spotNumber)
         .eq("user_id", user.id);
 
-      if (!error) {
-        await fetchUserAndReservations();
-      }
+      error = deleteError;
     }
 
+    if (error) {
+      console.error("Failed to reserve/unreserve spot", error);
+      alert(`Failed to reserve/unreserve spot: ${error.message}`);
+      return;
+    }
+
+    console.log("Spot reserved/unreserved successfully");
+    await fetchUserAndReservations();
     setSelectedSpot(null);
   };
 
@@ -236,17 +268,45 @@ export function GarageLayout() {
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
                   : selectedSpot.isOccupied
-                    ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
-                    : `Reserve Spot ${selectedSpot.spotNumber}?`}
+                  ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
+                  : `Reserve Spot ${selectedSpot.spotNumber}?`}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {selectedSpot.isOccupied &&
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? "Do you want to make this spot available again?"
                   : selectedSpot.isOccupied
-                    ? "This spot is currently reserved by someone else."
-                    : "Do you want to reserve this spot for the rest of the day?"}
+                  ? "This spot is currently reserved by someone else."
+                  : "Do you want to reserve this spot for the rest of the day?"}
               </AlertDialogDescription>
+              {!selectedSpot.isOccupied && user && (
+                <div className="mt-4">
+                  <label
+                    htmlFor="license-plate-select"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Select License Plate
+                  </label>
+                  <select
+                    id="license-plate-select"
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    value={selectedLicensePlate || ""}
+                    onChange={(e) => setSelectedLicensePlate(e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Select a license plate
+                    </option>
+                    <option value={user.license_plate}>
+                      {user.license_plate}
+                    </option>
+                    {user.second_license_plate && (
+                      <option value={user.second_license_plate}>
+                        {user.second_license_plate}
+                      </option>
+                    )}
+                  </select>
+                </div>
+              )}
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={() => setSelectedSpot(null)}>
@@ -257,7 +317,7 @@ export function GarageLayout() {
                 <AlertDialogAction
                   onClick={() =>
                     handleReservation(
-                      selectedSpot.isOccupied ? "unreserve" : "reserve",
+                      selectedSpot.isOccupied ? "unreserve" : "reserve"
                     )
                   }
                 >
@@ -270,7 +330,6 @@ export function GarageLayout() {
       )}
 
       {/* Unauthorized */}
-
       <AlertDialog
         open={showUnauthorizedAlert}
         onOpenChange={setShowUnauthorizedAlert}

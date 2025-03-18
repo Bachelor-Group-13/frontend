@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { handleLicensePlateChange, isValidLicensePlate } from "@/utils/helpers";
+import { handleLicensePlateChange } from "@/utils/helpers";
 
 /*
  * SettingsPage:
@@ -32,6 +32,7 @@ export default function SettingsPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
+  const [secondLicensePlate, setSecondLicensePlate] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
@@ -41,7 +42,7 @@ export default function SettingsPage() {
     useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null,
+    null
   );
 
   const router = useRouter();
@@ -65,7 +66,7 @@ export default function SettingsPage() {
         // Fetches user details from the users table in supabase
         const { data: userDetails, error: detailsError } = await supabase
           .from("users")
-          .select("license_plate, phone_number")
+          .select("license_plate, second_license_plate, phone_number")
           .eq("id", userData.user.id)
           .single();
 
@@ -77,6 +78,7 @@ export default function SettingsPage() {
 
         if (userDetails) {
           setLicensePlate(userDetails.license_plate || "");
+          setSecondLicensePlate(userDetails.second_license_plate || "");
           setPhoneNumber(userDetails.phone_number || "");
         }
       }
@@ -91,9 +93,20 @@ export default function SettingsPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
+  };
+
+  /**
+   * handleSecondLicensePlateChange function:
+   *
+   * Updates the second license plate state with the value from the input field.
+   */
+  const handleSecondLicensePlateInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSecondLicensePlate(e.target.value);
   };
 
   /*
@@ -125,7 +138,11 @@ export default function SettingsPage() {
       if (userId) {
         const { error: dbError } = await supabase
           .from("users")
-          .update({ license_plate: licensePlate, phone_number: phoneNumber })
+          .update({
+            license_plate: licensePlate,
+            second_license_plate: secondLicensePlate,
+            phone_number: phoneNumber,
+          })
           .eq("id", userId);
 
         if (dbError) {
@@ -139,7 +156,7 @@ export default function SettingsPage() {
     } catch (error: unknown) {
       // Handles errors during the update process
       setErrorMessage(
-        error instanceof Error ? error.message : "An unknown error occurred",
+        error instanceof Error ? error.message : "An unknown error occurred"
       );
       setShowErrorAlert(true);
     }
@@ -171,6 +188,18 @@ export default function SettingsPage() {
             {licensePlateError && (
               <p className="text-red-500 text-sm">{licensePlateError}</p>
             )}
+          </div>
+          <div>
+            <Label>Optional: Second License Plate</Label>
+            <Input
+              type="text"
+              value={secondLicensePlate}
+              onChange={handleSecondLicensePlateInputChange}
+              placeholder="Your second car's license plate"
+              className={licensePlateError ? "border-red-500" : ""}
+              minLength={7}
+              maxLength={7}
+            />
           </div>
           <div>
             <Label>Phone Number</Label>

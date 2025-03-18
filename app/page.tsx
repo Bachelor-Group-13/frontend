@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { Navbar } from "@/components/navbar";
 import { createServerSupabaseClient } from "@/utils/supabase/server";
 
 export default async function LandingPage() {

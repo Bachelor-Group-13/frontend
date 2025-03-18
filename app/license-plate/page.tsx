@@ -47,7 +47,7 @@ export default function LicensePlatePage() {
               phone_number: userInfo.phone_number,
             }
           : { plate };
-      }),
+      })
     );
 
     setPlatesInfo(results);
@@ -63,7 +63,7 @@ export default function LicensePlatePage() {
       const { data, error } = await supabase
         .from("users")
         .select("email, phone_number")
-        .eq("license_plate", plate);
+        .or(`license_plate.eq.${plate},second_license_plate.eq.${plate}`);
 
       if (error) {
         console.error("Error fetching user info:", error);
@@ -123,7 +123,7 @@ export default function LicensePlatePage() {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
 
       if (response.data && response.data.license_plate) {
@@ -136,7 +136,7 @@ export default function LicensePlatePage() {
       console.error(
         err.response?.data?.error ||
           err.message ||
-          "Failed to detect license plate.",
+          "Failed to detect license plate."
       );
     }
   };
