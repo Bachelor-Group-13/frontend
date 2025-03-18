@@ -71,9 +71,8 @@ export function GarageLayout() {
           `
            spot_number,
            user_id,
+           license_plate,
            reserved_by:users (
-             license_plate,
-             second_license_plate,
              email,
              phone_number
            )
@@ -104,9 +103,8 @@ export function GarageLayout() {
           isOccupied: !!reservation,
           occupiedBy: reservation
             ? {
-                license_plate: reservation.reserved_by.license_plate,
-                second_license_plate:
-                  reservation.reserved_by.second_license_plate,
+                license_plate: reservation.license_plate,
+                second_license_plate: null,
                 email: reservation.reserved_by.email,
                 phone_number: reservation.reserved_by.phone_number,
                 user_id: reservation.user_id,
@@ -166,6 +164,7 @@ export function GarageLayout() {
           {
             spot_number: selectedSpot.spotNumber,
             user_id: user.id,
+            license_plate: selectedLicensePlate,
             reservation_date: new Date().toISOString().split("T")[0],
           },
         ]);
@@ -241,9 +240,7 @@ export function GarageLayout() {
               {spot.isOccupied && spot.occupiedBy ? (
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold">
-                    Skiltnr:{" "}
-                    {spot.occupiedBy.license_plate ||
-                      spot.occupiedBy.second_license_plate}
+                    Skiltnr: {spot.occupiedBy.license_plate}
                   </h4>
                   <div className="text-sm text-gray-600">
                     <p>Email: {spot.occupiedBy.email}</p>

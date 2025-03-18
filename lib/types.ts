@@ -16,9 +16,8 @@ export type ParkingSpot = {
 export type ReservationResponse = {
   spot_number: string;
   user_id: string;
+  license_plate: string;
   reserved_by: {
-    license_plate: string | null;
-    second_license_plate: string | null;
     email: string | null;
     phone_number: string | null;
   };
