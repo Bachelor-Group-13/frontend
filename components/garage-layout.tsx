@@ -19,10 +19,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { Camera } from "lucide-react";
+import { Camera, Mail, MailIcon, MessageCircle, Phone } from "lucide-react";
 import { ParkingSpot, ReservationResponse } from "@/lib/types";
 
-// TODO: Fix hover card to display selected license plate
+// TODO: Add contact vehicle owner button
 /*
  * GarageLayout component:
  *
@@ -242,9 +242,31 @@ export function GarageLayout() {
                   <h4 className="text-sm font-semibold">
                     Skiltnr: {spot.occupiedBy.license_plate}
                   </h4>
-                  <div className="text-sm text-gray-600">
+                  <div className="flex justify-between items-center text-sm text-gray-600">
                     <p>Email: {spot.occupiedBy.email}</p>
+                    <a
+                      href={`mailto:${spot.occupiedBy.email}`}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <Mail className="h-4 w-4" />
+                    </a>
+                  </div>
+                  <div className="flex justify-between items-center text-sm text-gray-600">
                     <p>Phone: {spot.occupiedBy.phone_number}</p>
+                    <div className="flex space-x-2">
+                      <a
+                        href={`tel:${spot.occupiedBy.phone_number}`}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <Phone className="h-4 w-4" />
+                      </a>
+                      <a
+                        href={`sms:${spot.occupiedBy.phone_number}`}
+                        className="text-green-500 hover:text-green-700"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               ) : (
