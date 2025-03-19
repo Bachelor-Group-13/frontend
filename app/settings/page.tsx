@@ -44,6 +44,7 @@ export default function SettingsPage() {
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
     null
   );
+  const [showSecondLicensePlate, setShowSecondLicensePlate] = useState(false);
 
   const router = useRouter();
 
@@ -189,18 +190,30 @@ export default function SettingsPage() {
               <p className="text-red-500 text-sm">{licensePlateError}</p>
             )}
           </div>
-          <div>
-            <Label>Optional: Second License Plate</Label>
-            <Input
-              type="text"
-              value={secondLicensePlate}
-              onChange={handleSecondLicensePlateInputChange}
-              placeholder="Your second car's license plate"
-              className={licensePlateError ? "border-red-500" : ""}
-              minLength={7}
-              maxLength={7}
-            />
-          </div>
+          {!secondLicensePlate && !showSecondLicensePlate && (
+            <button
+              type="button"
+              onClick={() => setShowSecondLicensePlate(true)}
+              className="hover:text-blue-500 underline mt-1 text-sm"
+              style={{ padding: 1, margin: 3 }}
+            >
+              Add Second License Plate
+            </button>
+          )}
+          {(secondLicensePlate || showSecondLicensePlate) && (
+            <div>
+              <Label>Second License Plate</Label>
+              <Input
+                type="text"
+                value={secondLicensePlate}
+                onChange={handleSecondLicensePlateInputChange}
+                placeholder="Your second car's license plate"
+                className={licensePlateError ? "border-red-500" : ""}
+                minLength={7}
+                maxLength={7}
+              />
+            </div>
+          )}
           <div>
             <Label>Phone Number</Label>
             <Input
