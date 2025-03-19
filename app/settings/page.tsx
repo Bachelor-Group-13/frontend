@@ -194,7 +194,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => setShowSecondLicensePlate(true)}
-              className="hover:text-blue-500 underline mt-1 text-sm"
+              className="hover:text-blue-800 underline mt-1 text-sm"
               style={{ padding: 1, margin: 3 }}
             >
               Add Second License Plate
