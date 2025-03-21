@@ -246,7 +246,7 @@ export function GarageLayout() {
                     <p>Email: {spot.occupiedBy.email}</p>
                     <a
                       href={`mailto:${spot.occupiedBy.email}`}
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-neutral-900 hover:text-blue-700"
                     >
                       <Mail className="h-5 w-5" />
                     </a>
@@ -256,13 +256,13 @@ export function GarageLayout() {
                     <div className="flex space-x-2">
                       <a
                         href={`tel:${spot.occupiedBy.phone_number}`}
-                        className="text-blue-500 hover:text-blue-700"
+                        className="text-neutral-900 hover:text-blue-700"
                       >
                         <Phone className="h-5 w-5" />
                       </a>
                       <a
                         href={`sms:${spot.occupiedBy.phone_number}`}
-                        className="text-green-500 hover:text-green-700"
+                        className="text-neutral-900 hover:text-green-700"
                       >
                         <MessageCircle className="h-5 w-5" />
                       </a>
