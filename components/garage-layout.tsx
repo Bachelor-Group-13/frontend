@@ -22,7 +22,6 @@ import { Button } from "./ui/button";
 import { Camera, Mail, MailIcon, MessageCircle, Phone } from "lucide-react";
 import { ParkingSpot, ReservationResponse } from "@/lib/types";
 
-// TODO: Add contact vehicle owner button
 /*
  * GarageLayout component:
  *
