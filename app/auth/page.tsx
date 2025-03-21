@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,8 +10,9 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { supabase } from "@/utils/supabase/client";
-import { handleLicensePlateChange, isValidLicensePlate } from "@/utils/helpers";
+import { handleLicensePlateChange } from "@/utils/helpers";
+import axios from "axios";
+import { signIn } from "next-auth/react";
 
 /**
  * Auth Page:
@@ -32,9 +33,13 @@ export default function AuthPage() {
     description: string;
   } | null>(null);
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null,
+    null
   );
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/garage";
 
   /*
    * handleSubmit function:
@@ -45,127 +50,86 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isSignUp) {
-      // Sign up logic
-      // Checks if all required fields are filled
-      if (!email || !password || !licensePlate || !phoneNumber) {
-        setAlert({
-          type: "destructive",
-          title: "Missing Fields",
-          description: "All fields are required for sign-up.",
-        });
-        return;
-      }
-
-      // Checks if the password meets the minimum length requirement
-      if (password.length < 6) {
-        setAlert({
-          type: "destructive",
-          title: "Invalid Password",
-          description: "Password must be at least 6 characters long.",
-        });
-        return;
-      }
-
-      try {
-        console.log("Sign up flow triggered");
-        // Uses supabase signup method to create user
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        // Handles sign up errors
-        if (error) {
+    try {
+      if (isSignUp) {
+        // Sign up logic
+        // Checks if all required fields are filled
+        if (!email || !password || !licensePlate || !phoneNumber) {
           setAlert({
             type: "destructive",
-            title: "Sign Up Failed",
-            description: error.message,
+            title: "Missing Fields",
+            description: "All fields are required for sign-up.",
           });
+          setIsLoading(false);
           return;
         }
 
-        // If user created, insert additional user data into the users table
-        if (data.user) {
-          const { error: dbError } = await supabase.from("users").insert([
-            {
-              id: data.user.id,
-              email,
-              license_plate: licensePlate.toUpperCase(),
-              phone_number: phoneNumber,
-            },
-          ]);
-
-          // Handles database insertion error
-          if (dbError) {
-            setAlert({
-              type: "destructive",
-              title: "Database Error",
-              description: dbError.message,
-            });
-            return;
-          }
-
-          // Success message and switches to sign in tab
+        // Checks if the password meets the minimum length requirement
+        if (password.length < 6) {
           setAlert({
-            type: "default",
-            title: "Success",
-            description: "Account created successfully. Please sign in.",
+            type: "destructive",
+            title: "Invalid Password",
+            description: "Password must be at least 6 characters long.",
           });
-          setIsSignUp(false);
+          setIsLoading(false);
+          return;
         }
-      } catch (error: any) {
-        setAlert({
-          type: "destructive",
-          title: "Error",
-          description: error.message || "An unknown error occurred.",
-        });
-      }
-    } else {
-      // Sign in logic
-      // Checks if the required fields are filled
-      if (!email || !password) {
-        setAlert({
-          type: "destructive",
-          title: "Missing Fields",
-          description: "Email and password are required for sign-in.",
-        });
-        return;
-      }
 
-      try {
-        console.log("Sign in flow triggered");
-        // Uses supabase method to sign in the user
-        const { error } = await supabase.auth.signInWithPassword({
+        const response = await axios.post("/api/auth/register", {
           email,
           password,
+          licensePlate: licensePlate.toUpperCase(),
+          phoneNumber,
         });
 
-        // Handles errors during sign in
-        if (error) {
+        setAlert({
+          type: "default",
+          title: "Success",
+          description: "Account created successfully. Please sign in.",
+        });
+      } else {
+        // Sign in logic
+        // Checks if the required fields are filled
+        if (!email || !password) {
+          setAlert({
+            type: "destructive",
+            title: "Missing Fields",
+            description: "Email and password are required for sign-in.",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        const result = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+          callbackUrl,
+        });
+
+        if (result?.error) {
           setAlert({
             type: "destructive",
             title: "Sign In Failed",
-            description: error.message,
+            description: "Invalid email or password. Please try again.",
           });
+          setIsLoading(false);
           return;
         }
 
-        // After sign in, retrieve session and redirect to garage page
-        const { data: session } = await supabase.auth.getSession();
-        if (session) {
-          router.push("/garage");
-        } else {
-          throw new Error("Session not established");
-        }
-      } catch (error: any) {
-        // Handles unexpected errors during sign in process
-        setAlert({
-          type: "destructive",
-          title: "Error",
-          description: error.message || "An unknown error occurred.",
-        });
+        router.push(callbackUrl);
+        router.refresh();
       }
+    } catch (error: any) {
+      // Handles unexpected errors during sign in process
+      setAlert({
+        type: "destructive",
+        title: "Error",
+        description:
+          error.response?.data?.error || error.message || "An error occurred.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -175,7 +139,7 @@ export default function AuthPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };

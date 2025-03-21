@@ -1,3 +1,5 @@
+import { DefaultSession } from "next-auth";
+
 // Defines the type for parking spot
 export type ParkingSpot = {
   id: number;
@@ -29,3 +31,20 @@ export type PlateUserInfo = {
   email?: string;
   phone_number?: string;
 };
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      licensePlate?: string;
+      phoneNumber?: string;
+      secondLicensePlate?: string;
+    } & DefaultSession["user"];
+  }
+
+  interface User {
+    licensePlate?: string;
+    phoneNumber?: string;
+    secondLicensePlate?: string;
+  }
+}
