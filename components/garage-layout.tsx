@@ -86,6 +86,7 @@ export function GarageLayout() {
             : null,
         };
       });
+      setParkingSpots(spots);
     } catch (error) {
       console.error("Failed to fetch reservations", error);
     }
