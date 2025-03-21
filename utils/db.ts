@@ -11,8 +11,8 @@ export function getPool() {
       database: process.env.DB_DATABASE || "inneparkert",
       port: parseInt(process.env.DB_PORT || "5432"),
     });
-    return pool;
   }
+  return pool;
 }
 
 export async function query(text: string, params: any[] = []) {

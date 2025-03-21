@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/utils/supabase/client";
 import {
   HoverCard,
   HoverCardContent,
@@ -19,8 +18,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { Camera, Mail, MailIcon, MessageCircle, Phone } from "lucide-react";
+import { Camera, Mail, MessageCircle, Phone } from "lucide-react";
 import { ParkingSpot, ReservationResponse } from "@/lib/types";
+import { useSession } from "next-auth/react";
+import axios from "axios";
 
 /*
  * GarageLayout component:
@@ -32,7 +33,6 @@ import { ParkingSpot, ReservationResponse } from "@/lib/types";
 export function GarageLayout() {
   // State variables using the useState hook
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
-  const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
   const [selectedLicensePlate, setSelectedLicensePlate] = useState<
@@ -40,60 +40,35 @@ export function GarageLayout() {
   >(null);
 
   const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   /*
    * fetchUserAndReservations function:
    *
-   * Fetches the current users information and the list of reservations
-   * from supabase.
+   * Fetches the list of reservations from the database
    */
-  const fetchUserAndReservations = useCallback(async () => {
-    console.log("Fetching reservations...");
+  const fetchReservations = useCallback(async () => {
+    if (!user) return;
 
-    // Fetches user authentication data from supabase
-    const { data: userData } = await supabase.auth.getUser();
-    if (userData?.user) {
-      const { data: userDetails } = await supabase
-        .from("users")
-        .select("license_plate, second_license_plate, email, phone_number")
-        .eq("id", userData.user.id)
-        .single();
+    try {
+      console.log("Fetching reservations...");
+      const today = new Date().toISOString().split("T")[0];
+      const response = await axios.get(`/api/reservations?date=${today}`);
 
-      if (userDetails) {
-        setUser({ id: userData.user.id, ...userDetails });
-      }
-
-      // Fetches reservations for the current date from the reservations table
-      const { data: reservations } = await supabase
-        .from("reservations")
-        .select(
-          `
-           spot_number,
-           user_id,
-           license_plate,
-           reserved_by:users (
-             email,
-             phone_number
-           )
-         `
-        )
-        .eq("reservation_date", new Date().toISOString().split("T")[0]);
-
-      if (!reservations) {
+      if (!response.data) {
         console.error("Failed to fetch reservations");
         return;
       }
 
-      const typedReservations =
-        reservations as unknown as ReservationResponse[];
+      const reservations = response.data;
 
-      // Array of parking spots with their reservation status
       const spots = Array.from({ length: 14 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
           65 + (i % 2)
         )}`;
-        const reservation = typedReservations.find(
-          (res) => res.spot_number === spotNumber
+        const reservation: ReservationResponse | undefined = reservations.find(
+          (res: ReservationResponse) => res.spot_number === spotNumber
         );
 
         return {
@@ -111,15 +86,17 @@ export function GarageLayout() {
             : null,
         };
       });
-
-      setParkingSpots(spots);
+    } catch (error) {
+      console.error("Failed to fetch reservations", error);
     }
-  }, []);
+  }, [user]);
 
-  // useEffect hook to fetch user and reservation data
+  // useEffect hook to fetch reservation data
   useEffect(() => {
-    fetchUserAndReservations();
-  }, [fetchUserAndReservations]);
+    if (user) {
+      fetchReservations();
+    }
+  }, [fetchReservations, user]);
 
   /*
    * handleReservation function:
@@ -141,56 +118,43 @@ export function GarageLayout() {
       }
     }
 
-    let error = null;
+    try {
+      // Reserve the selected spot
+      if (actionType === "reserve") {
+        if (!selectedLicensePlate) {
+          alert("Please select a license plate.");
+          return;
+        }
 
-    // Reserve the selected spot
-    if (actionType === "reserve") {
-      if (!selectedLicensePlate) {
-        alert("Please select a license plate.");
-        return;
-      }
+        console.log("Creating reservation with:", {
+          spot_number: selectedSpot.spotNumber,
+          license_plate: selectedLicensePlate,
+          reservation_date: new Date().toISOString().split("T")[0],
+        });
 
-      console.log("Inserting reservation with:", {
-        spot_number: selectedSpot.spotNumber,
-        user_id: user.id,
-        license_plate: selectedLicensePlate,
-        reservation_date: new Date().toISOString().split("T")[0],
-      });
+        await axios.post("api/reservations", {
+          spot_number: selectedSpot.spotNumber,
+          license_plate: selectedLicensePlate,
+          reservation_date: new Date().toISOString().split("T")[0],
+        });
+      } else if (actionType === "unreserve") {
+        console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
 
-      const { error: insertError } = await supabase
-        .from("reservations")
-        .insert([
-          {
+        // Unreserves the selected spot
+        await axios.delete(`/api/reservations`, {
+          data: {
             spot_number: selectedSpot.spotNumber,
-            user_id: user.id,
-            license_plate: selectedLicensePlate,
             reservation_date: new Date().toISOString().split("T")[0],
           },
-        ]);
-
-      error = insertError;
-    } else if (actionType === "unreserve") {
-      console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
-
-      // Unreserves the selected spot
-      const { error: deleteError } = await supabase
-        .from("reservations")
-        .delete()
-        .eq("spot_number", selectedSpot.spotNumber)
-        .eq("user_id", user.id);
-
-      error = deleteError;
-    }
-
-    if (error) {
+        });
+      }
+      console.log("Spot reserved/unreserved successfully");
+      await fetchReservations();
+      setSelectedSpot(null);
+    } catch (error) {
       console.error("Failed to reserve/unreserve spot", error);
-      alert(`Failed to reserve/unreserve spot: ${error.message}`);
-      return;
+      alert(`Failed to ${actionType} spot.`);
     }
-
-    console.log("Spot reserved/unreserved successfully");
-    await fetchUserAndReservations();
-    setSelectedSpot(null);
   };
 
   /*
@@ -317,12 +281,12 @@ export function GarageLayout() {
                     <option value="" disabled>
                       Select a license plate
                     </option>
-                    <option value={user.license_plate}>
-                      {user.license_plate}
+                    <option value={user.licensePlate}>
+                      {user.licensePlate}
                     </option>
-                    {user.second_license_plate && (
-                      <option value={user.second_license_plate}>
-                        {user.second_license_plate}
+                    {user.secondLicensePlate && (
+                      <option value={user.secondLicensePlate}>
+                        {user.secondLicensePlate}
                       </option>
                     )}
                   </select>

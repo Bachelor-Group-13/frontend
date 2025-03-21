@@ -2,15 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { createServerSupabaseClient } from "@/utils/supabase/server";
+import { getServerSession } from "next-auth";
+import { getCurrentUser } from "@/utils/auth";
 
 export default async function LandingPage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const session = await getServerSession();
+  const user = await getCurrentUser();
 
-  const buttonText = session ? "Go to Garage" : "Get Started";
+  const buttonText = user ? "Go to Garage" : "Get Started";
 
   return (
     <div

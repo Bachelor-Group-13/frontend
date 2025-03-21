@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +17,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { handleLicensePlateChange } from "@/utils/helpers";
+import { useSession } from "next-auth/react";
+import axios from "axios";
 
 /*
  * SettingsPage:
@@ -47,46 +48,20 @@ export default function SettingsPage() {
   const [showSecondLicensePlate, setShowSecondLicensePlate] = useState(false);
 
   const router = useRouter();
+  const { data: session, update: updateSession } = useSession();
 
   // useEffect hook to fetch user data
   useEffect(() => {
-    const fetchUser = async () => {
-      // Fetches user authentication data from supabase
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
+    if (session?.user) {
+      setLicensePlate(session.user.licensePlate || "");
+      setSecondLicensePlate(session.user.secondLicensePlate || "");
+      setPhoneNumber(session.user.phoneNumber || "");
 
-      if (userError) {
-        setErrorMessage(userError.message);
-        setShowErrorAlert(true);
-        return;
+      if (session.user.secondLicensePlate) {
+        setShowSecondLicensePlate(true);
       }
-
-      if (userData?.user) {
-        setUserId(userData.user.id);
-
-        // Fetches user details from the users table in supabase
-        const { data: userDetails, error: detailsError } = await supabase
-          .from("users")
-          .select("license_plate, second_license_plate, phone_number")
-          .eq("id", userData.user.id)
-          .single();
-
-        if (detailsError) {
-          setErrorMessage(detailsError.message);
-          setShowErrorAlert(true);
-          return;
-        }
-
-        if (userDetails) {
-          setLicensePlate(userDetails.license_plate || "");
-          setSecondLicensePlate(userDetails.second_license_plate || "");
-          setPhoneNumber(userDetails.phone_number || "");
-        }
-      }
-    };
-
-    fetchUser();
-  }, []);
+    }
+  }, [session]);
 
   /**
    * handleLicensePlateChange function:
@@ -125,39 +100,45 @@ export default function SettingsPage() {
         return;
       }
 
-      // Updates the users password if a new password is provided
-      if (password) {
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password,
-        });
-        if (passwordError) {
-          throw new Error(passwordError.message);
-        }
+      const updateData: {
+        license_plate?: string;
+        second_license_plate?: string;
+        phone_number?: string;
+        password?: string;
+      } = {
+        license_plate: licensePlate,
+        phone_number: phoneNumber,
+      };
+
+      if (secondLicensePlate) {
+        updateData.second_license_plate = secondLicensePlate;
       }
 
-      // Updates the users license plate and phone number in the users table
-      if (userId) {
-        const { error: dbError } = await supabase
-          .from("users")
-          .update({
-            license_plate: licensePlate,
-            second_license_plate: secondLicensePlate,
-            phone_number: phoneNumber,
-          })
-          .eq("id", userId);
+      if (password) {
+        updateData.password = password;
+      }
 
-        if (dbError) {
-          throw new Error(dbError.message);
-        }
+      const response = await axios.put("/api/users/profile", updateData);
+
+      if (response.status === 200) {
+        await updateSession({
+          ...session,
+          user: {
+            ...session?.user,
+            licensePlate,
+            secondLicensePlate,
+            phoneNumber,
+          },
+        });
       }
 
       setShowSuccessAlert(true);
       setPassword("");
       setConfirmPassword("");
-    } catch (error: unknown) {
+    } catch (error: any) {
       // Handles errors during the update process
       setErrorMessage(
-        error instanceof Error ? error.message : "An unknown error occurred"
+        error.response?.data?.error || error.message || "An error occurred"
       );
       setShowErrorAlert(true);
     }

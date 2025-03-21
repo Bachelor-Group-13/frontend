@@ -1,6 +1,5 @@
 "use client";
 
-import { supabase } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -14,6 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Car } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 
 /*
  * Navbar component:
@@ -25,39 +25,9 @@ import { Car } from "lucide-react";
  */
 export function Navbar() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // useEffect hook to fetch user data and listen for auth state changes
-  useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoading(true);
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData?.user) {
-        setUser(userData.user);
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    };
-
-    fetchUser();
-
-    // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state change event:", event);
-        if (session?.user) {
-          setUser(session.user);
-        } else {
-          setUser(null);
-        }
-      },
-    );
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
+  const { data: session, status } = useSession();
+  const user = session?.user;
+  const isLoading = status === "loading";
 
   /*
    * handleSignOut function:
@@ -67,10 +37,7 @@ export function Navbar() {
    *
    */
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
-      router.push("/");
-    }
+    await signOut({ callbackUrl: "/" });
   };
 
   /*
@@ -114,7 +81,7 @@ export function Navbar() {
               <DropdownMenuTrigger>
                 <Avatar className="cursor-pointer">
                   <AvatarImage
-                    src={user?.avatar_url || undefined}
+                    src={user?.image || undefined}
                     alt="User Avatar"
                   />
                   <AvatarFallback className="text-gray-800">

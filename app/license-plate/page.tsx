@@ -1,7 +1,6 @@
 "use client";
 
 import LicensePlateUpload from "@/components/license-plate-upload";
-import { supabase } from "@/utils/supabase/client";
 import { useCallback, useRef, useState } from "react";
 import {
   Card,
@@ -60,20 +59,11 @@ export default function LicensePlatePage() {
    */
   const fetchLicensePlateInfo = async (plate: string) => {
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("email, phone_number")
-        .or(`license_plate.eq.${plate},second_license_plate.eq.${plate}`);
-
-      if (error) {
-        console.error("Error fetching user info:", error);
-        return null;
-      }
-
-      if (data && data.length > 0) {
+      const response = await axios.get(`/api/users/license-plate/${plate}`);
+      if (response.data && response.data.user) {
         return {
-          email: data[0].email,
-          phone_number: data[0].phone_number,
+          email: response.data.user.email,
+          phone_number: response.data.user.phone_number,
         };
       } else {
         return null;
