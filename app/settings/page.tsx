@@ -36,7 +36,6 @@ export default function SettingsPage() {
   const [secondLicensePlate, setSecondLicensePlate] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [showPasswordMismatchAlert, setShowPasswordMismatchAlert] =
