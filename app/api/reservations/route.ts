@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/utils/db";
 import { getCurrentUser, requireAuth } from "@/utils/auth";
 
-// GET /api/reservations - Get reservations for a specific date
+// GET /api/reservations
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/reservations - Create a new reservation
+// POST /api/reservations
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/reservations - Delete a reservation
+// DELETE /api/reservations
 export async function DELETE(request: NextRequest) {
   try {
     const user = await requireAuth();

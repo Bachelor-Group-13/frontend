@@ -121,20 +121,10 @@ export default function SettingsPage() {
       const response = await axios.put("/api/users/profile", updateData);
 
       if (response.status === 200) {
-        await updateSession({
-          ...session,
-          user: {
-            ...session?.user,
-            licensePlate,
-            secondLicensePlate,
-            phoneNumber,
-          },
-        });
+        setShowSuccessAlert(true);
+        setPassword("");
+        setConfirmPassword("");
       }
-
-      setShowSuccessAlert(true);
-      setPassword("");
-      setConfirmPassword("");
     } catch (error: any) {
       // Handles errors during the update process
       setErrorMessage(

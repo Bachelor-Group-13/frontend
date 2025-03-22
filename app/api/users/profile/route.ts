@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/utils/db";
 import { requireAuth } from "@/utils/auth";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export async function PUT(request: NextRequest) {
   try {
