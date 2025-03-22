@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/utils/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { plate: string } }
+  context: { params: { plate: string } }
 ) {
   try {
     // Check if user is authenticated
@@ -13,7 +13,8 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const plate = params.plate;
+    // TODO: Try to fix the await here. Need to have it to avoid errors in console, but vscode is complaining about it.
+    const { plate } = await context.params;
     if (!plate) {
       return NextResponse.json(
         { error: "License plate is required" },
