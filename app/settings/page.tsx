@@ -247,7 +247,7 @@ export default function SettingsPage() {
             <AlertDialogAction
               onClick={() => {
                 setShowSuccessAlert(false);
-                router.push("/garage");
+                window.location.href = "/garage";
               }}
             >
               OK
