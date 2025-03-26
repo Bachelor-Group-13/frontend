@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import Image from "next/image";
 
 interface ParkingSpotDetectionProps {
   onParkingSpotsDetected?: (parkingSpots: ParkingSpotBoundary[]) => void;
@@ -107,7 +106,7 @@ export function ParkingSpotDetection({
 
       {imagePreview && (
         <div className="mt-4 relative">
-          <Image
+          <img
             src={imagePreview}
             alt="Preview"
             className="w-full h-auto"
