@@ -50,10 +50,10 @@ export function ParkingSpotDetection({
       }
 
       const data = await response.json();
-      setParkingSpots(data.parking_spots);
-
+      const spots = data.parkingSpots || [];
+      setParkingSpots(spots);
       if (onParkingSpotsDetected) {
-        onParkingSpotsDetected(data.parking_spots);
+        onParkingSpotsDetected(spots);
       }
     } catch (error: any) {
       setError(`Failed to detect parking spots: ${error.message}`);
