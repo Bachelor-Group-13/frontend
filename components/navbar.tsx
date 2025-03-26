@@ -34,7 +34,12 @@ export function Navbar() {
       setIsLoading(true);
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user) {
-        setUser(userData.user);
+        const { data: profileData } = await supabase
+          .from("users")
+          .select("name")
+          .eq("id", userData.user.id)
+          .single();
+        setUser({ ...userData.user, name: profileData?.name });
       } else {
         setUser(null);
       }
@@ -48,11 +53,16 @@ export function Navbar() {
       async (event, session) => {
         console.log("Auth state change event:", event);
         if (session?.user) {
-          setUser(session.user);
+          const { data: profileData } = await supabase
+            .from("users")
+            .select("name")
+            .eq("id", session.user.id)
+            .single();
+          setUser({ ...session.user, name: profileData?.name });
         } else {
           setUser(null);
         }
-      },
+      }
     );
     return () => {
       authListener?.subscription.unsubscribe();
@@ -79,7 +89,15 @@ export function Navbar() {
    * Extracts the initials from the users email address.
    */
   const getInitials = () => {
-    if (user?.email) {
+    if (user?.name) {
+      const nameParts = user.name.split(" ");
+      const initials = nameParts
+        .filter((part: any) => part.length > 0)
+        .slice(0, 2)
+        .map((part: any) => part.charAt(0).toUpperCase())
+        .join("");
+      return initials;
+    } else if (user?.email) {
       const parts = user.email.split("@")[0].split(/[\W_]+/);
       const initials = parts
         .filter((part: any) => part.length > 0)
@@ -110,6 +128,7 @@ export function Navbar() {
         ) : user ? (
           // Logged-in state
           <div className="flex items-center space-x-4">
+          <p className="text-sm">Hello, {user.name}</p>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Avatar className="cursor-pointer">

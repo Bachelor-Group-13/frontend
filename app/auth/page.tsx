@@ -23,6 +23,7 @@ export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -32,7 +33,7 @@ export default function AuthPage() {
     description: string;
   } | null>(null);
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null,
+    null
   );
   const router = useRouter();
 
@@ -48,7 +49,7 @@ export default function AuthPage() {
     if (isSignUp) {
       // Sign up logic
       // Checks if all required fields are filled
-      if (!email || !password || !licensePlate || !phoneNumber) {
+      if (!email || !name || !password || !licensePlate || !phoneNumber) {
         setAlert({
           type: "destructive",
           title: "Missing Fields",
@@ -91,6 +92,7 @@ export default function AuthPage() {
             {
               id: data.user.id,
               email,
+              name,
               license_plate: licensePlate.toUpperCase(),
               phone_number: phoneNumber,
             },
@@ -175,7 +177,7 @@ export default function AuthPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
@@ -263,6 +265,16 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="email@example.com"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label>Name</Label>
+                    <Input
+                      type="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Ola Nordmann"
                       required
                     />
                   </div>
