@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { Camera, Mail, MailIcon, MessageCircle, Phone } from "lucide-react";
+import { Camera, Mail, MessageCircle, Phone } from "lucide-react";
 import { ParkingSpot, ReservationResponse } from "@/lib/types";
 
 /*
