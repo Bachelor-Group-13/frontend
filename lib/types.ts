@@ -29,3 +29,10 @@ export type PlateUserInfo = {
   email?: string;
   phone_number?: string;
 };
+
+// Interface for parking spot boandary
+export interface ParkingSpotBoundary {
+  id: number;
+  spotNumber: string;
+  boundingBox: [number, number, number, number];
+}
