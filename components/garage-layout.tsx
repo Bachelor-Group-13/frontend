@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { Camera, Mail, MailIcon, MessageCircle, Phone } from "lucide-react";
 import { ParkingSpot, ReservationResponse } from "@/lib/types";
+import CarspotVisuals from "./carspot-visuals";
 
 /*
  * GarageLayout component:
@@ -227,11 +228,10 @@ export function GarageLayout() {
             <HoverCardTrigger asChild>
               <div
                 className={`h-24 flex justify-center items-center text-white
-                          font-bold cursor-pointer rounded ${
-                            spot.isOccupied ? "bg-red-600" : "bg-green-600"
-                          }`}
+                          font-bold cursor-pointer rounded`}
                 onClick={() => setSelectedSpot(spot)}
               >
+                <CarspotVisuals isAvailable={!spot.isOccupied} />
                 {spot.spotNumber}
               </div>
             </HoverCardTrigger>
