@@ -136,7 +136,7 @@ export function GarageLayout() {
         reservations as unknown as ReservationResponse[];
 
       // Array of parking spots with their reservation status
-      const spots = Array.from({ length: 14 }, (_, i) => {
+      const spots = Array.from({ length: 10 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
           65 + (i % 2)
         )}`;
