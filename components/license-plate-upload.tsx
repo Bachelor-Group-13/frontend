@@ -5,6 +5,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 interface LicensePlateUploadProps {
   onLicensePlatesDetected: (licensePlate: string[]) => void;
@@ -62,7 +63,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
             "Content-Type": "multipart/form-data",
             Accept: "application/json",
           },
-        },
+        }
       );
 
       // Look for "license_plates" array in the response
@@ -81,14 +82,14 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
       setError(
         err.response?.data?.error ||
           err.message ||
-          "Failed to detect license plate.",
+          "Failed to detect license plate."
       );
     } finally {
       setLoading(false);
     }
   };
   return (
-    <div>
+    <div className="py-2">
       <Label htmlFor="image-upload">Upload License Plate Image</Label>
       <Input
         type="file"
@@ -97,13 +98,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         onChange={handleImageChange}
         disabled={loading}
       />
-      {previewURL && (
-        <img
-          src={previewURL}
-          alt="Preview"
-          style={{ maxWidth: "200px", marginTop: "10px" }}
-        />
-      )}
+      {previewURL && <Image src={previewURL} alt="Preview" className="mt-4" />}
       <Button
         onClick={handleSubmit}
         disabled={loading || !image}
