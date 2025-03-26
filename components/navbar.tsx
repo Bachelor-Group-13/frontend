@@ -34,7 +34,12 @@ export function Navbar() {
       setIsLoading(true);
       const { data: userData } = await supabase.auth.getUser();
       if (userData?.user) {
-        setUser(userData.user);
+        const { data: profileData } = await supabase
+          .from("users")
+          .select("name")
+          .eq("id", userData.user.id)
+          .single();
+        setUser({ ...userData.user, name: profileData?.name });
       } else {
         setUser(null);
       }
@@ -48,7 +53,12 @@ export function Navbar() {
       async (event, session) => {
         console.log("Auth state change event:", event);
         if (session?.user) {
-          setUser(session.user);
+          const { data: profileData } = await supabase
+            .from("users")
+            .select("name")
+            .eq("id", session.user.id)
+            .single();
+          setUser({ ...session.user, name: profileData?.name });
         } else {
           setUser(null);
         }
@@ -99,13 +109,6 @@ export function Navbar() {
     return "U";
   };
 
-  // Method to fetch username (First and Lastname) from 
-  // logged-in user. 
-  const getUserName = () => {
-    return user.name;
-  }
-
-
   return (
     <nav className="bg-neutral-900 text-white">
       <div
@@ -120,62 +123,48 @@ export function Navbar() {
           Inneparkert
         </Link>
 
-        {(() => {
-          if (isLoading) {
-            return <div>Loading...</div>;
-          }
-
-          if (user) {
-            // Logged-in state
-            return (
-              <div className="flex items-center space-x-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-grey-700">
-                        getUserName
-                        {/* {getUserName()} */}
-                      </span>
-
-                      <Avatar className="cursor-pointer">
-                        <AvatarImage
-                          src={user?.avatar_url || undefined}
-                          alt="User Avatar"
-                        />
-                        <AvatarFallback className="text-gray-800">
-                          {getInitials()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings">Settings</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleSignOut}
-                      className="font-bold text-red-600 hover:bg-red-600
-                        hover:text-white focus:bg-red-600 focus:text-white
-                        cursor-pointer transition-colors"
-                    >
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            );
-          }
-
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : user ? (
+          // Logged-in state
+          <div className="flex items-center space-x-4">
+          <p className="text-sm">Hello, {user.name}</p>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Avatar className="cursor-pointer">
+                  <AvatarImage
+                    src={user?.avatar_url || undefined}
+                    alt="User Avatar"
+                  />
+                  <AvatarFallback className="text-gray-800">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="font-bold text-red-600 hover:bg-red-600
+                    hover:text-white focus:bg-red-600 focus:text-white
+                    cursor-pointer transition-colors"
+                >
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
           // Logged-out state
-          return (
-            <Link href="/auth">
-              <Button className="text-primary" variant="outline" size="sm">
-                Sign In
-              </Button>
-            </Link>
-          );
-        })()}
+          <Link href="/auth">
+            <Button className="text-primary" variant="outline" size="sm">
+              Sign In
+            </Button>
+          </Link>
+        )}
       </div>
     </nav>
   );
