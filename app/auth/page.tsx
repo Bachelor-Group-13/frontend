@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/utils/supabase/client";
-import { handleLicensePlateChange, isValidLicensePlate } from "@/utils/helpers";
+import { handleLicensePlateChange } from "@/utils/helpers";
 
 /**
  * Auth Page:
@@ -33,7 +33,7 @@ export default function AuthPage() {
     description: string;
   } | null>(null);
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null
+    null,
   );
   const router = useRouter();
 
@@ -177,7 +177,7 @@ export default function AuthPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };

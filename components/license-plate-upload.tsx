@@ -5,7 +5,6 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Image from "next/image";
 
 interface LicensePlateUploadProps {
   onLicensePlatesDetected: (licensePlate: string[]) => void;
@@ -63,7 +62,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
             "Content-Type": "multipart/form-data",
             Accept: "application/json",
           },
-        }
+        },
       );
 
       // Look for "license_plates" array in the response
@@ -82,7 +81,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
       setError(
         err.response?.data?.error ||
           err.message ||
-          "Failed to detect license plate."
+          "Failed to detect license plate.",
       );
     } finally {
       setLoading(false);

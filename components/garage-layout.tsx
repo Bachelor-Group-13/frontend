@@ -508,7 +508,9 @@ export function GarageLayout() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ParkingSpotDetection
-                  onParkingSpotsDetected={handleParkingSpotsDetected}
+                  onVehiclesDetected={(vehicles) => {
+                    console.log("Detected vehicles:", vehicles);
+                  }}
                 />
 
                 {detectedSpots.length > 0 && (
