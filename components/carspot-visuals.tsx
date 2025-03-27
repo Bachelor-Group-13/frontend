@@ -10,7 +10,7 @@ const CarspotVisuals = ({ isAvailable, ...props }: CarspotVisualsProps) => {
     <div>
       {isAvailable ? (
         <Image
-          src="/available-parkingspot.svg"
+          src="/available-green.svg"
           alt="Available Parking Spot"
           width={500}
           height={100}
@@ -18,7 +18,7 @@ const CarspotVisuals = ({ isAvailable, ...props }: CarspotVisualsProps) => {
         />
       ) : (
         <Image
-          src="/unavailable-parkingspot.svg"
+          src="/unavailable-red.svg"
           alt="Unavailable Parking Spot"
           width={500}
           height={100}
