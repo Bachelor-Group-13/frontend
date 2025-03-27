@@ -30,7 +30,7 @@ export type PlateUserInfo = {
   phone_number?: string;
 };
 
-// Interface for parking spot boandary
+// Interface for parking spot boundary
 export interface ParkingSpotBoundary {
   id: number;
   spotNumber: string;
