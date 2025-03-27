@@ -56,7 +56,9 @@ export function GarageLayout() {
     if (userData?.user) {
       const { data: userDetails } = await supabase
         .from("users")
-        .select("license_plate, second_license_plate, email, phone_number")
+        .select(
+          "name, license_plate, second_license_plate, email, phone_number"
+        )
         .eq("id", userData.user.id)
         .single();
 
@@ -74,7 +76,8 @@ export function GarageLayout() {
            license_plate,
            reserved_by:users (
              email,
-             phone_number
+             phone_number,
+             name
            )
          `
         )
@@ -89,7 +92,7 @@ export function GarageLayout() {
         reservations as unknown as ReservationResponse[];
 
       // Array of parking spots with their reservation status
-      const spots = Array.from({ length: 14 }, (_, i) => {
+      const spots = Array.from({ length: 10 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
           65 + (i % 2)
         )}`;
@@ -105,6 +108,7 @@ export function GarageLayout() {
             ? {
                 license_plate: reservation.license_plate,
                 second_license_plate: null,
+                name: reservation.reserved_by.name,
                 email: reservation.reserved_by.email,
                 phone_number: reservation.reserved_by.phone_number,
                 user_id: reservation.user_id,
@@ -222,17 +226,21 @@ export function GarageLayout() {
         </div>
       </div>
       {/* Parkingsplasser */}
-      <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
+      <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-6">
         {parkingSpots.map((spot) => (
           <HoverCard key={spot.id}>
             <HoverCardTrigger asChild>
               <div
-                className={`h-24 flex justify-center items-center text-white
+                className={`h-24 flex flex-col justify-center items-center
                           font-bold cursor-pointer rounded`}
                 onClick={() => setSelectedSpot(spot)}
               >
-                <CarspotVisuals isAvailable={!spot.isOccupied} />
-                {spot.spotNumber}
+                <span className="justify-center items-center text-sm font-bold">
+                  {spot.spotNumber}
+                </span>
+                <div className="realtive w-full h-full">
+                  <CarspotVisuals isAvailable={!spot.isOccupied} />
+                </div>
               </div>
             </HoverCardTrigger>
             <HoverCardContent className="w-72">
@@ -241,6 +249,9 @@ export function GarageLayout() {
                   <h4 className="text-sm font-semibold">
                     Skiltnr: {spot.occupiedBy.license_plate}
                   </h4>
+                  <div className="flex justify-between items-center text-sm text-gray-600">
+                    <p>Name: {spot.occupiedBy.name}</p>
+                  </div>
                   <div className="flex justify-between items-center text-sm text-gray-600">
                     <p>Email: {spot.occupiedBy.email}</p>
                     <a
