@@ -250,7 +250,7 @@ export function GarageLayout() {
                     Skiltnr: {spot.occupiedBy.license_plate}
                   </h4>
                   <div className="flex justify-between items-center text-sm text-gray-600">
-                    <p>Name: {spot.occupiedBy.name}</p>
+                    <p>Name: {spot.occupiedBy.name || "Name not found"}</p>
                   </div>
                   <div className="flex justify-between items-center text-sm text-gray-600">
                     <p>Email: {spot.occupiedBy.email}</p>
