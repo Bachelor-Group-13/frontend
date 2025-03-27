@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { handleLicensePlateChange } from "@/utils/helpers";
+import { api, getCurrentUser } from "@/utils/auth";
 
 /*
  * SettingsPage:
@@ -51,37 +51,26 @@ export default function SettingsPage() {
   // useEffect hook to fetch user data
   useEffect(() => {
     const fetchUser = async () => {
-      // Fetches user authentication data from supabase
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
+      const user = await getCurrentUser();
 
-      if (userError) {
-        setErrorMessage(userError.message);
-        setShowErrorAlert(true);
+      if (!user) {
+        router.push("/auth");
         return;
       }
 
-      if (userData?.user) {
-        setUserId(userData.user.id);
+      setUserId(user.id);
+      try {
+        const response = await api.get(`/api/users/${user.id}`);
+        const userData = response.data;
 
-        // Fetches user details from the users table in supabase
-        const { data: userDetails, error: detailsError } = await supabase
-          .from("users")
-          .select("license_plate, second_license_plate, phone_number")
-          .eq("id", userData.user.id)
-          .single();
-
-        if (detailsError) {
-          setErrorMessage(detailsError.message);
-          setShowErrorAlert(true);
-          return;
-        }
-
-        if (userDetails) {
-          setLicensePlate(userDetails.license_plate || "");
-          setSecondLicensePlate(userDetails.second_license_plate || "");
-          setPhoneNumber(userDetails.phone_number || "");
-        }
+        setLicensePlate(userData.licensePlate || "");
+        setSecondLicensePlate(userData.secondLicensePlate || "");
+        setPhoneNumber(userData.phoneNumber || "");
+      } catch (error: any) {
+        setErrorMessage(
+          error.response?.data?.message || "Failed to fetch user data"
+        );
+        setShowErrorAlert(true);
       }
     };
 
@@ -125,44 +114,35 @@ export default function SettingsPage() {
         return;
       }
 
-      // Updates the users password if a new password is provided
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+
+      // Updates the user data
+      const updateData: any = {
+        licensePlate: licensePlate.toUpperCase(),
+        secondLicensePlate: secondLicensePlate
+          ? secondLicensePlate.toUpperCase()
+          : null,
+        phoneNumber,
+      };
+
       if (password) {
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password,
-        });
-        if (passwordError) {
-          throw new Error(passwordError.message);
-        }
+        updateData.password = password;
       }
 
-      // Updates the users license plate and phone number in the users table
-      if (userId) {
-        const { error: dbError } = await supabase
-          .from("users")
-          .update({
-            license_plate: licensePlate,
-            second_license_plate: secondLicensePlate,
-            phone_number: phoneNumber,
-          })
-          .eq("id", userId);
-
-        if (dbError) {
-          throw new Error(dbError.message);
-        }
-      }
+      await api.put(`/api/users/${userId}`, updateData);
 
       setShowSuccessAlert(true);
       setPassword("");
       setConfirmPassword("");
-    } catch (error: unknown) {
-      // Handles errors during the update process
+    } catch (error: any) {
       setErrorMessage(
-        error instanceof Error ? error.message : "An unknown error occurred"
+        error.response?.data?.message || "An unknown error occurred"
       );
       setShowErrorAlert(true);
     }
   };
-
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-6">
       <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6">
