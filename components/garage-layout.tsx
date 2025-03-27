@@ -17,9 +17,8 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { Camera, Mail, MessageCircle, Phone } from "lucide-react";
+import { Mail, MessageCircle, Phone } from "lucide-react";
 import {
   ParkingSpot,
   ParkingSpotBoundary,
@@ -61,7 +60,6 @@ export function GarageLayout() {
   const [showWebcam, setShowWebcam] = useState(false);
   const webcamRef = useRef<Webcam>(null);
 
-  const router = useRouter();
   /*
    * fetchUserAndReservations function:
    *
@@ -116,7 +114,7 @@ export function GarageLayout() {
              email,
              phone_number
            )
-         `
+         `,
         )
         .eq("reservation_date", new Date().toISOString().split("T")[0]);
 
@@ -138,10 +136,10 @@ export function GarageLayout() {
       // Array of parking spots with their reservation status
       const spots = Array.from({ length: 10 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
-          65 + (i % 2)
+          65 + (i % 2),
         )}`;
         const reservation = typedReservations.find(
-          (res) => res.spot_number === spotNumber
+          (res) => res.spot_number === spotNumber,
         );
 
         return {
@@ -274,7 +272,7 @@ export function GarageLayout() {
               phone_number: userInfo.phone_number,
             }
           : { plate };
-      })
+      }),
     );
 
     setPlatesInfo(results);
@@ -350,7 +348,7 @@ export function GarageLayout() {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       if (response.data && response.data.license_plate) {
@@ -363,7 +361,7 @@ export function GarageLayout() {
       console.error(
         err.response?.data?.error ||
           err.message ||
-          "Failed to detect license plate."
+          "Failed to detect license plate.",
       );
     }
   };
@@ -378,7 +376,10 @@ export function GarageLayout() {
   return (
     <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
       {/* Header */}
-      <div className="col-span-12 mb-4 flex flex-col items-center w-full md:flex-row md:justify-between">
+      <div
+        className="col-span-12 mb-4 flex flex-col items-center w-full
+        md:flex-row md:justify-between"
+      >
         <div className="md:w-1/3" />
         <h1 className="text-xl font-bold text-red-600 mb-2 md:mb-0">
           Parkeringhus
@@ -428,7 +429,10 @@ export function GarageLayout() {
                           <h4 className="text-sm font-semibold">
                             Skiltnr: {spot.occupiedBy.license_plate}
                           </h4>
-                          <div className="flex justify-between items-center text-sm text-gray-600">
+                          <div
+                            className="flex justify-between items-center
+                            text-sm text-gray-600"
+                          >
                             <p>Email: {spot.occupiedBy.email}</p>
                             <a
                               href={`mailto:${spot.occupiedBy.email}`}
@@ -437,7 +441,10 @@ export function GarageLayout() {
                               <Mail className="h-5 w-5" />
                             </a>
                           </div>
-                          <div className="flex justify-between items-center text-sm text-gray-600">
+                          <div
+                            className="flex justify-between items-center
+                            text-sm text-gray-600"
+                          >
                             <p>Phone: {spot.occupiedBy.phone_number}</p>
                             <div className="flex space-x-2">
                               <a
@@ -604,16 +611,16 @@ export function GarageLayout() {
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
                   : selectedSpot.isOccupied
-                  ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
-                  : `Reserve Spot ${selectedSpot.spotNumber}?`}
+                    ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
+                    : `Reserve Spot ${selectedSpot.spotNumber}?`}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {selectedSpot.isOccupied &&
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? "Do you want to make this spot available again?"
                   : selectedSpot.isOccupied
-                  ? "This spot is currently reserved by someone else."
-                  : "Do you want to reserve this spot for the rest of the day?"}
+                    ? "This spot is currently reserved by someone else."
+                    : "Do you want to reserve this spot for the rest of the day?"}
               </AlertDialogDescription>
               {!selectedSpot.isOccupied && user && (
                 <div className="mt-4">
@@ -625,7 +632,9 @@ export function GarageLayout() {
                   </label>
                   <select
                     id="license-plate-select"
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base
+                    border-gray-300 focus:outline-none focus:ring-indigo-500
+                    focus:border-indigo-500 sm:text-sm rounded-md"
                     value={selectedLicensePlate || ""}
                     onChange={(e) => setSelectedLicensePlate(e.target.value)}
                   >
@@ -653,7 +662,7 @@ export function GarageLayout() {
                 <AlertDialogAction
                   onClick={() =>
                     handleReservation(
-                      selectedSpot.isOccupied ? "unreserve" : "reserve"
+                      selectedSpot.isOccupied ? "unreserve" : "reserve",
                     )
                   }
                 >
