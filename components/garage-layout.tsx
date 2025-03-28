@@ -140,6 +140,7 @@ export function GarageLayout() {
    * handleReservation function:
    *
    * Handles the reservation or unreservation of a parking spot
+   * @param actionType
    */
   const handleReservation = async (actionType: "reserve" | "unreserve") => {
     if (!selectedSpot || !user) return;
@@ -229,6 +230,7 @@ export function GarageLayout() {
    * handleLicensePlateDetected:
    * Handles the detected license plate by removing whitespace
    * and fetching associated user information.
+   * @param plates
    */
   const handleLicensePlatesDetected = async (plates: string[]) => {
     const cleanedPlates = plates.map((p) => p.replace(/\s/g, ""));
@@ -252,6 +254,7 @@ export function GarageLayout() {
    * fetchLicensePlateInfo:
    * Fetches user information from the backend based on the provided
    * license plate.
+   * @param plate
    */
   const fetchLicensePlateInfo = async (plate: string) => {
     try {
