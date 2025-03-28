@@ -79,6 +79,7 @@ export default function AuthPage() {
           phoneNumber
         );
 
+        console.log("Sign up data:", data);
         // Handles sign up errors
         if (error) {
           setAlert({
@@ -120,6 +121,7 @@ export default function AuthPage() {
         // Sign in the user
         const { data, error } = await login(email, password);
 
+        console.log("Sign in data:", data);
         // Handles errors during sign in
         if (error) {
           setAlert({
@@ -129,6 +131,7 @@ export default function AuthPage() {
           });
           return;
         }
+        router.push("/garage");
       } catch (error: any) {
         // Handles unexpected errors during sign in process
         setAlert({

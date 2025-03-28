@@ -42,7 +42,7 @@ export default function SettingsPage() {
     useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null
+    null,
   );
   const [showSecondLicensePlate, setShowSecondLicensePlate] = useState(false);
 
@@ -60,7 +60,7 @@ export default function SettingsPage() {
 
       setUserId(user.id);
       try {
-        const response = await api.get(`/api/users/${user.id}`);
+        const response = await api.get(`/api/auth/${user.id}`);
         const userData = response.data;
 
         setLicensePlate(userData.licensePlate || "");
@@ -68,7 +68,7 @@ export default function SettingsPage() {
         setPhoneNumber(userData.phoneNumber || "");
       } catch (error: any) {
         setErrorMessage(
-          error.response?.data?.message || "Failed to fetch user data"
+          error.response?.data?.message || "Failed to fetch user data",
         );
         setShowErrorAlert(true);
       }
@@ -83,7 +83,7 @@ export default function SettingsPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
@@ -94,7 +94,7 @@ export default function SettingsPage() {
    * Updates the second license plate state with the value from the input field.
    */
   const handleSecondLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setSecondLicensePlate(e.target.value);
   };
@@ -119,26 +119,37 @@ export default function SettingsPage() {
       }
 
       // Updates the user data
-      const updateData: any = {
-        licensePlate: licensePlate.toUpperCase(),
-        secondLicensePlate: secondLicensePlate
-          ? secondLicensePlate.toUpperCase()
-          : null,
-        phoneNumber,
-      };
+      const updateData: any = {};
+
+      if (licensePlate) {
+        updateData.licensePlate = licensePlate.toUpperCase();
+      }
+
+      updateData.secondLicensePlate = secondLicensePlate
+        ? secondLicensePlate.toUpperCase()
+        : null;
 
       if (password) {
         updateData.password = password;
       }
 
-      await api.put(`/api/users/${userId}`, updateData);
+      const user = getCurrentUser();
+      console.log("Update request:", {
+        url: `/api/auth/${userId}`,
+        data: updateData,
+        token: user?.token,
+        headers: { Authorization: `Bearer ${user?.token}` },
+      });
+
+      await api.put(`/api/auth/${userId}`, updateData);
 
       setShowSuccessAlert(true);
       setPassword("");
       setConfirmPassword("");
     } catch (error: any) {
+      console.error("Error updating user settings:", error);
       setErrorMessage(
-        error.response?.data?.message || "An unknown error occurred"
+        error.response?.data?.message || "An unknown error occurred",
       );
       setShowErrorAlert(true);
     }

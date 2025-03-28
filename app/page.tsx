@@ -2,15 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { createServerSupabaseClient } from "@/utils/supabase/server";
+import { getCurrentUser } from "@/utils/auth";
 
 export default async function LandingPage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const user = getCurrentUser();
 
-  const buttonText = session ? "Go to Garage" : "Get Started";
+  const buttonText = user ? "Go to Garage" : "Get Started";
 
   return (
     <div
@@ -34,7 +31,7 @@ export default async function LandingPage() {
             colleagues—all in one place.
           </p>
           <div className="flex gap-4">
-            <Link href={session ? "/garage" : "/auth"}>
+            <Link href={user ? "/garage" : "/auth"}>
               {" "}
               {/* Update Link */}
               <Button size="lg" className="gap-2">

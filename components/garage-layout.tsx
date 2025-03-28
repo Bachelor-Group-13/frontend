@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { supabase } from "@/utils/supabase/client";
 import {
   HoverCard,
   HoverCardContent,
@@ -19,14 +18,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
 import { Mail, MessageCircle, Phone } from "lucide-react";
-import {
-  ParkingSpot,
-  ParkingSpotBoundary,
-  PlateUserInfo,
-  ReservationResponse,
-} from "@/lib/types";
+import { ParkingSpot, ParkingSpotBoundary, PlateUserInfo } from "@/lib/types";
 import Webcam from "react-webcam";
-import axios from "axios";
+import { api, getCurrentUser } from "@/utils/auth";
 import {
   Card,
   CardContent,
@@ -43,7 +37,7 @@ import LicensePlateUpload from "./license-plate-upload";
  *
  * This component displays the layout of the garage, including parking spots
  * and their reservation status. It allows users to reserve or unreserve
- * parking spots and integrates with supabase
+ * parking spots and integrates with the Spring Boot backend
  */
 export function GarageLayout() {
   // State variables using the useState hook
@@ -64,64 +58,39 @@ export function GarageLayout() {
    * fetchUserAndReservations function:
    *
    * Fetches the current users information and the list of reservations
-   * from supabase.
+   * from the Spring Boot backend.
    */
   const fetchUserAndReservations = useCallback(async () => {
     console.log("Fetching reservations...");
 
     try {
-      // Fetches user authentication data from supabase
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
-      if (userError) {
-        console.error("Failed to fetch user data:", userError);
-        return;
-      }
+      const currentUser = getCurrentUser();
 
-      if (!userData?.user) {
+      if (!currentUser) {
         console.error("No authenticated user found");
         return;
       }
 
-      console.log("User data:", userData);
+      console.log("User data:", currentUser);
 
-      const { data: userDetails, error: userDetailsError } = await supabase
-        .from("users")
-        .select("license_plate, second_license_plate, email, phone_number")
-        .eq("id", userData.user.id)
-        .single();
-
-      if (userDetailsError) {
-        console.error("Failed to fetch user details:", userDetailsError);
-        return;
-      }
-
-      console.log("User details:", userDetails);
+      const userResponse = await api.get(`/api/auth/${currentUser.id}`);
+      const userDetails = userResponse.data;
 
       if (userDetails) {
-        setUser({ id: userData.user.id, ...userDetails });
+        setUser({
+          id: userDetails.id,
+          license_plate: userDetails.licensePlate,
+          second_license_plate: userDetails.secondLicensePlate,
+          email: userDetails.email,
+          phone_number: userDetails.phoneNumber,
+        });
       }
 
-      // Fetches reservations for the current date from the reservations table
-      const { data: reservations, error: reservationError } = await supabase
-        .from("reservations")
-        .select(
-          `
-           spot_number,
-           user_id,
-           license_plate,
-           reserved_by:users (
-             email,
-             phone_number
-           )
-         `,
-        )
-        .eq("reservation_date", new Date().toISOString().split("T")[0]);
-
-      if (reservationError) {
-        console.error("Failed to fetch reservations:", reservationError);
-        return;
-      }
+      const today = new Date().toISOString().split("T")[0];
+      const reservationsResponse = await api.get(
+        `/api/reservations/date/${today}`,
+      );
+      const reservations = reservationsResponse.data;
 
       console.log("Reservations:", reservations);
 
@@ -130,16 +99,12 @@ export function GarageLayout() {
         return;
       }
 
-      const typedReservations =
-        reservations as unknown as ReservationResponse[];
-
-      // Array of parking spots with their reservation status
       const spots = Array.from({ length: 10 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
           65 + (i % 2),
         )}`;
-        const reservation = typedReservations.find(
-          (res) => res.spot_number === spotNumber,
+        const reservation = reservations.find(
+          (res: any) => res.spotNumber === spotNumber,
         );
 
         return {
@@ -148,11 +113,11 @@ export function GarageLayout() {
           isOccupied: !!reservation,
           occupiedBy: reservation
             ? {
-                license_plate: reservation.license_plate,
+                license_plate: reservation.licensePlate,
                 second_license_plate: null,
-                email: reservation.reserved_by.email,
-                phone_number: reservation.reserved_by.phone_number,
-                user_id: reservation.user_id,
+                email: reservation.user?.email,
+                phone_number: reservation.user?.phoneNumber,
+                user_id: reservation.userId,
               }
             : null,
         };
@@ -165,7 +130,6 @@ export function GarageLayout() {
     }
   }, []);
 
-  // useEffect hook to fetch user and reservation data
   useEffect(() => {
     if (activeTab === "garage") {
       fetchUserAndReservations();
@@ -192,56 +156,62 @@ export function GarageLayout() {
       }
     }
 
-    let error = null;
+    try {
+      // Reserve the selected spot
+      if (actionType === "reserve") {
+        if (!selectedLicensePlate) {
+          alert("Please select a license plate.");
+          return;
+        }
 
-    // Reserve the selected spot
-    if (actionType === "reserve") {
-      if (!selectedLicensePlate) {
-        alert("Please select a license plate.");
-        return;
+        console.log("Creating reservation with:", {
+          spotNumber: selectedSpot.spotNumber,
+          userId: user.id,
+          licensePlate: selectedLicensePlate,
+          reservationDate: new Date().toISOString().split("T")[0],
+        });
+
+        await api.post("/api/reservations", {
+          spotNumber: selectedSpot.spotNumber,
+          userId: user.id,
+          licensePlate: selectedLicensePlate,
+          reservationDate: new Date().toISOString().split("T")[0],
+        });
+      } else if (actionType === "unreserve") {
+        console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
+
+        // Find the reservation ID first
+        const today = new Date().toISOString().split("T")[0];
+        const reservationsResponse = await api.get(
+          `/api/reservations/date/${today}`,
+        );
+        const reservations = reservationsResponse.data;
+
+        const reservation = reservations.find(
+          (res: { spotNumber: string; userId: number }) =>
+            res.spotNumber === selectedSpot.spotNumber &&
+            res.userId === user.id,
+        );
+
+        if (reservation) {
+          // Unreserve the selected spot
+          await api.delete(`/api/reservations/${reservation.id}`);
+        } else {
+          throw new Error("Reservation not found");
+        }
       }
 
-      console.log("Inserting reservation with:", {
-        spot_number: selectedSpot.spotNumber,
-        user_id: user.id,
-        license_plate: selectedLicensePlate,
-        reservation_date: new Date().toISOString().split("T")[0],
-      });
-
-      const { error: insertError } = await supabase
-        .from("reservations")
-        .insert([
-          {
-            spot_number: selectedSpot.spotNumber,
-            user_id: user.id,
-            license_plate: selectedLicensePlate,
-            reservation_date: new Date().toISOString().split("T")[0],
-          },
-        ]);
-
-      error = insertError;
-    } else if (actionType === "unreserve") {
-      console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
-
-      // Unreserves the selected spot
-      const { error: deleteError } = await supabase
-        .from("reservations")
-        .delete()
-        .eq("spot_number", selectedSpot.spotNumber)
-        .eq("user_id", user.id);
-
-      error = deleteError;
-    }
-
-    if (error) {
+      console.log("Spot reserved/unreserved successfully");
+      await fetchUserAndReservations();
+      setSelectedSpot(null);
+    } catch (error) {
       console.error("Failed to reserve/unreserve spot", error);
-      alert(`Failed to reserve/unreserve spot: ${error.message}`);
-      return;
+      if (error instanceof Error) {
+        alert(`Failed to reserve/unreserve spot: ${error.message}`);
+      } else {
+        alert("Failed to reserve/unreserve spot: An unknown error occurred.");
+      }
     }
-
-    console.log("Spot reserved/unreserved successfully");
-    await fetchUserAndReservations();
-    setSelectedSpot(null);
   };
 
   /**
@@ -269,7 +239,7 @@ export function GarageLayout() {
           ? {
               plate,
               email: userInfo.email,
-              phone_number: userInfo.phone_number,
+              phone_number: userInfo.phoneNumber,
             }
           : { plate };
       }),
@@ -280,27 +250,20 @@ export function GarageLayout() {
 
   /**
    * fetchLicensePlateInfo:
-   * Fetches user information from supabase based on the provided
+   * Fetches user information from the backend based on the provided
    * license plate.
    */
   const fetchLicensePlateInfo = async (plate: string) => {
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("email, phone_number")
-        .or(`license_plate.eq.${plate},second_license_plate.eq.${plate}`);
+      const response = await api.get(`/api/auth/license-plate/${plate}`);
 
-      if (error) {
-        console.error("Error fetching user info:", error);
-        return null;
-      }
-
-      if (data && data.length > 0) {
+      if (response.data && response.data.email) {
         return {
-          email: data[0].email,
-          phone_number: data[0].phone_number,
+          email: response.data.email,
+          phoneNumber: response.data.phoneNumber,
         };
       } else {
+        console.log(`No user found for plate ${plate}`);
         return null;
       }
     } catch (error) {
@@ -341,17 +304,13 @@ export function GarageLayout() {
 
     try {
       // Sends the image to the recognition API
-      const response = await axios.post(
-        "http://localhost:8080/license-plate",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      const response = await api.post("/license-plate", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
 
-      if (response.data && response.data.license_plate) {
+      if (response.data && response.data.license_plates) {
         handleLicensePlatesDetected(response.data.license_plates);
       } else {
         console.error("License plate not found.");
