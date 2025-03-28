@@ -231,15 +231,15 @@ export function GarageLayout() {
           <HoverCard key={spot.id}>
             <HoverCardTrigger asChild>
               <div
-                className={`h-24 flex flex-col justify-center items-center
+                className={`flex flex-col justify-center items-center
                           font-bold cursor-pointer rounded`}
                 onClick={() => setSelectedSpot(spot)}
               >
                 <span className="justify-center items-center text-sm font-bold">
                   {spot.spotNumber}
                 </span>
-                <div className="realtive w-full h-full">
-                  <CarspotVisuals isAvailable={!spot.isOccupied} />
+                <div className="relative w-full h-full md:h-full md:w-full xs:w-full xs:h-full">
+                  <CarspotVisuals isAvailable={!spot.isOccupied}/>
                 </div>
               </div>
             </HoverCardTrigger>
