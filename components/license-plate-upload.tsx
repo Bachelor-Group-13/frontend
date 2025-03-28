@@ -88,7 +88,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     }
   };
   return (
-    <div>
+    <div className="py-2">
       <Label htmlFor="image-upload">Upload License Plate Image</Label>
       <Input
         type="file"
@@ -97,13 +97,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         onChange={handleImageChange}
         disabled={loading}
       />
-      {previewURL && (
-        <img
-          src={previewURL}
-          alt="Preview"
-          style={{ maxWidth: "200px", marginTop: "10px" }}
-        />
-      )}
+      {previewURL && <img src={previewURL} alt="Preview" className="mt-4" />}
       <Button
         onClick={handleSubmit}
         disabled={loading || !image}

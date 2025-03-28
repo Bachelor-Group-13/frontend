@@ -1,6 +1,5 @@
 "use client";
 
-import { supabase } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -14,6 +13,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Car } from "lucide-react";
+import { logout } from "@/utils/auth";
+import { useAuth } from "./auth-context";
 
 /*
  * Navbar component:
@@ -24,49 +25,12 @@ import { Car } from "lucide-react";
  * it in an avatar.
  */
 export function Navbar() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const { user, setUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  // useEffect hook to fetch user data and listen for auth state changes
   useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoading(true);
-      const { data: userData } = await supabase.auth.getUser();
-      if (userData?.user) {
-        const { data: profileData } = await supabase
-          .from("users")
-          .select("name")
-          .eq("id", userData.user.id)
-          .single();
-        setUser({ ...userData.user, name: profileData?.name });
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
-    };
-
-    fetchUser();
-
-    // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state change event:", event);
-        if (session?.user) {
-          const { data: profileData } = await supabase
-            .from("users")
-            .select("name")
-            .eq("id", session.user.id)
-            .single();
-          setUser({ ...session.user, name: profileData?.name });
-        } else {
-          setUser(null);
-        }
-      }
-    );
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
+    setIsLoading(false);
   }, []);
 
   /*
@@ -76,11 +40,10 @@ export function Navbar() {
    * landing page
    *
    */
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
-      router.push("/");
-    }
+  const handleSignOut = () => {
+    logout();
+    setUser(null);
+    router.push("/");
   };
 
   /*
@@ -128,7 +91,7 @@ export function Navbar() {
         ) : user ? (
           // Logged-in state
           <div className="flex items-center space-x-4">
-          <p className="text-sm">Hello, {user.name}</p>
+            <p className="text-sm">Hello, {user.name}</p>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Avatar className="cursor-pointer">
