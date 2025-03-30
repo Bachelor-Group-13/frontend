@@ -16,7 +16,7 @@ import { login, register } from "@/utils/auth";
 /**
  * Auth Page:
  * This page allows users to either sign in or sign up.
- * It includes integration with Supabase for user authentication.
+ * It handles user authentication and session management.
  */
 export default function AuthPage() {
   // State variables
@@ -33,15 +33,15 @@ export default function AuthPage() {
     description: string;
   } | null>(null);
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null
+    null,
   );
   const router = useRouter();
 
   /*
    * handleSubmit function:
    * Handles form submission for both sign in and sign up.
-   * Validates the input fields, interacts with supabase and
-   * manages user sessions.
+   * Validates the input fields, and triggers the appropriate action.
+   * @param e: React.FormEvent - The form submission event.
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +76,7 @@ export default function AuthPage() {
           email,
           password,
           licensePlate.toUpperCase(),
-          phoneNumber
+          phoneNumber,
         );
 
         console.log("Sign up data:", data);
@@ -149,7 +149,7 @@ export default function AuthPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
