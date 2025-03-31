@@ -10,8 +10,8 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { supabase } from "@/utils/supabase/client";
-import { handleLicensePlateChange, isValidLicensePlate } from "@/utils/helpers";
+import { handleLicensePlateChange } from "@/utils/helpers";
+import { login, register } from "@/utils/auth";
 
 /**
  * Auth Page:
@@ -70,12 +70,16 @@ export default function AuthPage() {
 
       try {
         console.log("Sign up flow triggered");
-        // Uses supabase signup method to create user
-        const { data, error } = await supabase.auth.signUp({
+        // Register the user
+        const { data, error } = await register(
+          name,
           email,
           password,
-        });
+          licensePlate.toUpperCase(),
+          phoneNumber
+        );
 
+        console.log("Sign up data:", data);
         // Handles sign up errors
         if (error) {
           setAlert({
@@ -86,36 +90,13 @@ export default function AuthPage() {
           return;
         }
 
-        // If user created, insert additional user data into the users table
-        if (data.user) {
-          const { error: dbError } = await supabase.from("users").insert([
-            {
-              id: data.user.id,
-              email,
-              name,
-              license_plate: licensePlate.toUpperCase(),
-              phone_number: phoneNumber,
-            },
-          ]);
-
-          // Handles database insertion error
-          if (dbError) {
-            setAlert({
-              type: "destructive",
-              title: "Database Error",
-              description: dbError.message,
-            });
-            return;
-          }
-
-          // Success message and switches to sign in tab
-          setAlert({
-            type: "default",
-            title: "Success",
-            description: "Account created successfully. Please sign in.",
-          });
-          setIsSignUp(false);
-        }
+        // Success message and switches to sign in tab
+        setAlert({
+          type: "default",
+          title: "Success",
+          description: "Account created successfully. Please sign in.",
+        });
+        setIsSignUp(false);
       } catch (error: any) {
         setAlert({
           type: "destructive",
@@ -137,12 +118,10 @@ export default function AuthPage() {
 
       try {
         console.log("Sign in flow triggered");
-        // Uses supabase method to sign in the user
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        // Sign in the user
+        const { data, error } = await login(email, password);
 
+        console.log("Sign in data:", data);
         // Handles errors during sign in
         if (error) {
           setAlert({
@@ -152,14 +131,7 @@ export default function AuthPage() {
           });
           return;
         }
-
-        // After sign in, retrieve session and redirect to garage page
-        const { data: session } = await supabase.auth.getSession();
-        if (session) {
-          router.push("/garage");
-        } else {
-          throw new Error("Session not established");
-        }
+        router.push("/garage");
       } catch (error: any) {
         // Handles unexpected errors during sign in process
         setAlert({
