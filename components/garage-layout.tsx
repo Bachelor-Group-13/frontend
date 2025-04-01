@@ -29,7 +29,6 @@ import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
 import { useWebcamCapture } from "@/hooks/useWebcamCapture";
 import { ParkingSpotCard } from "./parkingspot-card";
-import CarspotVisuals from "./carspot-visuals";
 
 /*
  * GarageLayout component:
