@@ -91,7 +91,7 @@ export function Navbar() {
         ) : user ? (
           // Logged-in state
           <div className="flex items-center space-x-4">
-            <p className="text-sm">Hello, {user.name}</p>
+            <p className="text-md">{user.name}</p>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Avatar className="cursor-pointer">

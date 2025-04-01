@@ -34,7 +34,7 @@ export function ParkingSpotCard({
         {spot.isOccupied && spot.occupiedBy ? (
           <div className="space-y-2">
             <h4 className="text-sm font-semibold">
-              Skiltnr: {spot.occupiedBy.license_plate}
+              License plate: {spot.occupiedBy.license_plate}
             </h4>
             <div
               className="flex justify-between items-center
