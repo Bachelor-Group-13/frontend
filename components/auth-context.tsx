@@ -16,6 +16,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const currentUser = getCurrentUser();
+
+    try {
+      const payload = JSON.parse(atob(currentUser.token.split(".")[1]));
+      const isExpired = Date.now() >= payload.exp * 1000;
+
+      if (isExpired) {
+        localStorage.removeItem("user");
+        document.cookie =
+          "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        setUser(null);
+        return;
+      }
+    } catch (error) {
+      console.error("Error parsing token:", error);
+    }
+
     setUser(currentUser);
 
     const handleAuthChange = (event: CustomEvent) => {

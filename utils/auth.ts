@@ -25,7 +25,7 @@ export const login = async (email: string, password: string) => {
       document.cookie = `user=${response.data.token}; path=/;`;
 
       window.dispatchEvent(
-        new CustomEvent("userAuthChange", { detail: response.data }),
+        new CustomEvent("userAuthChange", { detail: response.data })
       );
     }
     return { data: response.data, error: null };
@@ -42,7 +42,7 @@ export const register = async (
   email: string,
   password: string,
   licensePlate?: string,
-  phoneNumber?: string,
+  phoneNumber?: string
 ) => {
   try {
     const response = await axios.post(`${API_URL}signup`, {
@@ -82,31 +82,39 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401 && error.response?.data?.message === "Expired JWT token") {
-      const currentUser = getCurrentUser(); 
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.message === "Expired JWT token"
+    ) {
+      const currentUser = getCurrentUser();
       const refreshToken = currentUser?.refreshToken;
 
       if (refreshToken) {
         try {
-          const refreshResponse = await axios.post(`${API_URL}refresh`, refreshToken, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
+          const refreshResponse = await axios.post(
+            `${API_URL}refresh`,
+            refreshToken,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
           const newTokens = refreshResponse.data;
           localStorage.setItem("user", JSON.stringify(newTokens));
+          document.cookie = `user=${newTokens.token}; path=/;`;
 
           error.config.headers["Authorization"] = `Bearer ${newTokens.token}`;
           return axios(error.config);
         } catch (refreshError) {
-          logout(); 
+          logout();
           return Promise.reject(refreshError);
         }
       }
