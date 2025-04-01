@@ -190,7 +190,7 @@ export function GarageLayout() {
                 bg-gray-200"
               >
                 <p className="text-neutral-900 font-bold rotate-90">
-                  DRIVINGLANE
+                  DRIVING LANE
                 </p>
               </div>
 
