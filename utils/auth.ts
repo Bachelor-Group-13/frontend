@@ -84,3 +84,34 @@ api.interceptors.request.use(
     return Promise.reject(error);
   },
 );
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401 && error.response?.data?.message === "Expired JWT token") {
+      const currentUser = getCurrentUser(); 
+      const refreshToken = currentUser?.refreshToken;
+
+      if (refreshToken) {
+        try {
+          const refreshResponse = await axios.post(`${API_URL}refresh`, refreshToken, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const newTokens = refreshResponse.data;
+          localStorage.setItem("user", JSON.stringify(newTokens));
+
+          error.config.headers["Authorization"] = `Bearer ${newTokens.token}`;
+          return axios(error.config);
+        } catch (refreshError) {
+          logout(); 
+          return Promise.reject(refreshError);
+        }
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
