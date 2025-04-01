@@ -1,6 +1,7 @@
 import { ParkingSpot } from "@/lib/types";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Mail, MessageCircle, Phone } from "lucide-react";
+import CarspotVisuals from "./carspot-visuals";
 
 export function ParkingSpotCard({
   spot,
@@ -21,7 +22,12 @@ export function ParkingSpotCard({
                                   }`}
           onClick={onClick}
         >
-          {spot.spotNumber}
+          <span className="justify-center items-center text-sm font-bold">
+            {spot.spotNumber}
+          </span>
+          <div className="relative w-full h-full md:h-full md:w-full xs:w-full xs:h-full">
+            <CarspotVisuals isAvailable={!spot.isOccupied} />
+          </div>
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="w-72">
