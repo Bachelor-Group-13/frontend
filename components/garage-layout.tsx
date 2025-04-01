@@ -31,6 +31,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import LicensePlateUpload from "./license-plate-upload";
+import CarspotVisuals from "./carspot-visuals";
 
 /*
  * GarageLayout component:
@@ -115,6 +116,7 @@ export function GarageLayout() {
             ? {
                 license_plate: reservation.licensePlate,
                 second_license_plate: null,
+                name: reservation.user?.name,
                 email: reservation.user?.email,
                 phone_number: reservation.user?.phoneNumber,
                 user_id: reservation.userId,
@@ -382,7 +384,12 @@ export function GarageLayout() {
                                   }`}
                         onClick={() => setSelectedSpot(spot)}
                       >
-                        {spot.spotNumber}
+                        <span className="justify-center items-center text-sm font-bold">
+                  {spot.spotNumber}
+                </span>
+                <div className="relative w-full h-full md:h-full md:w-full xs:w-full xs:h-full">
+                  <CarspotVisuals isAvailable={!spot.isOccupied}/>
+                      </div>
                       </div>
                     </HoverCardTrigger>
                     <HoverCardContent className="w-72">
