@@ -74,13 +74,10 @@ export function Navbar() {
 
   return (
     <nav className="bg-neutral-900 text-white">
-      <div
-        className="container mx-auto flex items-center justify-between px-4
-        py-4"
-      >
+      <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <Link
           href="/"
-          className="text-2xl font-bold font-mono flex items-center gap-2"
+          className="flex items-center gap-2 font-mono text-2xl font-bold"
         >
           <Car className="h-6 w-6" />
           Inneparkert
@@ -111,9 +108,8 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="font-bold text-red-600 hover:bg-red-600
-                    hover:text-white focus:bg-red-600 focus:text-white
-                    cursor-pointer transition-colors"
+                  className="cursor-pointer font-bold text-red-600 transition-colors hover:bg-red-600
+                    hover:text-white focus:bg-red-600 focus:text-white"
                 >
                   Sign Out
                 </DropdownMenuItem>

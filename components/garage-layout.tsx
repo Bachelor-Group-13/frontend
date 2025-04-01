@@ -54,7 +54,6 @@ export function GarageLayout() {
   const { platesInfo, handleLicensePlatesDetected } =
     useLicensePlateDetection();
   const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
-      
 
   useEffect(() => {
     if (activeTab === "garage") {
@@ -141,14 +140,14 @@ export function GarageLayout() {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-2 bg-gray-50 p-4 rounded-lg">
+    <div className="grid grid-cols-12 gap-2 rounded-lg bg-gray-50 p-4">
       {/* Header */}
       <div
-        className="col-span-12 mb-4 flex flex-col items-center w-full
-        md:flex-row md:justify-between"
+        className="col-span-12 mb-4 flex w-full flex-col items-center md:flex-row
+          md:justify-between"
       >
         <div className="md:w-1/3" />
-        <h1 className="text-xl font-bold text-red-600 mb-2 md:mb-0">
+        <h1 className="mb-2 text-xl font-bold text-red-600 md:mb-0">
           Parking Garage
         </h1>
         <div className="md:w-1/3" />
@@ -174,7 +173,7 @@ export function GarageLayout() {
           <TabsContent value="garage" className="mt-4">
             <div className="grid grid-cols-12 gap-4">
               {/* Parkingspots */}
-              <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
+              <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
                 {parkingSpots.map((spot) => (
                   <ParkingSpotCard
                     key={spot.id}
@@ -185,23 +184,17 @@ export function GarageLayout() {
               </div>
 
               {/* Driving lane */}
-              <div
-                className="hidden md:col-span-2 md:flex items-center justify-center
-                bg-gray-200"
-              >
-                <p className="text-neutral-900 font-bold rotate-90">
+              <div className="hidden items-center justify-center bg-gray-200 md:col-span-2 md:flex">
+                <p className="rotate-90 font-bold text-neutral-900">
                   DRIVING LANE
                 </p>
               </div>
 
               {/* Stairs / Entrance */}
-              <div
-                className="hidden md:col-span-4 md:flex items-center justify-center
-                ml-7"
-              >
+              <div className="ml-7 hidden items-center justify-center md:col-span-4 md:flex">
                 <div
-                  className="h-40 w-full bg-neutral-900 text-white font-bold flex
-                  items-center justify-center rounded"
+                  className="flex h-40 w-full items-center justify-center rounded bg-neutral-900 font-bold
+                    text-white"
                 >
                   STAIRS / ENTRANCE
                 </div>
@@ -227,16 +220,16 @@ export function GarageLayout() {
 
                 {detectedSpots.length > 0 && (
                   <div className="mt-8">
-                    <h2 className="text-xl font-semibold mb-4">
+                    <h2 className="mb-4 text-xl font-semibold">
                       Detected Parking Spots
                     </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                       {detectedSpots.map((spot) => (
                         <div
                           key={spot.id}
-                          className="p-4 border rounded-md bg-gray-50"
+                          className="rounded-md border bg-gray-50 p-4"
                         >
-                          <p className="font-bold text-lg">{spot.spotNumber}</p>
+                          <p className="text-lg font-bold">{spot.spotNumber}</p>
                           <p className="text-sm text-gray-600">
                             Position: [{spot.boundingBox.join(", ")}]
                           </p>
@@ -281,7 +274,7 @@ export function GarageLayout() {
                     />
                     <Button
                       onClick={capture}
-                      className="absolute bottom-2 left-1/2 transform -translate-x-1/2"
+                      className="absolute bottom-2 left-1/2 -translate-x-1/2 transform"
                     >
                       Capture
                     </Button>
@@ -296,7 +289,7 @@ export function GarageLayout() {
                   <div className="mt-4 space-y-2">
                     <h3 className="font-bold">Detected Plates:</h3>
                     {platesInfo.map((p) => (
-                      <div key={p.plate} className="border p-2 rounded">
+                      <div key={p.plate} className="rounded border p-2">
                         <p className="font-semibold">Plate: {p.plate}</p>
                         {p.email && p.phone_number ? (
                           <div>
@@ -329,16 +322,16 @@ export function GarageLayout() {
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
                   : selectedSpot.isOccupied
-                  ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
-                  : `Reserve Spot ${selectedSpot.spotNumber}?`}
+                    ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
+                    : `Reserve Spot ${selectedSpot.spotNumber}?`}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {selectedSpot.isOccupied &&
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? "Do you want to make this spot available again?"
                   : selectedSpot.isOccupied
-                  ? "This spot is currently reserved by someone else."
-                  : "Do you want to reserve this spot for the rest of the day?"}
+                    ? "This spot is currently reserved by someone else."
+                    : "Do you want to reserve this spot for the rest of the day?"}
               </AlertDialogDescription>
               {!selectedSpot.isOccupied && user && (
                 <div className="mt-4">
@@ -350,9 +343,8 @@ export function GarageLayout() {
                   </label>
                   <select
                     id="license-plate-select"
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base
-                    border-gray-300 focus:outline-none focus:ring-indigo-500
-                    focus:border-indigo-500 sm:text-sm rounded-md"
+                    className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base
+                      focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                     value={selectedLicensePlate || ""}
                     onChange={(e) => setSelectedLicensePlate(e.target.value)}
                   >
