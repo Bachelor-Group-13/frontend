@@ -29,7 +29,6 @@ import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
 import { useWebcamCapture } from "@/hooks/useWebcamCapture";
 import { ParkingSpotCard } from "./parkingspot-card";
-import CarspotVisuals from "./carspot-visuals";
 
 /*
  * GarageLayout component:
@@ -54,7 +53,6 @@ export function GarageLayout() {
   const { platesInfo, handleLicensePlatesDetected } =
     useLicensePlateDetection();
   const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
-      
 
   useEffect(() => {
     if (activeTab === "garage") {
@@ -110,13 +108,14 @@ export function GarageLayout() {
         // Find the reservation ID first
         const today = new Date().toISOString().split("T")[0];
         const reservationsResponse = await api.get(
-          `/api/reservations/date/${today}`
+          `/api/reservations/date/${today}`,
         );
         const reservations = reservationsResponse.data;
 
         const reservation = reservations.find(
           (res: { spotNumber: string; userId: number }) =>
-            res.spotNumber === selectedSpot.spotNumber && res.userId === user.id
+            res.spotNumber === selectedSpot.spotNumber &&
+            res.userId === user.id,
         );
 
         if (reservation) {
@@ -329,16 +328,16 @@ export function GarageLayout() {
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
                   : selectedSpot.isOccupied
-                  ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
-                  : `Reserve Spot ${selectedSpot.spotNumber}?`}
+                    ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
+                    : `Reserve Spot ${selectedSpot.spotNumber}?`}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {selectedSpot.isOccupied &&
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? "Do you want to make this spot available again?"
                   : selectedSpot.isOccupied
-                  ? "This spot is currently reserved by someone else."
-                  : "Do you want to reserve this spot for the rest of the day?"}
+                    ? "This spot is currently reserved by someone else."
+                    : "Do you want to reserve this spot for the rest of the day?"}
               </AlertDialogDescription>
               {!selectedSpot.isOccupied && user && (
                 <div className="mt-4">
@@ -380,7 +379,7 @@ export function GarageLayout() {
                 <AlertDialogAction
                   onClick={() =>
                     handleReservation(
-                      selectedSpot.isOccupied ? "unreserve" : "reserve"
+                      selectedSpot.isOccupied ? "unreserve" : "reserve",
                     )
                   }
                 >
