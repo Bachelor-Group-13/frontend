@@ -62,7 +62,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
             "Content-Type": "multipart/form-data",
             Accept: "application/json",
           },
-        },
+        }
       );
 
       // Look for "license_plates" array in the response
@@ -81,7 +81,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
       setError(
         err.response?.data?.error ||
           err.message ||
-          "Failed to detect license plate.",
+          "Failed to detect license plate."
       );
     } finally {
       setLoading(false);
@@ -106,7 +106,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         {loading ? "Detecting..." : "Detect License Plate"}
       </Button>
 
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+      {error && <p className="mt-2 text-red-500">{error}</p>}
     </div>
   );
 };

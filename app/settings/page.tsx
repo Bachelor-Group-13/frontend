@@ -42,7 +42,7 @@ export default function SettingsPage() {
     useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null,
+    null
   );
   const [showSecondLicensePlate, setShowSecondLicensePlate] = useState(false);
 
@@ -68,7 +68,7 @@ export default function SettingsPage() {
         setPhoneNumber(userData.phoneNumber || "");
       } catch (error: any) {
         setErrorMessage(
-          error.response?.data?.message || "Failed to fetch user data",
+          error.response?.data?.message || "Failed to fetch user data"
         );
         setShowErrorAlert(true);
       }
@@ -83,7 +83,7 @@ export default function SettingsPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
@@ -94,7 +94,7 @@ export default function SettingsPage() {
    * Updates the second license plate state with the value from the input field.
    */
   const handleSecondLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setSecondLicensePlate(e.target.value);
   };
@@ -149,17 +149,17 @@ export default function SettingsPage() {
     } catch (error: any) {
       console.error("Error updating user settings:", error);
       setErrorMessage(
-        error.response?.data?.message || "An unknown error occurred",
+        error.response?.data?.message || "An unknown error occurred"
       );
       setShowErrorAlert(true);
     }
   };
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-6">
-      <div className="max-w-xl w-full bg-white shadow-md rounded-lg p-6">
-        <div className="flex justify-between items-center mb-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-6">
+      <div className="w-full max-w-xl rounded-lg bg-white p-6 shadow-md">
+        <div className="mb-4 flex items-center justify-between">
           <Link href="/garage">
-            <ArrowLeft className="h-5 w-5 text-neutral-900 cursor-pointer" />
+            <ArrowLeft className="h-5 w-5 cursor-pointer text-neutral-900" />
           </Link>
           <h1 className="text-2xl font-bold">User Settings</h1>
           <div />
@@ -178,14 +178,14 @@ export default function SettingsPage() {
               maxLength={7}
             />
             {licensePlateError && (
-              <p className="text-red-500 text-sm">{licensePlateError}</p>
+              <p className="text-sm text-red-500">{licensePlateError}</p>
             )}
           </div>
           {!secondLicensePlate && !showSecondLicensePlate && (
             <button
               type="button"
               onClick={() => setShowSecondLicensePlate(true)}
-              className="hover:text-blue-800 underline mt-1 text-sm"
+              className="mt-1 text-sm underline hover:text-blue-800"
               style={{ padding: 1, margin: 3 }}
             >
               Add Second License Plate

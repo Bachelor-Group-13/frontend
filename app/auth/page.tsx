@@ -33,7 +33,7 @@ export default function AuthPage() {
     description: string;
   } | null>(null);
   const [licensePlateError, setLicensePlateError] = useState<string | null>(
-    null,
+    null
   );
   const router = useRouter();
 
@@ -76,7 +76,7 @@ export default function AuthPage() {
           email,
           password,
           licensePlate.toUpperCase(),
-          phoneNumber,
+          phoneNumber
         );
 
         console.log("Sign up data:", data);
@@ -149,13 +149,13 @@ export default function AuthPage() {
    * Updates the license plate state with the value from the input field.
    */
   const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export default function AuthPage() {
             onValueChange={(value) => setIsSignUp(value === "signup")}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="mb-4 grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
@@ -283,7 +283,7 @@ export default function AuthPage() {
                       className={licensePlateError ? "border-red-500" : ""}
                     />
                     {licensePlateError && (
-                      <p className="text-red-500 text-sm">
+                      <p className="text-sm text-red-500">
                         {licensePlateError}
                       </p>
                     )}

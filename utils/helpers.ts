@@ -21,7 +21,7 @@ export const isValidLicensePlate = (licensePlate: string): boolean => {
 export const handleLicensePlateChange = (
   e: React.ChangeEvent<HTMLInputElement>,
   setLicensePlate: Dispatch<SetStateAction<string>>,
-  setLicensePlateError: Dispatch<SetStateAction<string | null>>,
+  setLicensePlateError: Dispatch<SetStateAction<string | null>>
 ) => {
   const value = e.target.value.toUpperCase();
   setLicensePlate(value);
