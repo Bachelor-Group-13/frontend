@@ -1,11 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -17,10 +12,9 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
-import { Mail, MessageCircle, Phone } from "lucide-react";
-import { ParkingSpot, ParkingSpotBoundary, PlateUserInfo } from "@/lib/types";
+import { ParkingSpot, ParkingSpotBoundary } from "@/lib/types";
 import Webcam from "react-webcam";
-import { api, getCurrentUser } from "@/utils/auth";
+import { api } from "@/utils/auth";
 import {
   Card,
   CardContent,
@@ -31,6 +25,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import LicensePlateUpload from "./license-plate-upload";
+import { useGarageReservations } from "@/hooks/useGarageReservations";
+import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
+import { useWebcamCapture } from "@/hooks/useWebcamCapture";
+import { ParkingSpotCard } from "./parkingspot-card";
 import CarspotVisuals from "./carspot-visuals";
 
 /*
@@ -42,8 +40,6 @@ import CarspotVisuals from "./carspot-visuals";
  */
 export function GarageLayout() {
   // State variables using the useState hook
-  const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
-  const [user, setUser] = useState<any>(null);
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
   const [selectedLicensePlate, setSelectedLicensePlate] = useState<
@@ -51,86 +47,14 @@ export function GarageLayout() {
   >(null);
   const [activeTab, setActiveTab] = useState("garage");
   const [detectedSpots, setDetectedSpots] = useState<ParkingSpotBoundary[]>([]);
-  const [platesInfo, setPlatesInfo] = useState<PlateUserInfo[]>([]);
   const [showWebcam, setShowWebcam] = useState(false);
-  const webcamRef = useRef<Webcam>(null);
 
-  /*
-   * fetchUserAndReservations function:
-   *
-   * Fetches the current users information and the list of reservations
-   * from the Spring Boot backend.
-   */
-  const fetchUserAndReservations = useCallback(async () => {
-    console.log("Fetching reservations...");
-
-    try {
-      const currentUser = getCurrentUser();
-
-      if (!currentUser) {
-        console.error("No authenticated user found");
-        return;
-      }
-
-      console.log("User data:", currentUser);
-
-      const userResponse = await api.get(`/api/auth/${currentUser.id}`);
-      const userDetails = userResponse.data;
-
-      if (userDetails) {
-        setUser({
-          id: userDetails.id,
-          license_plate: userDetails.licensePlate,
-          second_license_plate: userDetails.secondLicensePlate,
-          email: userDetails.email,
-          phone_number: userDetails.phoneNumber,
-        });
-      }
-
-      const today = new Date().toISOString().split("T")[0];
-      const reservationsResponse = await api.get(
-        `/api/reservations/date/${today}`,
-      );
-      const reservations = reservationsResponse.data;
-
-      console.log("Reservations:", reservations);
-
-      if (!reservations) {
-        console.error("Failed to fetch reservations");
-        return;
-      }
-
-      const spots = Array.from({ length: 10 }, (_, i) => {
-        const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
-          65 + (i % 2),
-        )}`;
-        const reservation = reservations.find(
-          (res: any) => res.spotNumber === spotNumber,
-        );
-
-        return {
-          id: i + 1,
-          spotNumber,
-          isOccupied: !!reservation,
-          occupiedBy: reservation
-            ? {
-                license_plate: reservation.licensePlate,
-                second_license_plate: null,
-                name: reservation.user?.name,
-                email: reservation.user?.email,
-                phone_number: reservation.user?.phoneNumber,
-                user_id: reservation.userId,
-              }
-            : null,
-        };
-      });
-
-      console.log("Parking spots:", spots);
-      setParkingSpots(spots);
-    } catch (error) {
-      console.error("Error in fetchUserAndReservations:", error);
-    }
-  }, []);
+  const { parkingSpots, user, fetchUserAndReservations } =
+    useGarageReservations();
+  const { platesInfo, handleLicensePlatesDetected } =
+    useLicensePlateDetection();
+  const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
+      
 
   useEffect(() => {
     if (activeTab === "garage") {
@@ -186,14 +110,13 @@ export function GarageLayout() {
         // Find the reservation ID first
         const today = new Date().toISOString().split("T")[0];
         const reservationsResponse = await api.get(
-          `/api/reservations/date/${today}`,
+          `/api/reservations/date/${today}`
         );
         const reservations = reservationsResponse.data;
 
         const reservation = reservations.find(
           (res: { spotNumber: string; userId: number }) =>
-            res.spotNumber === selectedSpot.spotNumber &&
-            res.userId === user.id,
+            res.spotNumber === selectedSpot.spotNumber && res.userId === user.id
         );
 
         if (reservation) {
@@ -215,126 +138,6 @@ export function GarageLayout() {
         alert("Failed to reserve/unreserve spot: An unknown error occurred.");
       }
     }
-  };
-
-  /**
-   * handleParkingSpotsDetected:
-   * Handles the detected parking spots by setting the state
-   * and logging the detected spots.
-   * @param parkingSpots
-   */
-  const handleParkingSpotsDetected = (parkingSpots: ParkingSpotBoundary[]) => {
-    setDetectedSpots(parkingSpots);
-    console.log("Detected parking spots:", parkingSpots);
-  };
-
-  /**
-   * handleLicensePlateDetected:
-   * Handles the detected license plate by removing whitespace
-   * and fetching associated user information.
-   * @param plates
-   */
-  const handleLicensePlatesDetected = async (plates: string[]) => {
-    const cleanedPlates = plates.map((p) => p.replace(/\s/g, ""));
-    const results = await Promise.all(
-      cleanedPlates.map(async (plate) => {
-        const userInfo = await fetchLicensePlateInfo(plate);
-        return userInfo
-          ? {
-              plate,
-              email: userInfo.email,
-              phone_number: userInfo.phoneNumber,
-            }
-          : { plate };
-      }),
-    );
-
-    setPlatesInfo(results);
-  };
-
-  /**
-   * fetchLicensePlateInfo:
-   * Fetches user information from the backend based on the provided
-   * license plate.
-   * @param plate
-   */
-  const fetchLicensePlateInfo = async (plate: string) => {
-    try {
-      const response = await api.get(`/api/auth/license-plate/${plate}`);
-
-      if (response.data && response.data.email) {
-        return {
-          email: response.data.email,
-          phoneNumber: response.data.phoneNumber,
-        };
-      } else {
-        console.log(`No user found for plate ${plate}`);
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-      return null;
-    }
-  };
-
-  /**
-   * capture:
-   * Captures an image from the webcam and processes it to detect license plate
-   */
-  const capture = useCallback(async () => {
-    if (webcamRef.current) {
-      // Takes a screenshot from webcam
-      const imageSrc = webcamRef.current.getScreenshot();
-      if (imageSrc) {
-        const blob = await (await fetch(imageSrc)).blob();
-        const file = new File([blob], "captured-image.jpg", {
-          type: "image/jpeg",
-        });
-
-        // Sends the captured image to be processed
-        handleWebcamImage(file);
-        // Hides webcam after taking image
-        setShowWebcam(false);
-      }
-    }
-  }, [webcamRef]);
-
-  /**
-   * handleWebcamImage:
-   * Sends captured image to the recognition API and handles response
-   */
-  const handleWebcamImage = async (image: File) => {
-    const formData = new FormData();
-    formData.append("image", image);
-
-    try {
-      // Sends the image to the recognition API
-      const response = await api.post("/license-plate", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.data && response.data.license_plates) {
-        handleLicensePlatesDetected(response.data.license_plates);
-      } else {
-        console.error("License plate not found.");
-      }
-    } catch (err: any) {
-      // Handles error during the API request
-      console.error(
-        err.response?.data?.error ||
-          err.message ||
-          "Failed to detect license plate.",
-      );
-    }
-  };
-
-  // Configuration for the webcam
-  const videoConstraints = {
-    width: 480,
-    height: 360,
-    facingMode: "environment",
   };
 
   return (
@@ -373,71 +176,11 @@ export function GarageLayout() {
               {/* Parkingsplasser */}
               <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
                 {parkingSpots.map((spot) => (
-                  <HoverCard key={spot.id}>
-                    <HoverCardTrigger asChild>
-                      <div
-                        className={`h-24 flex justify-center items-center text-white
-                                  font-bold cursor-pointer rounded ${
-                                    spot.isOccupied
-                                      ? "bg-red-600"
-                                      : "bg-green-600"
-                                  }`}
-                        onClick={() => setSelectedSpot(spot)}
-                      >
-                        <span className="justify-center items-center text-sm font-bold">
-                  {spot.spotNumber}
-                </span>
-                <div className="relative w-full h-full md:h-full md:w-full xs:w-full xs:h-full">
-                  <CarspotVisuals isAvailable={!spot.isOccupied}/>
-                      </div>
-                      </div>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-72">
-                      {spot.isOccupied && spot.occupiedBy ? (
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-semibold">
-                            Skiltnr: {spot.occupiedBy.license_plate}
-                          </h4>
-                          <div
-                            className="flex justify-between items-center
-                            text-sm text-gray-600"
-                          >
-                            <p>Email: {spot.occupiedBy.email}</p>
-                            <a
-                              href={`mailto:${spot.occupiedBy.email}`}
-                              className="text-neutral-900 hover:text-blue-700"
-                            >
-                              <Mail className="h-5 w-5" />
-                            </a>
-                          </div>
-                          <div
-                            className="flex justify-between items-center
-                            text-sm text-gray-600"
-                          >
-                            <p>Phone: {spot.occupiedBy.phone_number}</p>
-                            <div className="flex space-x-2">
-                              <a
-                                href={`tel:${spot.occupiedBy.phone_number}`}
-                                className="text-neutral-900 hover:text-blue-700"
-                              >
-                                <Phone className="h-5 w-5" />
-                              </a>
-                              <a
-                                href={`sms:${spot.occupiedBy.phone_number}`}
-                                className="text-neutral-900 hover:text-green-700"
-                              >
-                                <MessageCircle className="h-5 w-5" />
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500">
-                          This spot is available.
-                        </p>
-                      )}
-                    </HoverCardContent>
-                  </HoverCard>
+                  <ParkingSpotCard
+                    key={spot.id}
+                    spot={spot}
+                    onClick={() => setSelectedSpot(spot)}
+                  />
                 ))}
               </div>
 
@@ -529,7 +272,11 @@ export function GarageLayout() {
                       audio={false}
                       ref={webcamRef}
                       screenshotFormat="image/jpeg"
-                      videoConstraints={videoConstraints}
+                      videoConstraints={{
+                        width: 480,
+                        height: 360,
+                        facingMode: "environment",
+                      }}
                       className="rounded-md"
                     />
                     <Button
@@ -582,16 +329,16 @@ export function GarageLayout() {
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
                   : selectedSpot.isOccupied
-                    ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
-                    : `Reserve Spot ${selectedSpot.spotNumber}?`}
+                  ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
+                  : `Reserve Spot ${selectedSpot.spotNumber}?`}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {selectedSpot.isOccupied &&
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? "Do you want to make this spot available again?"
                   : selectedSpot.isOccupied
-                    ? "This spot is currently reserved by someone else."
-                    : "Do you want to reserve this spot for the rest of the day?"}
+                  ? "This spot is currently reserved by someone else."
+                  : "Do you want to reserve this spot for the rest of the day?"}
               </AlertDialogDescription>
               {!selectedSpot.isOccupied && user && (
                 <div className="mt-4">
@@ -633,7 +380,7 @@ export function GarageLayout() {
                 <AlertDialogAction
                   onClick={() =>
                     handleReservation(
-                      selectedSpot.isOccupied ? "unreserve" : "reserve",
+                      selectedSpot.isOccupied ? "unreserve" : "reserve"
                     )
                   }
                 >

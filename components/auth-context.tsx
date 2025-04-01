@@ -1,4 +1,5 @@
 "use client";
+
 import { getCurrentUser } from "@/utils/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 

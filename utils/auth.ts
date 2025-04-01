@@ -16,7 +16,10 @@ export const getCurrentUser = () => {
 
 export const login = async (email: string, password: string) => {
   try {
+    console.log("Attempting to login with", { email });
     const response = await axios.post(`${API_URL}signin`, { email, password });
+    console.log("Login response", response.data);
+
     if (response.data.token) {
       localStorage.setItem("user", JSON.stringify(response.data));
       document.cookie = `user=${response.data.token}; path=/;`;
