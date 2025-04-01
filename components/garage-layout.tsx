@@ -2,11 +2,6 @@
 
 import { useState, useEffect } from "react";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogHeader,
@@ -17,7 +12,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
-import { Mail, MessageCircle, Phone } from "lucide-react";
 import { ParkingSpot, ParkingSpotBoundary } from "@/lib/types";
 import Webcam from "react-webcam";
 import { api } from "@/utils/auth";
