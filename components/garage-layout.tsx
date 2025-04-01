@@ -149,7 +149,7 @@ export function GarageLayout() {
       >
         <div className="md:w-1/3" />
         <h1 className="text-xl font-bold text-red-600 mb-2 md:mb-0">
-          Parkeringhus
+          Parking Garage
         </h1>
         <div className="md:w-1/3" />
       </div>
@@ -173,7 +173,7 @@ export function GarageLayout() {
           {/* Garage Layout Tab */}
           <TabsContent value="garage" className="mt-4">
             <div className="grid grid-cols-12 gap-4">
-              {/* Parkingsplasser */}
+              {/* Parkingspots */}
               <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
                 {parkingSpots.map((spot) => (
                   <ParkingSpotCard
@@ -184,17 +184,17 @@ export function GarageLayout() {
                 ))}
               </div>
 
-              {/* Kjørefelt */}
+              {/* Driving lane */}
               <div
                 className="hidden md:col-span-2 md:flex items-center justify-center
                 bg-gray-200"
               >
                 <p className="text-neutral-900 font-bold rotate-90">
-                  Kjørefelt
+                  DRIVINGLANE
                 </p>
               </div>
 
-              {/* Trapp / Inngang */}
+              {/* Stairs / Entrance */}
               <div
                 className="hidden md:col-span-4 md:flex items-center justify-center
                 ml-7"
@@ -203,7 +203,7 @@ export function GarageLayout() {
                   className="h-40 w-full bg-neutral-900 text-white font-bold flex
                   items-center justify-center rounded"
                 >
-                  TRAPP / INNGANG
+                  STAIRS / ENTRANCE
                 </div>
               </div>
             </div>
