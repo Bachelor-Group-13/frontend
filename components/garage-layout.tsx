@@ -34,6 +34,7 @@ import LicensePlateUpload from "./license-plate-upload";
 import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
 import { useWebcamCapture } from "@/hooks/useWebcamCapture";
+import { ParkingSpotCard } from "./parkingspot-card";
 
 /*
  * GarageLayout component:
@@ -179,66 +180,11 @@ export function GarageLayout() {
               {/* Parkingsplasser */}
               <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
                 {parkingSpots.map((spot) => (
-                  <HoverCard key={spot.id}>
-                    <HoverCardTrigger asChild>
-                      <div
-                        className={`h-24 flex justify-center items-center text-white
-                                  font-bold cursor-pointer rounded ${
-                                    spot.isOccupied
-                                      ? "bg-red-600"
-                                      : "bg-green-600"
-                                  }`}
-                        onClick={() => setSelectedSpot(spot)}
-                      >
-                        {spot.spotNumber}
-                      </div>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-72">
-                      {spot.isOccupied && spot.occupiedBy ? (
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-semibold">
-                            Skiltnr: {spot.occupiedBy.license_plate}
-                          </h4>
-                          <div
-                            className="flex justify-between items-center
-                            text-sm text-gray-600"
-                          >
-                            <p>Email: {spot.occupiedBy.email}</p>
-                            <a
-                              href={`mailto:${spot.occupiedBy.email}`}
-                              className="text-neutral-900 hover:text-blue-700"
-                            >
-                              <Mail className="h-5 w-5" />
-                            </a>
-                          </div>
-                          <div
-                            className="flex justify-between items-center
-                            text-sm text-gray-600"
-                          >
-                            <p>Phone: {spot.occupiedBy.phone_number}</p>
-                            <div className="flex space-x-2">
-                              <a
-                                href={`tel:${spot.occupiedBy.phone_number}`}
-                                className="text-neutral-900 hover:text-blue-700"
-                              >
-                                <Phone className="h-5 w-5" />
-                              </a>
-                              <a
-                                href={`sms:${spot.occupiedBy.phone_number}`}
-                                className="text-neutral-900 hover:text-green-700"
-                              >
-                                <MessageCircle className="h-5 w-5" />
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500">
-                          This spot is available.
-                        </p>
-                      )}
-                    </HoverCardContent>
-                  </HoverCard>
+                  <ParkingSpotCard
+                    key={spot.id}
+                    spot={spot}
+                    onClick={() => setSelectedSpot(spot)}
+                  />
                 ))}
               </div>
 
