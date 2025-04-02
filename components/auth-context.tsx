@@ -47,13 +47,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     window.addEventListener(
       "userAuthChange",
-      handleAuthChange as EventListener,
+      handleAuthChange as EventListener
     );
 
     return () => {
       window.removeEventListener(
         "userAuthChange",
-        handleAuthChange as EventListener,
+        handleAuthChange as EventListener
       );
     };
   }, []);

@@ -108,14 +108,13 @@ export function GarageLayout() {
         // Find the reservation ID first
         const today = new Date().toISOString().split("T")[0];
         const reservationsResponse = await api.get(
-          `/api/reservations/date/${today}`,
+          `/api/reservations/date/${today}`
         );
         const reservations = reservationsResponse.data;
 
         const reservation = reservations.find(
           (res: { spotNumber: string; userId: number }) =>
-            res.spotNumber === selectedSpot.spotNumber &&
-            res.userId === user.id,
+            res.spotNumber === selectedSpot.spotNumber && res.userId === user.id
         );
 
         if (reservation) {
@@ -372,7 +371,7 @@ export function GarageLayout() {
                 <AlertDialogAction
                   onClick={() =>
                     handleReservation(
-                      selectedSpot.isOccupied ? "unreserve" : "reserve",
+                      selectedSpot.isOccupied ? "unreserve" : "reserve"
                     )
                   }
                 >
