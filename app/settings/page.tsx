@@ -23,11 +23,11 @@ import { api, getCurrentUser } from "@/utils/auth";
  * SettingsPage:
  *
  * User interface for users to update their profile
- * settings, including license plate, phone number, and password.
+ * including license plate, phone number, and password.
  * It fetches the users current information form Supabase and allows them
  * to update it
  */
-export default function SettingsPage() {
+export default function ProfilePage() {
   // State variables using useState hook
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -102,7 +102,7 @@ export default function SettingsPage() {
   /*
    * handleUpdate function:
    *
-   * Handles the update of user settings. It validates
+   * Handles the update of user profile. It validates
    * the input fields and interacts with supabase to update the users
    * information.
    */
@@ -147,7 +147,7 @@ export default function SettingsPage() {
       setPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      console.error("Error updating user settings:", error);
+      console.error("Error updating user profile:", error);
       setErrorMessage(
         error.response?.data?.message || "An unknown error occurred"
       );
@@ -161,7 +161,7 @@ export default function SettingsPage() {
           <Link href="/garage">
             <ArrowLeft className="h-5 w-5 cursor-pointer text-neutral-900" />
           </Link>
-          <h1 className="text-2xl font-bold">User Settings</h1>
+          <h1 className="text-2xl font-bold">Profile</h1>
           <div />
         </div>
 

@@ -20,7 +20,7 @@ import { useAuth } from "./auth-context";
  * Navbar component:
  *
  * Navigation bar with user authentication features,
- * including sign out button and link to the settings page.
+ * including sign out button and link to the profile page.
  * It fetches users information from supabase and displays
  * it in an avatar.
  */
@@ -103,7 +103,7 @@ export function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link href="/settings">Settings</Link>
+                  <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
