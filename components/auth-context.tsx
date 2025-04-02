@@ -16,6 +16,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const currentUser = getCurrentUser();
+
+    if (currentUser?.token) {
+      try {
+        const payload = JSON.parse(atob(currentUser.token.split(".")[1]));
+        const isExpired = Date.now() >= payload.exp * 1000;
+
+        if (isExpired) {
+          localStorage.removeItem("user");
+          document.cookie =
+            "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          setUser(null);
+          return;
+        }
+      } catch (error) {
+        console.error("Error parsing token:", error);
+        localStorage.removeItem("user");
+        document.cookie =
+          "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        setUser(null);
+        return;
+      }
+    }
+
     setUser(currentUser);
 
     const handleAuthChange = (event: CustomEvent) => {
@@ -24,13 +47,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     window.addEventListener(
       "userAuthChange",
-      handleAuthChange as EventListener
+      handleAuthChange as EventListener,
     );
 
     return () => {
       window.removeEventListener(
         "userAuthChange",
-        handleAuthChange as EventListener
+        handleAuthChange as EventListener,
       );
     };
   }, []);

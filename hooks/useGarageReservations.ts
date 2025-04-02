@@ -26,7 +26,9 @@ export function useGarageReservations() {
       const reservations = reservationsRes.data;
 
       const spots = Array.from({ length: 10 }, (_, i) => {
-        const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(65 + (i % 2))}`;
+        const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
+          65 + (i % 2)
+        )}`;
         const reservation = reservations.find(
           (res: any) => res.spotNumber === spotNumber
         );
@@ -39,7 +41,7 @@ export function useGarageReservations() {
             ? {
                 license_plate: reservation.licensePlate,
                 second_license_plate: null,
-                name: null,
+                name: reservation.user?.name || null,
                 email: reservation.user?.email,
                 phone_number: reservation.user?.phoneNumber,
                 user_id: reservation.userId,

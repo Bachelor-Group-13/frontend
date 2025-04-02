@@ -2,7 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("user")?.value;
-  const isUserAuthenticated = Boolean(token);
+  let isUserAuthenticated = false;
+
+  if (token) {
+    try {
+      const payload = JSON.parse(
+        Buffer.from(token.split(".")[1], "base64").toString()
+      );
+      const isExpired = Date.now() >= payload.exp * 1000;
+
+      if (!isExpired) {
+        isUserAuthenticated = true;
+      }
+    } catch (error) {
+      console.error("Error parsing token:", error);
+    }
+  }
 
   if (request.nextUrl.pathname.startsWith("/garage") && !isUserAuthenticated) {
     const redirectUrl = new URL("/auth", request.url);

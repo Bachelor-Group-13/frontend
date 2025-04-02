@@ -1,4 +1,4 @@
-import { api } from "@/utils/auth";
+import { api } from "./auth";
 
 export const getUserById = (id: number) => api.get(`/api/auth/${id}`);
 
