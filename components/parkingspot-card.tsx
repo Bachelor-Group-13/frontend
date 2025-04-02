@@ -14,18 +14,14 @@ export function ParkingSpotCard({
     <HoverCard key={spot.id}>
       <HoverCardTrigger asChild>
         <div
-          className={`h-24 flex justify-center items-center text-white
-                                  font-bold cursor-pointer rounded ${
-                                    spot.isOccupied
-                                      ? "bg-red-600"
-                                      : "bg-green-600"
-                                  }`}
+          className={`flex h-24 cursor-pointer items-center justify-center rounded font-bold
+            text-white ${spot.isOccupied ? "bg-red-600" : "bg-green-600"}`}
           onClick={onClick}
         >
-          <span className="justify-center items-center text-sm font-bold">
+          <span className="items-center justify-center text-sm font-bold">
             {spot.spotNumber}
           </span>
-          <div className="relative w-full h-full md:h-full md:w-full xs:w-full xs:h-full">
+          <div className="xs:w-full xs:h-full relative h-full w-full md:h-full md:w-full">
             <CarspotVisuals isAvailable={!spot.isOccupied} />
           </div>
         </div>
@@ -36,10 +32,7 @@ export function ParkingSpotCard({
             <h4 className="text-sm font-semibold">
               License plate: {spot.occupiedBy.license_plate}
             </h4>
-            <div
-              className="flex justify-between items-center
-                            text-sm text-gray-600"
-            >
+            <div className="flex items-center justify-between text-sm text-gray-600">
               <p>Email: {spot.occupiedBy.email}</p>
               <a
                 href={`mailto:${spot.occupiedBy.email}`}
@@ -48,10 +41,7 @@ export function ParkingSpotCard({
                 <Mail className="h-5 w-5" />
               </a>
             </div>
-            <div
-              className="flex justify-between items-center
-                            text-sm text-gray-600"
-            >
+            <div className="flex items-center justify-between text-sm text-gray-600">
               <p>Phone: {spot.occupiedBy.phone_number}</p>
               <div className="flex space-x-2">
                 <a

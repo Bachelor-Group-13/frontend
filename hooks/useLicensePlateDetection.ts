@@ -17,7 +17,7 @@ export function useLicensePlateDetection() {
               phone_number: userInfo.phoneNumber,
             }
           : { plate };
-      }),
+      })
     );
 
     setPlatesInfo(results);

@@ -17,7 +17,10 @@ export const getCurrentUser = () => {
 export const login = async (email: string, password: string) => {
   try {
     console.log("Attempting to login with", { email });
-    const response = await axios.post(`${API_URL}signin`, { email, password });
+    const response = await axios.post(`${API_URL}signin`, {
+      email,
+      password,
+    });
     console.log("Login response", response.data);
 
     if (response.data.token) {
@@ -25,7 +28,9 @@ export const login = async (email: string, password: string) => {
       document.cookie = `user=${response.data.token}; path=/;`;
 
       window.dispatchEvent(
-        new CustomEvent("userAuthChange", { detail: response.data })
+        new CustomEvent("userAuthChange", {
+          detail: response.data,
+        })
       );
     }
     return { data: response.data, error: null };

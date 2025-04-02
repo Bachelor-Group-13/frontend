@@ -8,13 +8,10 @@ import { GarageLayout } from "@/components/garage-layout";
  */
 export default function GaragePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      <div className="flex justify-center items-center flex-grow p-4">
-        <div
-          className="w-full max-w-6xl bg-white shadow-lg rounded-lg
-          overflow-hidden"
-        >
-          <div className="p-6 bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-100">
+      <div className="flex flex-grow items-center justify-center p-4">
+        <div className="w-full max-w-6xl overflow-hidden rounded-lg bg-white shadow-lg">
+          <div className="bg-gray-50 p-6">
             <GarageLayout />
           </div>
         </div>

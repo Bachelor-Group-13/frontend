@@ -10,7 +10,9 @@ export function useWebcamCapture(onDetected: (plates: string[]) => void) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
         const blob = await (await fetch(imageSrc)).blob();
-        const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+        const file = new File([blob], "capture.jpg", {
+          type: "image/jpeg",
+        });
         await sendToRecognition(file);
       }
     }
@@ -22,7 +24,9 @@ export function useWebcamCapture(onDetected: (plates: string[]) => void) {
 
     try {
       const res = await api.post("/license-plate", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       if (res.data?.license_plates) {
