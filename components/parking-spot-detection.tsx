@@ -3,32 +3,19 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import axios from "axios";
-
-interface Vehicle {
-  type: string;
-  confidence: number;
-  boudingBox: number[];
-  canter: number[];
-  area: number;
-  position: "front" | "back";
-}
+import { ParkingSpotBoundary } from "@/lib/types";
+import { detectParkingSpots } from "@/utils/vision";
 
 interface ParkingDetectionProps {
-  onVehiclesDetected?: (vehicles: Vehicle[]) => void;
+  onSpotsDetected?: (spots: ParkingSpotBoundary[]) => void;
 }
 
 export function ParkingSpotDetection({
-  onVehiclesDetected,
+  onSpotsDetected,
 }: ParkingDetectionProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [processedImage, setProcessedImage] = useState<string | null>(null);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [stats, setStats] = useState<{
-    totalVehicles: number;
-    frontVehicles: number;
-    backVehicles: number;
-  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,8 +25,6 @@ export function ParkingSpotDetection({
       setSelectedImage(file);
       setImagePreview(URL.createObjectURL(file));
       setProcessedImage(null);
-      setVehicles([]);
-      setStats(null);
       setError(null);
     }
   };
@@ -53,55 +38,25 @@ export function ParkingSpotDetection({
     setLoading(true);
     setError(null);
 
-    /*     try { */
-    const formData = new FormData();
-    formData.append("file", selectedImage);
+    try {
+      const data = await detectParkingSpots(selectedImage);
 
-    axios
-      .post("http://localhost:8000/parking-detection", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((response) => {
-        setVehicles(response.data.vehicles || []);
-        setProcessedImage(response.data.processed_image || null);
-        setStats({
-          totalVehicles: response.data.total_vehicles,
-          frontVehicles: response.data.front_vehicles,
-          backVehicles: response.data.back_vehicles,
-        });
-
-        if (onVehiclesDetected) {
-          onVehiclesDetected(response.data.vehicles);
-        }
-      })
-      .catch((e) => {
-        alert("Error");
-        console.error(e);
-      });
-
-    //   const data = response.data();
-    //   setVehicles(data.vehicles || []);
-    //   setProcessedImage(data.processed_image || null);
-    //   setStats({
-    //     totalVehicles: data.total_vehicles,
-    //     frontVehicles: data.front_vehicles,
-    //     backVehicles: data.back_vehicles,
-    //   });
-    //
-    //   if (onVehiclesDetected) {
-    //     onVehiclesDetected(data.vehicles);
-    //   }
-    // } catch (error: any) {
-    //   setError(
-    //     `Failed to detect parking spots: ${
-    //       error.response?.data?.detail || error.message
-    //     }`,
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
+      const vehicles = data.vehicles || [];
+      const spots = vehicles.map(
+        (vehicle: any, index: number): ParkingSpotBoundary => ({
+          id: index,
+          spotNumber: `Detected-${index + 1}`,
+          boundingBox: vehicle.boundingBox,
+        })
+      );
+      setProcessedImage(data.processedImage || null);
+      onSpotsDetected?.(data.spots || []);
+    } catch (error) {
+      console.error("Error detecting vehicles:", error);
+      setError("Failed to detect vehicles. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -145,61 +100,6 @@ export function ParkingSpotDetection({
               alt="Processed"
               className="h-auto w-full rounded-md"
             />
-          </div>
-        )}
-
-        {stats && (
-          <div className="rounded-md bg-gray-50 p-4">
-            <h3 className="mb-4 font-medium">Detection Results</h3>
-
-            <div className="mb-4 grid grid-cols-3 gap-2">
-              <div className="rounded-md bg-white p-3 shadow-sm">
-                <p className="text-sm text-gray-500">Total Vehicles</p>
-                <p className="text-2xl font-bold">{stats.totalVehicles}</p>
-              </div>
-              <div className="rounded-md bg-white p-3 shadow-sm">
-                <p className="text-sm text-gray-500">Front</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {stats.frontVehicles}
-                </p>
-              </div>
-              <div className="rounded-md bg-white p-3 shadow-sm">
-                <p className="text-sm text-gray-500">Back</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {stats.backVehicles}
-                </p>
-              </div>
-            </div>
-
-            {vehicles.length > 0 && (
-              <div>
-                <h4 className="mb-2 font-medium">Detected Vehicles</h4>
-                <div className="max-h-60 overflow-y-auto">
-                  {vehicles.map((vehicle, index) => (
-                    <div
-                      key={index}
-                      className="mb-2 rounded-md bg-white p-2 shadow-sm"
-                    >
-                      <div className="flex justify-between">
-                        <span className="font-medium">{vehicle.type}</span>
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs ${
-                          vehicle.position === "front"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-purple-100 text-purple-800"
-                          }`}
-                        >
-                          {vehicle.position}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-500">
-                        Confidence: {(vehicle.confidence * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
