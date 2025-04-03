@@ -21,7 +21,7 @@ export function ParkingSpotCard({
           <span className="items-center justify-center text-sm font-bold">
             {spot.spotNumber}
           </span>
-          <div className="xs:w-full xs:h-full relative h-full w-full md:h-full md:w-full">
+          <div className="relative inset-1 flex h-full w-full items-center justify-center">
             <CarspotVisuals isAvailable={!spot.isOccupied} />
           </div>
         </div>
