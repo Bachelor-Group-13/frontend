@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import axios from "axios";
 import { ParkingSpotBoundary } from "@/lib/types";
 import { detectParkingSpots } from "@/utils/vision";
 
@@ -41,6 +40,7 @@ export function ParkingSpotDetection({
     try {
       const data = await detectParkingSpots(selectedImage);
 
+      console.log("Raw API response:", data);
       const vehicles = data.vehicles || [];
       const spots = vehicles.map(
         (vehicle: any, index: number): ParkingSpotBoundary => ({
@@ -50,7 +50,7 @@ export function ParkingSpotDetection({
         })
       );
       setProcessedImage(data.processedImage || null);
-      onSpotsDetected?.(data.spots || []);
+      onSpotsDetected?.(spots || null);
     } catch (error) {
       console.error("Error detecting vehicles:", error);
       setError("Failed to detect vehicles. Please try again.");

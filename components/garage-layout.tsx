@@ -212,7 +212,8 @@ export function GarageLayout() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ParkingSpotDetection
-                  onVehiclesDetected={(spots) => {
+                  onSpotsDetected={(spots) => {
+                    console.log("Detected spots:", spots);
                     setDetectedSpots(spots);
                   }}
                 />
@@ -236,6 +237,11 @@ export function GarageLayout() {
                       ))}
                     </div>
                   </div>
+                )}
+                {detectedSpots.length === 0 && (
+                  <p className="text-sm text-gray-500">
+                    No parking spots detected yet.
+                  </p>
                 )}
               </CardContent>
             </Card>
