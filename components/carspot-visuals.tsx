@@ -7,18 +7,12 @@ interface CarspotVisualsProps {
 
 const CarspotVisuals = ({ isAvailable, ...props }: CarspotVisualsProps) => {
   return (
-    <div>
+    <div className="relative h-full w-full">
       {isAvailable ? (
-        <Image
-          src="/available-green.svg"
-          alt="Available Parking Spot"
-          layout="fill"
-          objectFit="contain"
-          {...props}
-        />
+        <div className="h-full w-full bg-transparent" {...props}></div>
       ) : (
         <Image
-          src="/unavailable-red.svg"
+          src="/car-parkingspot.svg"
           alt="Unavailable Parking Spot"
           layout="fill"
           objectFit="contain"
