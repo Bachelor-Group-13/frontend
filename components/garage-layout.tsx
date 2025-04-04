@@ -25,6 +25,15 @@ import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { ParkingSpotCard } from "./parkingspot-card";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import Link from "next/link";
+import { Camera, CircleParking, StepBackIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 /*
  * GarageLayout component:
@@ -41,14 +50,16 @@ export function GarageLayout() {
     string | null
   >(null);
   const [detectedSpots, setDetectedSpots] = useState<ParkingSpotBoundary[]>([]);
-  const [showDetectionCard, setShowDetectionCard] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("garage");
 
   const { parkingSpots, user, fetchUserAndReservations } =
     useGarageReservations();
 
   useEffect(() => {
-    fetchUserAndReservations();
-  }, [fetchUserAndReservations]);
+    if (activeTab === "garage") {
+      fetchUserAndReservations();
+    }
+  }, [activeTab, fetchUserAndReservations]);
 
   /*
    * handleReservation function:
@@ -129,116 +140,125 @@ export function GarageLayout() {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-2 rounded-lg bg-gray-50 p-4">
+    <div className="container mx-auto px-4 py-6">
       {/* Header */}
-      <div
-        className="col-span-12 mb-4 flex w-full flex-col items-center md:flex-row
-          md:justify-between"
-      >
-        <div className="md:w-1/3" />
-        <h1 className="mb-2 text-xl font-bold text-red-600 md:mb-0">
-          Parking Garage
-        </h1>
-        <div className="md:w-1/3" />
-      </div>
-      <div
-        className="col-span-12 mb-4 flex w-full flex-col items-center md:flex-row
-          md:justify-between"
-      >
-        <Link href="/plate-recognition">
-          <Button variant="outline">Detect License Plate</Button>
-        </Link>
+      <div className="mb-6 flex flex-col items-center space-y-4">
+        <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
+        <p className="text-gray-500">Reserve your parking spot</p>
+        <div className="flex w-full max-w-md justify-center space-x-4">
+          <Link href="/plate-recognition" className="w-full">
+            <Button variant="outline" className="w-full">
+              <Camera className="mr-2 h-4 w-4" />
+              Detect License Plate
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="col-span-12">
-        {/* Garage Layout Tab */}
-        <div className="grid grid-cols-12 gap-4">
-          {/* Parkingspots */}
-          <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
-            {parkingSpots.map((spot) => (
-              <ParkingSpotCard
-                key={spot.id}
-                spot={spot}
-                onClick={() => setSelectedSpot(spot)}
+      <Tabs
+        defaultValue="garage"
+        className="w-full"
+        onValueChange={setActiveTab}
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="garage" className="flex items-center">
+            <CircleParking className="mr-2 h-4 w-4" />
+            Garage Layout
+          </TabsTrigger>
+          <TabsTrigger value="detection" className="flex items-center">
+            <Camera className="mr-2 h-4 w-4" />
+            Detect Parking Spots
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="garage" className="mt-6">
+          <Card className="border-0 bg-gray-50 shadow-sm">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-12 gap-4">
+                <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
+                  {parkingSpots.map((spot) => (
+                    <ParkingSpotCard
+                      key={spot.id}
+                      spot={spot}
+                      onClick={() => setSelectedSpot(spot)}
+                    />
+                  ))}
+                </div>
+
+                {/* Driving lane */}
+                <div className="hidden items-center justify-center rounded-lg bg-gray-200 md:col-span-2 md:flex">
+                  <p className="rotate-90 whitespace-nowrap font-bold text-gray-600">
+                    DRIVING LANE
+                  </p>
+                </div>
+
+                {/* Stairs / Entrance */}
+                <div className="ml-7 hidden items-center justify-center md:col-span-4 md:flex">
+                  <div
+                    className="flex h-40 w-full items-center justify-center rounded-lg bg-gray-800 font-bold
+                      text-white"
+                  >
+                    <StepBackIcon className="mr-3 h-5 w-5" />
+                    STAIRS / ENTRANCE
+                  </div>
+                </div>
+              </div>
+              <div className="mt-8 flex flex-wrap justify-center gap-4 rounded-lg bg-white p-4 text-sm">
+                <div className="flex items-center">
+                  <div className="mr-2 h-4 w-4 rounded-full bg-green-500"></div>
+                  <span>Available</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="mr-2 h-4 w-4 rounded-full bg-red-500"></div>
+                  <span>Occupied</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="detection" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Detect Parking Spots</CardTitle>
+              <CardDescription>
+                Upload an image of the garage to automatically detect available
+                spots.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <ParkingSpotDetection
+                onSpotsDetected={(spots) => {
+                  console.log("Detected spots:", spots);
+                  setDetectedSpots(spots);
+                }}
               />
-            ))}
-          </div>
 
-          {/* Driving lane */}
-          <div className="hidden items-center justify-center bg-gray-200 md:col-span-2 md:flex">
-            <p className="rotate-90 font-bold text-neutral-900">DRIVING LANE</p>
-          </div>
-
-          {/* Stairs / Entrance */}
-          <div className="ml-7 hidden items-center justify-center md:col-span-4 md:flex">
-            <div
-              className="flex h-40 w-full items-center justify-center rounded bg-neutral-900 font-bold
-                text-white"
-            >
-              STAIRS / ENTRANCE
-            </div>
-          </div>
-
-          {/* Parking spots */}
-          <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
-            <Button
-              variant="outline"
-              onClick={() => setShowDetectionCard((prev) => !prev)}
-              className="w-full md:w-auto"
-            >
-              {showDetectionCard
-                ? "Hide Detection Card"
-                : "Show Detection Card"}
-            </Button>
-          </div>
-          {showDetectionCard && (
-            <div className="col-span-12">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Detect Parking Spots</CardTitle>
-                  <CardDescription>
-                    Upload an image of the garage to detect available spots.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <ParkingSpotDetection
-                    onSpotsDetected={(spots) => {
-                      console.log("Detected spots:", spots);
-                      setDetectedSpots(spots);
-                    }}
-                  />
-
-                  {detectedSpots.length > 0 && (
-                    <div className="mt-8">
-                      <h2 className="mb-4 text-xl font-semibold">
-                        Detected Parking Spots
-                      </h2>
-                      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        {detectedSpots.map((spot) => (
-                          <div
-                            key={spot.id}
-                            className="rounded-md border bg-gray-50 p-4"
-                          >
-                            <p className="text-lg font-bold">
-                              {spot.spotNumber}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Position: [{spot.boundingBox.join(", ")}]
-                            </p>
-                          </div>
-                        ))}
+              {detectedSpots.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="mb-4 text-xl font-semibold">
+                    Detected Parking Spots
+                  </h2>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {detectedSpots.map((spot) => (
+                      <div
+                        key={spot.id}
+                        className="rounded-md border bg-white p-4 shadow-sm transition-all hover:shadow-md"
+                      >
+                        <p className="text-lg font-bold">{spot.spotNumber}</p>
+                        <p className="text-sm text-gray-600">
+                          Position: [{spot.boundingBox.join(", ")}]
+                        </p>
                       </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
-
-        {/* License Plate Tab */}
-      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Reservasjon */}
       {selectedSpot && (
@@ -246,9 +266,9 @@ export function GarageLayout() {
           open={!!selectedSpot}
           onOpenChange={() => setSelectedSpot(null)}
         >
-          <AlertDialogContent>
+          <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle>
+              <AlertDialogTitle className="flex items-center">
                 {selectedSpot.isOccupied &&
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
@@ -268,33 +288,32 @@ export function GarageLayout() {
                 <div className="mt-4">
                   <label
                     htmlFor="license-plate-select"
-                    className="block text-sm font-medium text-gray-700"
+                    className="mt-2 block text-sm font-medium text-gray-700"
                   >
                     Select License Plate
                   </label>
-                  <select
-                    id="license-plate-select"
-                    className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base
-                      focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                  <Select
                     value={selectedLicensePlate || ""}
-                    onChange={(e) => setSelectedLicensePlate(e.target.value)}
+                    onValueChange={setSelectedLicensePlate}
                   >
-                    <option value="" disabled>
-                      Select a license plate
-                    </option>
-                    <option value={user.license_plate}>
-                      {user.license_plate}
-                    </option>
-                    {user.second_license_plate && (
-                      <option value={user.second_license_plate}>
-                        {user.second_license_plate}
-                      </option>
-                    )}
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a license plate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={user.license_plate}>
+                        {user.license_plate}
+                      </SelectItem>
+                      {user.second_license_plate && (
+                        <SelectItem value={user.second_license_plate}>
+                          {user.second_license_plate}
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </AlertDialogHeader>
-            <AlertDialogFooter>
+            <AlertDialogFooter className="mt-4 flex-col space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0">
               <AlertDialogCancel onClick={() => setSelectedSpot(null)}>
                 Cancel
               </AlertDialogCancel>
@@ -305,6 +324,11 @@ export function GarageLayout() {
                     handleReservation(
                       selectedSpot.isOccupied ? "unreserve" : "reserve"
                     )
+                  }
+                  className={
+                    selectedSpot.isOccupied
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-green-600 hover:bg-green-700"
                   }
                 >
                   {selectedSpot.isOccupied ? "Unreserve" : "Reserve"}
