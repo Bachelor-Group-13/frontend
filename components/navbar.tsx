@@ -122,7 +122,7 @@ export function Navbar() {
                     className="flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 transition-colors
                       hover:bg-black/10"
                   >
-                    <Avatar className="h-8 w-8 border border-gray-200">
+                    <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={user?.avatar_url || undefined}
                         alt={user.name || "User"}

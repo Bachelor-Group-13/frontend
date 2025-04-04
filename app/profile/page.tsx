@@ -5,7 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Car,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Lock,
+  Phone,
+  Plus,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
@@ -18,6 +28,16 @@ import {
 } from "@/components/ui/alert-dialog";
 import { handleLicensePlateChange } from "@/utils/helpers";
 import { api, getCurrentUser } from "@/utils/auth";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 /*
  * SettingsPage:
@@ -33,6 +53,8 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [secondLicensePlate, setSecondLicensePlate] = useState("");
+  const [name, setName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
@@ -45,12 +67,15 @@ export default function ProfilePage() {
     null
   );
   const [showSecondLicensePlate, setShowSecondLicensePlate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
 
   // useEffect hook to fetch user data
   useEffect(() => {
     const fetchUser = async () => {
+      setIsLoading(true);
       const user = await getCurrentUser();
 
       if (!user) {
@@ -66,11 +91,19 @@ export default function ProfilePage() {
         setLicensePlate(userData.licensePlate || "");
         setSecondLicensePlate(userData.secondLicensePlate || "");
         setPhoneNumber(userData.phoneNumber || "");
+        setUserEmail(userData.email || "");
+        setName(userData.name || "");
+
+        if (userData.secondLicensePlate) {
+          setShowSecondLicensePlate(true);
+        }
       } catch (error: any) {
         setErrorMessage(
           error.response?.data?.message || "Failed to fetch user data"
         );
         setShowErrorAlert(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -107,10 +140,12 @@ export default function ProfilePage() {
    * information.
    */
   const handleUpdate = async () => {
+    setIsSubmitting(true);
     try {
       // Checks if the password and confirm password match
       if (password && password !== confirmPassword) {
         setShowPasswordMismatchAlert(true);
+        setIsSubmitting(false);
         return;
       }
 
@@ -128,6 +163,10 @@ export default function ProfilePage() {
       updateData.secondLicensePlate = secondLicensePlate
         ? secondLicensePlate.toUpperCase()
         : null;
+
+      if (phoneNumber) {
+        updateData.phoneNumber = phoneNumber;
+      }
 
       if (password) {
         updateData.password = password;
@@ -152,116 +191,256 @@ export default function ProfilePage() {
         error.response?.data?.message || "An unknown error occurred"
       );
       setShowErrorAlert(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-4 border-neutral-200
+              border-t-neutral-900"
+          ></div>
+          <p className="text-sm text-gray-500">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-6">
-      <div className="w-full max-w-xl rounded-lg bg-white p-6 shadow-md">
-        <div className="mb-4 flex items-center justify-between">
-          <Link href="/garage">
-            <ArrowLeft className="h-5 w-5 cursor-pointer text-neutral-900" />
+    <div className="min-h-screen bg-gray-50 pb-12 pt-8">
+      <div className="container mx-auto px-4">
+        <div className="mb-8 flex items-center justify-between">
+          <Link
+            href="/garage"
+            className="rounded-full p-2 transition-colors hover:bg-gray-200"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <h1 className="text-2xl font-bold">Profile</h1>
-          <div />
+          <div className="w-5" />
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <Label>License Plate</Label>
-            <Input
-              type="text"
-              value={licensePlate}
-              onChange={handleLicensePlateInputChange}
-              placeholder={licensePlate || "Your car's license plate"}
-              className={licensePlateError ? "border-red-500" : ""}
-              minLength={7}
-              maxLength={7}
-            />
-            {licensePlateError && (
-              <p className="text-sm text-red-500">{licensePlateError}</p>
-            )}
-          </div>
-          {!secondLicensePlate && !showSecondLicensePlate && (
-            <button
-              type="button"
-              onClick={() => setShowSecondLicensePlate(true)}
-              className="mt-1 text-sm underline hover:text-blue-800"
-              style={{ padding: 1, margin: 3 }}
-            >
-              Add Second License Plate
-            </button>
-          )}
-          {(secondLicensePlate || showSecondLicensePlate) && (
-            <div>
-              <Label>Second License Plate</Label>
-              <Input
-                type="text"
-                value={secondLicensePlate}
-                onChange={handleSecondLicensePlateInputChange}
-                placeholder="Your second car's license plate"
-                className={licensePlateError ? "border-red-500" : ""}
-                minLength={7}
-                maxLength={7}
-              />
-            </div>
-          )}
-          <div>
-            <Label>Phone Number</Label>
-            <Input
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder={phoneNumber || "Your phone number"}
-            />
-          </div>
-          <div>
-            <Label>New Password</Label>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter new password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-3 flex items-center"
+        <div className="mx-auto max-w-2xl">
+          <Card className="mb-6 overflow-hidden shadow-md">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 pb-6">
+              <div className="flex items-center gap-4">
+                <div
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 text-xl
+                    font-bold text-white"
+                >
+                  {name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("") || "U"}
+                </div>
+                <div>
+                  <CardTitle className="text-xl">{name}</CardTitle>
+                  <CardDescription className="text-sm text-gray-500">
+                    {userEmail}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
+                    <Car className="h-5 w-5 text-gray-500" />
+                    Vehicle Information
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="license-plate" className="text-sm">
+                        Primary License Plate
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="license-plate"
+                          type="text"
+                          value={licensePlate}
+                          onChange={handleLicensePlateInputChange}
+                          placeholder="AB12345"
+                          className={licensePlateError ? "border-red-500" : ""}
+                          minLength={7}
+                          maxLength={7}
+                        />
+                      </div>
+                      {licensePlateError && (
+                        <p className="text-xs text-red-500">
+                          {licensePlateError}
+                        </p>
+                      )}
+                    </div>
+
+                    {!secondLicensePlate && !showSecondLicensePlate ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowSecondLicensePlate(true)}
+                        className="flex items-center gap-1 text-xs"
+                      >
+                        <Plus className="h-3 w-3" />
+                        Add Second License Plate
+                      </Button>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="second-license-plate"
+                          className="text-sm"
+                        >
+                          Secondary License Plate
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="second-license-plate"
+                            type="text"
+                            value={secondLicensePlate}
+                            onChange={handleSecondLicensePlateInputChange}
+                            placeholder="Second license plate"
+                            minLength={7}
+                            maxLength={7}
+                          />
+                          {secondLicensePlate && (
+                            <Badge className="absolute right-2 top-2 bg-gray-500">
+                              Secondary
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
+                    <Phone className="h-5 w-5 text-gray-500" />
+                    Contact Information
+                  </h3>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone-number" className="text-sm">
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="phone-number"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="Your phone number"
+                      maxLength={8}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
+                    <Lock className="h-5 w-5 text-gray-500" />
+                    Security
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password" className="text-sm">
+                        New Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="new-password"
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter new password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password" className="text-sm">
+                        Confirm New Password
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="confirm-password"
+                          type={showPassword ? "text" : "password"}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm new password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Leave blank if you don't want to change your password
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter className="flex justify-end border-t bg-gray-50 p-6">
+              <Button
+                onClick={handleUpdate}
+                className="bg-neutral-900 hover:bg-neutral-800"
+                disabled={isSubmitting}
               >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
-            </div>
-          </div>
-          <div>
-            <Label>Confirm New Password</Label>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute inset-y-0 right-3 flex items-center"
-              >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
-            </div>
-          </div>
-          <Button onClick={handleUpdate} className="w-full bg-neutral-900">
-            Update Profile
-          </Button>
+                {isSubmitting ? (
+                  <>
+                    <span
+                      className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white
+                        border-t-transparent"
+                    ></span>
+                    Updating...
+                  </>
+                ) : (
+                  "Update Profile"
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </div>
 
+      {/* Success Alert Dialog */}
       <AlertDialog open={showSuccessAlert} onOpenChange={setShowSuccessAlert}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Success</AlertDialogTitle>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5" />
+              Profile Updated
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Profile updated successfully
+              Your profile has been successfully updated.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -270,6 +449,28 @@ export default function ProfilePage() {
                 setShowSuccessAlert(false);
                 router.push("/garage");
               }}
+              className="bg-neutral-900 hover:bg-neutral-800"
+            >
+              Back to Garage
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Error Alert Dialog */}
+      <AlertDialog open={showErrorAlert} onOpenChange={setShowErrorAlert}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Error
+            </AlertDialogTitle>
+            <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => setShowErrorAlert(false)}
+              className="bg-neutral-900 hover:bg-neutral-800"
             >
               OK
             </AlertDialogAction>
@@ -277,27 +478,17 @@ export default function ProfilePage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={showErrorAlert} onOpenChange={setShowErrorAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Error</AlertDialogTitle>
-            <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowErrorAlert(false)}>
-              OK
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+      {/* Password Mismatch Alert Dialog */}
       <AlertDialog
         open={showPasswordMismatchAlert}
         onOpenChange={setShowPasswordMismatchAlert}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Password Mismatch</AlertDialogTitle>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Password Mismatch
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Passwords do not match. Please try again.
             </AlertDialogDescription>
@@ -305,6 +496,7 @@ export default function ProfilePage() {
           <AlertDialogFooter>
             <AlertDialogAction
               onClick={() => setShowPasswordMismatchAlert(false)}
+              className="bg-neutral-900 hover:bg-neutral-800"
             >
               OK
             </AlertDialogAction>
