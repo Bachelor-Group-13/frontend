@@ -5,6 +5,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { detectLicensePlates } from "@/utils/vision";
 
 interface LicensePlateUploadProps {
   onLicensePlatesDetected: (licensePlate: string[]) => void;
@@ -53,8 +54,15 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     formData.append("image", image);
 
     try {
+      const platesFromOpenCV = await detectLicensePlates(formData);
+
+      if (platesFromOpenCV.length > 0) {
+        onLicensePlatesDetected(platesFromOpenCV);
+        return;
+      }
+
       // Sends the image to the API
-      const response = await axios.post(
+      const fallbackResponse = await axios.post(
         "http://localhost:8080/license-plate",
         formData,
         {
@@ -65,16 +73,11 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         }
       );
 
-      // Look for "license_plates" array in the response
-      if (response.data && response.data.license_plates) {
-        const plates = response.data.license_plates as string[];
-        if (plates.length > 0) {
-          onLicensePlatesDetected(plates);
-        } else {
-          setError("No license plates found.");
-        }
+      const fallbackPlates = fallbackResponse.data.license_plates || [];
+      if (fallbackPlates.length > 0) {
+        onLicensePlatesDetected(fallbackPlates);
       } else {
-        setError("No license plates found.");
+        setError("No license plate detected in either systems.");
       }
     } catch (err: any) {
       // Handles errors during the API request

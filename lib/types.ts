@@ -38,3 +38,12 @@ export interface ParkingSpotBoundary {
   spotNumber: string;
   boundingBox: [number, number, number, number];
 }
+
+export interface Vehicle {
+  type: string;
+  confidence: number;
+  boudingBox: [number, number, number, number];
+  center: [number, number];
+  area: number;
+  position: "front" | "back";
+}

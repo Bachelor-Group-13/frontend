@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
 import { ParkingSpot, ParkingSpotBoundary } from "@/lib/types";
-import Webcam from "react-webcam";
 import { api } from "@/utils/auth";
 import {
   Card,
@@ -22,13 +21,10 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { ParkingSpotDetection } from "./parking-spot-detection";
-import LicensePlateUpload from "./license-plate-upload";
 import { useGarageReservations } from "@/hooks/useGarageReservations";
-import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
-import { useWebcamCapture } from "@/hooks/useWebcamCapture";
 import { ParkingSpotCard } from "./parkingspot-card";
+import { ParkingSpotDetection } from "./parking-spot-detection";
+import Link from "next/link";
 
 /*
  * GarageLayout component:
@@ -44,21 +40,15 @@ export function GarageLayout() {
   const [selectedLicensePlate, setSelectedLicensePlate] = useState<
     string | null
   >(null);
-  const [activeTab, setActiveTab] = useState("garage");
   const [detectedSpots, setDetectedSpots] = useState<ParkingSpotBoundary[]>([]);
-  const [showWebcam, setShowWebcam] = useState(false);
+  const [showDetectionCard, setShowDetectionCard] = useState(false);
 
   const { parkingSpots, user, fetchUserAndReservations } =
     useGarageReservations();
-  const { platesInfo, handleLicensePlatesDetected } =
-    useLicensePlateDetection();
-  const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
 
   useEffect(() => {
-    if (activeTab === "garage") {
-      fetchUserAndReservations();
-    }
-  }, [activeTab, fetchUserAndReservations]);
+    fetchUserAndReservations();
+  }, [fetchUserAndReservations]);
 
   /*
    * handleReservation function:
@@ -151,161 +141,103 @@ export function GarageLayout() {
         </h1>
         <div className="md:w-1/3" />
       </div>
+      <div
+        className="col-span-12 mb-4 flex w-full flex-col items-center md:flex-row
+          md:justify-between"
+      >
+        <Link href="/plate-recognition">
+          <Button variant="outline">Detect License Plate</Button>
+        </Link>
+      </div>
 
       {/* Tabs */}
       <div className="col-span-12">
-        <Tabs
-          defaultValue="garage"
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="garage">Garage Layout</TabsTrigger>
-            <TabsTrigger value="parking-detection">
-              Parking Detection
-            </TabsTrigger>
-            <TabsTrigger value="license-plate">License Plate</TabsTrigger>
-          </TabsList>
+        {/* Garage Layout Tab */}
+        <div className="grid grid-cols-12 gap-4">
+          {/* Parkingspots */}
+          <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
+            {parkingSpots.map((spot) => (
+              <ParkingSpotCard
+                key={spot.id}
+                spot={spot}
+                onClick={() => setSelectedSpot(spot)}
+              />
+            ))}
+          </div>
 
-          {/* Garage Layout Tab */}
-          <TabsContent value="garage" className="mt-4">
-            <div className="grid grid-cols-12 gap-4">
-              {/* Parkingspots */}
-              <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
-                {parkingSpots.map((spot) => (
-                  <ParkingSpotCard
-                    key={spot.id}
-                    spot={spot}
-                    onClick={() => setSelectedSpot(spot)}
-                  />
-                ))}
-              </div>
+          {/* Driving lane */}
+          <div className="hidden items-center justify-center bg-gray-200 md:col-span-2 md:flex">
+            <p className="rotate-90 font-bold text-neutral-900">DRIVING LANE</p>
+          </div>
 
-              {/* Driving lane */}
-              <div className="hidden items-center justify-center bg-gray-200 md:col-span-2 md:flex">
-                <p className="rotate-90 font-bold text-neutral-900">
-                  DRIVING LANE
-                </p>
-              </div>
-
-              {/* Stairs / Entrance */}
-              <div className="ml-7 hidden items-center justify-center md:col-span-4 md:flex">
-                <div
-                  className="flex h-40 w-full items-center justify-center rounded bg-neutral-900 font-bold
-                    text-white"
-                >
-                  STAIRS / ENTRANCE
-                </div>
-              </div>
+          {/* Stairs / Entrance */}
+          <div className="ml-7 hidden items-center justify-center md:col-span-4 md:flex">
+            <div
+              className="flex h-40 w-full items-center justify-center rounded bg-neutral-900 font-bold
+                text-white"
+            >
+              STAIRS / ENTRANCE
             </div>
-          </TabsContent>
+          </div>
 
-          {/* Parking Detection Tab */}
-          <TabsContent value="parking-detection" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Parking Spot Detection</CardTitle>
-                <CardDescription>
-                  Upload an image to detect parking spots.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <ParkingSpotDetection
-                  onVehiclesDetected={(vehicles) => {
-                    console.log("Detected vehicles:", vehicles);
-                  }}
-                />
+          {/* Parking spots */}
+          <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowDetectionCard((prev) => !prev)}
+              className="w-full md:w-auto"
+            >
+              {showDetectionCard
+                ? "Hide Detection Card"
+                : "Show Detection Card"}
+            </Button>
+          </div>
+          {showDetectionCard && (
+            <div className="col-span-12">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Detect Parking Spots</CardTitle>
+                  <CardDescription>
+                    Upload an image of the garage to detect available spots.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <ParkingSpotDetection
+                    onSpotsDetected={(spots) => {
+                      console.log("Detected spots:", spots);
+                      setDetectedSpots(spots);
+                    }}
+                  />
 
-                {detectedSpots.length > 0 && (
-                  <div className="mt-8">
-                    <h2 className="mb-4 text-xl font-semibold">
-                      Detected Parking Spots
-                    </h2>
-                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                      {detectedSpots.map((spot) => (
-                        <div
-                          key={spot.id}
-                          className="rounded-md border bg-gray-50 p-4"
-                        >
-                          <p className="text-lg font-bold">{spot.spotNumber}</p>
-                          <p className="text-sm text-gray-600">
-                            Position: [{spot.boundingBox.join(", ")}]
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* License Plate Tab */}
-          <TabsContent value="license-plate" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>License Plate Recognition</CardTitle>
-                <CardDescription>
-                  Upload an image to detect the license plate.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button
-                  className="bg-neutral-900"
-                  onClick={() => setShowWebcam(!showWebcam)}
-                >
-                  {showWebcam ? "Hide Camera" : "Open Camera"}
-                </Button>
-
-                {showWebcam && (
-                  <div className="relative">
-                    <Webcam
-                      audio={false}
-                      ref={webcamRef}
-                      screenshotFormat="image/jpeg"
-                      videoConstraints={{
-                        width: 480,
-                        height: 360,
-                        facingMode: "environment",
-                      }}
-                      className="rounded-md"
-                    />
-                    <Button
-                      onClick={capture}
-                      className="absolute bottom-2 left-1/2 -translate-x-1/2 transform"
-                    >
-                      Capture
-                    </Button>
-                  </div>
-                )}
-
-                <LicensePlateUpload
-                  onLicensePlatesDetected={handleLicensePlatesDetected}
-                />
-
-                {platesInfo.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <h3 className="font-bold">Detected Plates:</h3>
-                    {platesInfo.map((p) => (
-                      <div key={p.plate} className="rounded border p-2">
-                        <p className="font-semibold">Plate: {p.plate}</p>
-                        {p.email && p.phone_number ? (
-                          <div>
-                            <p>Email: {p.email}</p>
-                            <p>Phone: {p.phone_number}</p>
+                  {detectedSpots.length > 0 && (
+                    <div className="mt-8">
+                      <h2 className="mb-4 text-xl font-semibold">
+                        Detected Parking Spots
+                      </h2>
+                      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                        {detectedSpots.map((spot) => (
+                          <div
+                            key={spot.id}
+                            className="rounded-md border bg-gray-50 p-4"
+                          >
+                            <p className="text-lg font-bold">
+                              {spot.spotNumber}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Position: [{spot.boundingBox.join(", ")}]
+                            </p>
                           </div>
-                        ) : (
-                          <p>No user found for this plate.</p>
-                        )}
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+
+        {/* License Plate Tab */}
       </div>
 
       {/* Reservasjon */}
