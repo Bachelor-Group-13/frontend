@@ -15,11 +15,10 @@ export function ParkingSpotCard({
       <HoverCardTrigger asChild>
         <div
           className={`flex h-24 cursor-pointer items-center justify-center rounded font-bold
-            text-white
-            ${spot.isOccupied ? "bg-red-600" : "bg-green-600"}`}
+            text-white ${spot.isOccupied ? "bg-red-600" : "bg-green-600"}`}
           onClick={onClick}
         >
-          <span className="items-center justify-center text-sm font-bold ml-2">
+          <span className="ml-2 items-center justify-center text-sm font-bold">
             {spot.spotNumber}
           </span>
           <div className="xs:w-full xs:h-full relative h-full w-full md:h-full md:w-full">
