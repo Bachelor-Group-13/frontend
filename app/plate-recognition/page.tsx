@@ -56,7 +56,7 @@ export default function ParkingDetectionPage() {
           </h1>
           <div className="w-8" />
         </div>
-        <p className="mt-2 text-center max-w-2xl mx-auto text-gray-500">
+        <p className="mx-auto mt-2 max-w-2xl text-center text-gray-500">
           Identify license plates and find associated user information
         </p>
       </div>
