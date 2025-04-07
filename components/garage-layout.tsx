@@ -25,7 +25,7 @@ import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { ParkingSpotCard } from "./parkingspot-card";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import Link from "next/link";
-import { Camera, CircleParking, StepBackIcon } from "lucide-react";
+import { Camera, CircleParking } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Select,
