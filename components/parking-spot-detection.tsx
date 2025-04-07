@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { ParkingSpotBoundary } from "@/lib/types";
@@ -30,7 +29,7 @@ export function ParkingSpotDetection({
    */
   const processSelectedFile = (file: File) => {
     // Checks if the file is an image
-    if (!file.type.startsWith("image.*")) {
+    if (!file.type.startsWith("image/")) {
       setError("Please select an image file (JPEG, PNG, etc.)");
       return;
     }
