@@ -14,6 +14,7 @@ import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
 import { useWebcamCapture } from "@/hooks/useWebcamCapture";
 import {
   AlertCircle,
+  ArrowLeft,
   Camera,
   Car,
   CheckCircle2,
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import Webcam from "react-webcam";
+import Link from "next/link";
 
 export default function ParkingDetectionPage() {
   const [activeTab, setActiveTab] = useState<string>("upload");
@@ -41,11 +43,20 @@ export default function ParkingDetectionPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header Section */}
-      <div className="mb-8 flex flex-col items-center text-center">
-        <h1 className="text-3xl font-bold text-gray-900">
-          License Plate Recognition
-        </h1>
-        <p className="mt-2 max-w-2xl text-gray-500">
+      <div className="mb-8 space-y-2">
+        <div className="flex items-center justify-between">
+          <Link
+            href="/garage"
+            className="rounded-full p-2 transition-colors hover:bg-gray-200"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">
+            License Plate Recognition
+          </h1>
+          <div className="w-8" />
+        </div>
+        <p className="mt-2 text-center max-w-2xl mx-auto text-gray-500">
           Identify license plates and find associated user information
         </p>
       </div>
@@ -144,8 +155,8 @@ export default function ParkingDetectionPage() {
                     {platesInfo.map((plateInfo) => (
                       <Card key={plateInfo.plate} className="overflow-hidden">
                         <CardHeader className="bg-gray-50 p-4">
-                          <CardTitle className="text-lg flex items-center">
-                          <Car className="h-6 w-6 mr-3" />
+                          <CardTitle className="flex items-center text-lg">
+                            <Car className="mr-3 h-6 w-6" />
                             {plateInfo.plate}
                           </CardTitle>
                         </CardHeader>
