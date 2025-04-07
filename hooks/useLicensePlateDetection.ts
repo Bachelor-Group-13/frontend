@@ -14,9 +14,10 @@ export function useLicensePlateDetection() {
           ? {
               plate,
               email: userInfo.email,
+              name: userInfo.name,
               phone_number: userInfo.phoneNumber,
             }
-          : { plate };
+          : { plate, name: "" };
       })
     );
 
@@ -29,6 +30,7 @@ export function useLicensePlateDetection() {
       if (res.data?.email) {
         return {
           email: res.data.email,
+          name: res.data.name,
           phoneNumber: res.data.phoneNumber,
         };
       }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Car } from "lucide-react";
 import { getCurrentUser } from "@/utils/auth";
 
 export default async function LandingPage() {
@@ -10,67 +10,142 @@ export default async function LandingPage() {
   const buttonLink = user ? "/garage" : "/auth";
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 to-slate-100">
-      {/* Main Content */}
-      <main
-        className="container mx-auto flex flex-col-reverse items-center justify-center gap-12 px-4
-          py-20 md:flex-row md:items-start"
-      >
-        {/* Left: Instructions */}
-        <section className="max-w-xl flex-1 space-y-6">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            How to use Inneparkert
-          </h2>
-
-          <p className="font-medium text-slate-700">
-            <strong>
-              Inneparkert is an internal-use application designed to help you
-              manage parking more efficiently.
-            </strong>
-          </p>
-
-          <p className="text-slate-700">
-            By registering your car’s license plate, you’ll receive a
-            notification if your car is detected parked-in the company’s parking
-            garage. You can also view an overview of available parking spaces in
-            real time.
-          </p>
-
-          <div>
-            <h3 className="font-semibold">Get Started in 3 easy steps:</h3>
-            <ol className="list-inside list-decimal text-slate-700">
-              <li>Press “Get Started” to create your account</li>
-              <li>Enter your information and license plate</li>
-              <li>Log in with your new account and start using the app</li>
-            </ol>
+    <div className="flex min-h-screen flex-col bg-white">
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-neutral-900 py-20 text-white">
+          <div className="absolute inset-0 z-0 opacity-20">
+            <Image
+              src="/parking-lot3.jpg"
+              alt="Background"
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
+          <div
+            className="absolute inset-0 z-10 bg-gradient-to-r from-neutral-900 via-neutral-900/95
+              to-neutral-900/80"
+          ></div>
 
-          <Link href={buttonLink}>
-            <Button size="lg" className="mt-2 gap-2">
-              {buttonText} <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <div className="container relative z-20 mx-auto px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <h1 className="mb-6 text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+                Inneparkert
+              </h1>
+              <Link href={buttonLink}>
+                <Button
+                  size="lg"
+                  className="gap-2 bg-white px-8 text-neutral-900 hover:bg-gray-100"
+                >
+                  {buttonText} <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
         </section>
 
-        {/* Right: Placeholder box for image or future content */}
-        <div className="relative h-64 w-full flex-1 md:h-96 md:w-[400px]">
-          <Image
-            src="/parking-lot3.jpg"
-            alt="Parking garage illustration"
-            fill
-            className="rounded-xl object-cover shadow-md"
-            priority
-          />
-        </div>
+        {/* How to Use section */}
+        <section className="bg-white py-20">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-6xl">
+              <div className="grid items-center gap-12 md:grid-cols-2">
+                {/* Image */}
+                <div className="relative h-[400px] overflow-hidden rounded-xl shadow-lg">
+                  <Image
+                    src="/parking-lot3.jpg"
+                    alt="Parking garage illustration"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
+
+                {/* Instructions */}
+                <div className="space-y-6">
+                  <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                    Get Started with Inneparkert
+                  </h2>
+
+                  <p className="text-lg text-gray-600">
+                    Inneparkert is an internal-use application designed to help
+                    you manage parking more efficiently.
+                  </p>
+
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((step, i) => (
+                      <div className="flex items-start gap-3" key={i}>
+                        <div
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-900
+                            text-white"
+                        >
+                          {step}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">
+                            {
+                              [
+                                "Create Your Account",
+                                "Register Your Vehicle",
+                                "Start Using the App",
+                              ][i]
+                            }
+                          </h4>
+                          <p className="text-gray-600">
+                            {
+                              [
+                                'Press "Get Started" to create your account',
+                                "Enter your information and license plate",
+                                "Log in with your new account and start using the app",
+                              ][i]
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-4">
+                    <Link href={buttonLink}>
+                      <Button
+                        size="lg"
+                        className="gap-2 bg-neutral-900 hover:bg-neutral-800"
+                      >
+                        {buttonText} <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <footer className="container mx-auto px-4 pb-12 text-sm text-slate-600">
-        <h4 className="font-semibold">Who is this for?</h4>
-        <p>
-          This app is intended for employees and registered users only. <br />
-          By signing in, you agree to share your registered information with
-          Inneparkert and its users.
-        </p>
+      {/* Footer Section */}
+      <footer className="mt-auto bg-white py-12">
+        <div className="container mx-auto px-4">
+          <div
+            className="flex flex-col items-center justify-between gap-6 border-t border-gray-200 pt-8
+              md:flex-row"
+          >
+            <div className="flex items-center gap-2">
+              <Car className="h-5 w-5 text-neutral-900" />
+              <span className="font-mono text-xl font-bold">Inneparkert</span>
+            </div>
+
+            <div className="text-center text-sm text-gray-600 md:text-right">
+              <p className="mb-1">
+                This app is intended for employees and registered users only.
+              </p>
+              <p>
+                By signing in, you agree to share your registered information
+                with Inneparkert and its users.
+              </p>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

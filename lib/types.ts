@@ -27,6 +27,7 @@ export type ReservationResponse = {
 
 // Defines the type for storing plate + user info
 export type PlateUserInfo = {
+  name: string;
   plate: string;
   email?: string;
   phone_number?: string;
