@@ -199,7 +199,6 @@ export function GarageLayout() {
                     className="flex h-40 w-full items-center justify-center rounded-lg bg-gray-800 font-bold
                       text-white"
                   >
-                    <StepBackIcon className="mr-3 h-5 w-5" />
                     STAIRS / ENTRANCE
                   </div>
                 </div>

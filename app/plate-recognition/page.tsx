@@ -1,7 +1,6 @@
 "use client";
 
 import LicensePlateUpload from "@/components/license-plate-upload";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,17 +9,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { TabsContent, TabsTrigger, Tabs, TabsList } from "@/components/ui/tabs";
 import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
 import { useWebcamCapture } from "@/hooks/useWebcamCapture";
-import { Tabs, TabsList } from "@radix-ui/react-tabs";
 import {
   AlertCircle,
   Camera,
+  Car,
   CheckCircle2,
   Mail,
   Phone,
   Upload,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 import Webcam from "react-webcam";
@@ -53,7 +53,7 @@ export default function ParkingDetectionPage() {
       {/* Card Section */}
       <div className="mx-auto max-w-3xl">
         <Card className="overflow-hidden shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 pb-8">
+          <CardHeader className="pb-8">
             <CardTitle className="flex items-center gap-2 text-2xl">
               License Plate Scanner
             </CardTitle>
@@ -69,19 +69,13 @@ export default function ParkingDetectionPage() {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <div className="border-b px-6">
+            <div className="border-b px-6 py-4">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger
-                  value="upload"
-                  className="flex items-center gap-2 py-3"
-                >
+                <TabsTrigger value="upload" className="flex items-center gap-2">
                   <Upload className="h-4 w-4" />
                   Upload Image
                 </TabsTrigger>
-                <TabsTrigger
-                  value="camera"
-                  className="flex items-center gap-2 py-3"
-                >
+                <TabsTrigger value="camera" className="flex items-center gap-2">
                   <Camera className="h-4 w-4" />
                   Use Camera
                 </TabsTrigger>
@@ -150,13 +144,20 @@ export default function ParkingDetectionPage() {
                     {platesInfo.map((plateInfo) => (
                       <Card key={plateInfo.plate} className="overflow-hidden">
                         <CardHeader className="bg-gray-50 p-4">
-                          <CardTitle className="text-lg">
+                          <CardTitle className="text-lg flex items-center">
+                          <Car className="h-6 w-6 mr-3" />
                             {plateInfo.plate}
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="p-4">
                           {plateInfo.email && plateInfo.phone_number ? (
                             <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">
+                                  {plateInfo.name}
+                                </span>
+                              </div>
                               <div className="flex items-center gap-2">
                                 <Mail className="h-4 w-4 text-gray-500" />
                                 <span className="text-sm">
