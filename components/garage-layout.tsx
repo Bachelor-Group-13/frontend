@@ -90,6 +90,10 @@ export function GarageLayout() {
           return;
         }
 
+        const userHasReserved = parkingSpots.some(
+          (spot) => spot.occupiedBy?.user_id === user.id
+        )
+
         console.log("Creating reservation with:", {
           spotNumber: selectedSpot.spotNumber,
           userId: user.id,
