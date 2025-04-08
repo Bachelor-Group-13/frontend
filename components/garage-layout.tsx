@@ -94,6 +94,11 @@ export function GarageLayout() {
           (spot) => spot.occupiedBy?.user_id === user.id
         )
 
+        if (userHasReserved) {
+          alert("You already have a reserved spot today.");
+          return;
+        }
+
         console.log("Creating reservation with:", {
           spotNumber: selectedSpot.spotNumber,
           userId: user.id,
