@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/auth/";
+const API_URL = "http://129.241.152.242:8080/api/auth/";
 
 export const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "http://129.241.152.242:8080",
 });
 
 export const getCurrentUser = () => {

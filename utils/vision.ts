@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const visionApi = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://129.241.152.242:8000",
 });
 
 export const detectParkingSpots = async (file: File) => {
