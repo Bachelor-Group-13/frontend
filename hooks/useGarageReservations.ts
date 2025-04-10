@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { api, getCurrentUser } from "@/utils/auth";
+import { api } from "@/utils/auth";
 import { ParkingSpot } from "@/lib/types";
 
 export function useGarageReservations() {
@@ -8,10 +8,7 @@ export function useGarageReservations() {
 
   const fetchUserAndReservations = useCallback(async () => {
     try {
-      const currentUser = getCurrentUser();
-      if (!currentUser) return;
-
-      const userRes = await api.get(`/api/auth/${currentUser.id}`);
+      const userRes = await api.get("/api/auth/me");
       const userDetails = userRes.data;
       setUser({
         id: userDetails.id,
@@ -19,6 +16,7 @@ export function useGarageReservations() {
         second_license_plate: userDetails.secondLicensePlate,
         email: userDetails.email,
         phone_number: userDetails.phoneNumber,
+        name: userDetails.name,
       });
 
       const today = new Date().toISOString().split("T")[0];

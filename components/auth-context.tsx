@@ -1,66 +1,68 @@
 "use client";
 
-import { getCurrentUser } from "@/utils/auth";
 import { createContext, useContext, useEffect, useState } from "react";
+import { api } from "@/utils/auth";
+import { useRouter, usePathname } from "next/navigation";
 
-const AuthContext = createContext<{
-  user: any;
-  setUser: (user: any) => void;
-}>({
+interface User {
+  id: number;
+  email: string;
+  name: string;
+  licensePlate: string;
+  secondLicensePlate: string;
+  phoneNumber: string;
+}
+interface AuthContextType {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
+
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  isLoading: true,
   user: null,
   setUser: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-
-    if (currentUser?.token) {
+    const checkAuth = async () => {
       try {
-        const payload = JSON.parse(atob(currentUser.token.split(".")[1]));
-        const isExpired = Date.now() >= payload.exp * 1000;
-
-        if (isExpired) {
-          localStorage.removeItem("user");
-          document.cookie =
-            "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          setUser(null);
-          return;
-        }
-      } catch (error) {
-        console.error("Error parsing token:", error);
-        localStorage.removeItem("user");
-        document.cookie =
-          "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        const response = await api.get("/api/auth/me");
+        setUser(response.data);
+        setIsAuthenticated(true);
+      } catch (error: any) {
+        setIsAuthenticated(false);
         setUser(null);
-        return;
+        if (pathname !== "/auth") {
+          router.push("/auth");
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
-
-    setUser(currentUser);
-
-    const handleAuthChange = (event: CustomEvent) => {
-      setUser(event.detail);
     };
 
-    window.addEventListener(
-      "userAuthChange",
-      handleAuthChange as EventListener
-    );
+    checkAuth();
+  }, [pathname]);
 
-    return () => {
-      window.removeEventListener(
-        "userAuthChange",
-        handleAuthChange as EventListener
-      );
-    };
-  }, []);
+  const value: AuthContextType = {
+    isAuthenticated,
+    isLoading,
+    user,
+    setUser,
+  };
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {!isLoading ? children : <div>Loading...</div>}
     </AuthContext.Provider>
   );
 };

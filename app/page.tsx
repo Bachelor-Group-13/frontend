@@ -1,13 +1,18 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Car } from "lucide-react";
-import { getCurrentUser } from "@/utils/auth";
+import { useAuth } from "@/components/auth-context";
 
-export default async function LandingPage() {
-  const user = getCurrentUser();
+export default function LandingPage() {
+  const { user, isLoading } = useAuth();
   const buttonText = user ? "Go to Garage" : "Get Started";
   const buttonLink = user ? "/garage" : "/auth";
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
