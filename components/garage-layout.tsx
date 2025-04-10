@@ -92,7 +92,7 @@ export function GarageLayout() {
 
         const userHasReserved = parkingSpots.some(
           (spot) => spot.occupiedBy?.user_id === user.id
-        )
+        );
 
         if (userHasReserved) {
           alert("You already have a reserved spot today.");
