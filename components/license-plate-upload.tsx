@@ -132,7 +132,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
 
       // Sends the image to the API
       const fallbackResponse = await axios.post(
-        "http://129.241.152.242:8080/license-plate",
+        `${process.env.NEXT_PUBLIC_API_URL}/license-plate`,
         formData,
         {
           headers: {

@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_URL = process.env.NEXT_PUBLIC_VISION_API_URL;
+
 export const visionApi = axios.create({
-  baseURL: "http://129.241.152.242:8082",
+  baseURL: API_URL,
 });
 
 export const detectParkingSpots = async (file: File) => {
