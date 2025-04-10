@@ -10,14 +10,6 @@ export const api = axios.create({
   },
 });
 
-// export const getCurrentUser = () => {
-//   if (typeof window !== "undefined") {
-//     const userStr = localStorage.getItem("user");
-//     if (userStr) return JSON.parse(userStr);
-//   }
-//   return null;
-// };
-
 export const login = async (email: string, password: string) => {
   try {
     console.log("Attempting to login with", { email });
@@ -67,71 +59,15 @@ export const register = async (
 
 export const logout = async () => {
   try {
-    await api.post(`${API_URL}/logout`, {}, { withCredentials: true });
+    await api.post(`${API_URL}logout`, {}, { withCredentials: true });
 
     window.dispatchEvent(new CustomEvent("userAuthChange", { detail: null }));
 
-    window.location.href = "/auth";
+    window.location.href = "/";
   } catch (error) {
     console.error("Logout failed:", error);
   }
 };
-
-// export const isAuthenticated = () => {
-//   return getCurrentUser() !== null;
-// };
-
-// api.interceptors.request.use(
-//   (config) => {
-//     // const user = getCurrentUser();
-//     // if (user && user.token) {
-//     //   config.headers["Authorization"] = `Bearer ${user.token}`;
-//     }
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
-
-// api.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     if (
-//       error.response?.status === 401 &&
-//       error.response?.data?.message === "Expired JWT token"
-//     ) {
-//       const currentUser = getCurrentUser();
-//       const refreshToken = currentUser?.refreshToken;
-
-//       if (refreshToken) {
-//         try {
-//           const refreshResponse = await axios.post(
-//             `${API_URL}refresh`,
-//             refreshToken,
-//             {
-//               headers: {
-//                 "Content-Type": "application/json",
-//               },
-//             }
-//           );
-
-//           const newTokens = refreshResponse.data;
-//           localStorage.setItem("user", JSON.stringify(newTokens));
-//           document.cookie = `user=${newTokens.token}; path=/;`;
-
-//           error.config.headers["Authorization"] = `Bearer ${newTokens.token}`;
-//           return axios(error.config);
-//         } catch (refreshError) {
-//           logout();
-//           return Promise.reject(refreshError);
-//         }
-//       }
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
 
 api.interceptors.response.use(
   (response) => response,

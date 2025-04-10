@@ -27,7 +27,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { handleLicensePlateChange } from "@/utils/helpers";
-import { api, getCurrentUser } from "@/utils/auth";
+import { api } from "@/utils/auth";
+import { useAuth } from "@/components/auth-context";
 import {
   Card,
   CardContent,
@@ -57,7 +58,6 @@ export default function ProfilePage() {
   const [userEmail, setUserEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [showPasswordMismatchAlert, setShowPasswordMismatchAlert] =
@@ -71,19 +71,18 @@ export default function ProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
 
   // useEffect hook to fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       setIsLoading(true);
-      const user = await getCurrentUser();
 
-      if (!user) {
+      if (!isAuthenticated || !user) {
         router.push("/auth");
         return;
       }
 
-      setUserId(user.id);
       try {
         const response = await api.get(`/api/auth/${user.id}`);
         const userData = response.data;
@@ -108,7 +107,7 @@ export default function ProfilePage() {
     };
 
     fetchUser();
-  }, []);
+  }, [user, isAuthenticated, router]);
 
   /**
    * handleLicensePlateChange function:
@@ -142,18 +141,16 @@ export default function ProfilePage() {
   const handleUpdate = async () => {
     setIsSubmitting(true);
     try {
-      // Checks if the password and confirm password match
       if (password && password !== confirmPassword) {
         setShowPasswordMismatchAlert(true);
         setIsSubmitting(false);
         return;
       }
 
-      if (!userId) {
+      if (!user?.id) {
         throw new Error("User ID not found");
       }
 
-      // Updates the user data
       const updateData: any = {};
 
       if (licensePlate) {
@@ -172,15 +169,7 @@ export default function ProfilePage() {
         updateData.password = password;
       }
 
-      const user = getCurrentUser();
-      console.log("Update request:", {
-        url: `/api/auth/${userId}`,
-        data: updateData,
-        token: user?.token,
-        headers: { Authorization: `Bearer ${user?.token}` },
-      });
-
-      await api.put(`/api/auth/${userId}`, updateData);
+      await api.put(`/api/auth/${user.id}`, updateData);
 
       setShowSuccessAlert(true);
       setPassword("");

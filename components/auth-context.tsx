@@ -11,6 +11,7 @@ interface User {
   licensePlate: string;
   secondLicensePlate: string;
   phoneNumber: string;
+  avatar_url?: string;
 }
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (error: any) {
         setIsAuthenticated(false);
         setUser(null);
-        if (pathname !== "/auth") {
+        if (pathname !== "/auth" && pathname !== "/") {
           router.push("/auth");
         }
       } finally {
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     checkAuth();
-  }, [pathname]);
+  }, [pathname, router]);
 
   const value: AuthContextType = {
     isAuthenticated,
