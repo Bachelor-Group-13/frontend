@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { api } from "@/utils/auth";
-import { ParkingSpot } from "@/lib/types";
+import { ParkingSpot } from "@/utils/types";
 
 export function useGarageReservations() {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);

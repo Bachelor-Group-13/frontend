@@ -1,4 +1,4 @@
-import { ParkingSpot } from "@/lib/types";
+import { ParkingSpot } from "@/utils/types";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 import { Mail, MessageCircle, Phone } from "lucide-react";
 import CarspotVisuals from "./carspot-visuals";

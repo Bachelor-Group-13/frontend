@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { ParkingSpotBoundary } from "@/lib/types";
+import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
 import { detectParkingSpots } from "@/utils/vision";
 import { cn } from "@/lib/utils";
 import { Car, AlertCircle, ArrowRight, Loader2, ImageIcon } from "lucide-react";
@@ -9,7 +9,7 @@ import { Progress } from "./ui/progress";
 import { Alert, AlertDescription } from "./ui/alert";
 
 interface ParkingDetectionProps {
-  onSpotsDetected?: (spots: ParkingSpotBoundary[]) => void;
+  onSpotsDetected?: (spots: ParkingSpotBoundary[], vehicles: Vehicle[]) => void;
 }
 
 export function ParkingSpotDetection({
@@ -137,7 +137,7 @@ export function ParkingSpotDetection({
       clearInterval(progressInterval);
       setProgress(100);
       setProcessedImage(data.processedImage || null);
-      onSpotsDetected?.(spots || null);
+      onSpotsDetected?.(spots, vehicles);
     } catch (error) {
       clearInterval(progressInterval);
       console.error("Error detecting vehicles:", error);

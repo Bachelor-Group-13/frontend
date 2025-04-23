@@ -12,7 +12,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
-import { ParkingSpot, ParkingSpotBoundary } from "@/lib/types";
 import { api } from "@/utils/auth";
 import {
   Card,
@@ -34,6 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { ParkingSpot, ParkingSpotBoundary, Vehicle } from "@/utils/types";
+import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
 
 /*
  * GarageLayout component:
@@ -50,16 +51,116 @@ export function GarageLayout() {
     string | null
   >(null);
   const [detectedSpots, setDetectedSpots] = useState<ParkingSpotBoundary[]>([]);
+  const [visualGarageSpots, setVisualGarageSpots] = useState<ParkingSpot[]>([]);
   const [activeTab, setActiveTab] = useState<string>("garage");
+  const [detectedVehicles, setDetectedVehicles] = useState<Vehicle[]>([]);
 
   const { parkingSpots, user, fetchUserAndReservations } =
     useGarageReservations();
+
+  const { platesInfo } = useLicensePlateDetection();
+
+  useEffect(() => {
+    if (
+      detectedVehicles.length === 0 ||
+      detectedSpots.length === 0 ||
+      activeTab !== "detection"
+    )
+      return;
+
+    const matchedSpots: ParkingSpotBoundary[] = detectedSpots.map((spot) => {
+      const vehicleMatch = detectedVehicles.find((vehicle) => {
+        const [cx, cy] = vehicle.center;
+        const [x1, y1, x2, y2] = spot.boundingBox;
+        return cx >= x1 && cx <= x2 && cy >= y1 && cy <= y2;
+      });
+
+      return {
+        ...spot,
+        isOccupied: !!vehicleMatch,
+        vehicle: vehicleMatch ?? null,
+      };
+    });
+
+    const detectedSpotNumbers = matchedSpots
+      .filter((spot) => spot.vehicle?.licensePlate)
+      .map((spot) => ({
+        spotNumber: spot.spotNumber,
+        licensePlate: spot.vehicle!.licensePlate!,
+      }));
+
+    if (detectedSpotNumbers.length === 0) return;
+
+    const reserveDetected = async () => {
+      try {
+        const today = new Date().toISOString().split("T")[0];
+
+        for (const { spotNumber, licensePlate } of detectedSpotNumbers) {
+          try {
+            await api.post("/api/reservations", {
+              spotNumber,
+              licensePlate,
+              reservationDate: today,
+            });
+          } catch (error) {
+            console.error(`Failed to reserve spot ${spotNumber}`, error);
+          }
+        }
+
+        await fetchUserAndReservations();
+      } catch (error) {
+        console.error("Batch reservation error", error);
+      }
+    };
+
+    reserveDetected();
+  }, [detectedVehicles, activeTab]);
+
+  function isInsideBox(
+    center: [number, number],
+    box: [number, number, number, number]
+  ) {
+    const [x, y] = center;
+    const [x1, y1, x2, y2] = box;
+    return x >= x1 && x <= x2 && y >= y1 && y <= y2;
+  }
+
+  useEffect(() => {
+    if (detectedVehicles.length === 0 || platesInfo.length === 0) return;
+
+    const enrichedVehicles = detectedVehicles.map((vehicle) => {
+      const matchingPlate = platesInfo.find((plateInfo: any) =>
+        isInsideBox(vehicle.center, plateInfo.boundingBox)
+      );
+
+      return {
+        ...vehicle,
+        licensePlate: matchingPlate?.plate || null,
+      };
+    });
+
+    setDetectedVehicles(enrichedVehicles);
+  }, [detectedVehicles, platesInfo]);
 
   useEffect(() => {
     if (activeTab === "garage") {
       fetchUserAndReservations();
     }
   }, [activeTab, fetchUserAndReservations]);
+
+  useEffect(() => {
+    if (activeTab !== "garage") return;
+
+    const updated = parkingSpots.map((spot) => {
+      const match = detectedSpots.find((d) => d.spotNumber === spot.spotNumber);
+      return {
+        ...spot,
+        isOccupied: match?.isOccupied ?? spot.isOccupied,
+      };
+    });
+
+    setVisualGarageSpots(updated);
+  }, [parkingSpots, detectedSpots, activeTab]);
 
   /*
    * handleReservation function:
@@ -186,7 +287,7 @@ export function GarageLayout() {
             <CardContent className="p-6">
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
-                  {parkingSpots.map((spot) => (
+                  {visualGarageSpots.map((spot) => (
                     <ParkingSpotCard
                       key={spot.id}
                       spot={spot}
@@ -237,9 +338,10 @@ export function GarageLayout() {
             </CardHeader>
             <CardContent className="space-y-6">
               <ParkingSpotDetection
-                onSpotsDetected={(spots) => {
+                onSpotsDetected={(spots, vehicles) => {
                   console.log("Detected spots:", spots);
                   setDetectedSpots(spots);
+                  setDetectedVehicles(vehicles);
                 }}
               />
 

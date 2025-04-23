@@ -38,6 +38,8 @@ export interface ParkingSpotBoundary {
   id: number;
   spotNumber: string;
   boundingBox: [number, number, number, number];
+  isOccupied?: boolean;
+  vehicle?: Vehicle | null;
 }
 
 export interface Vehicle {
@@ -47,4 +49,5 @@ export interface Vehicle {
   center: [number, number];
   area: number;
   position: "front" | "back";
+  licensePlate?: string | null;
 }
