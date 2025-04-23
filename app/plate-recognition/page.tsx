@@ -20,12 +20,15 @@ import {
   CheckCircle2,
   Mail,
   Phone,
+  Search,
   Upload,
   User,
 } from "lucide-react";
 import { useState } from "react";
 import Webcam from "react-webcam";
 import Link from "next/link";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "@/components/ui/input";
 
 export default function ParkingDetectionPage() {
   const [activeTab, setActiveTab] = useState<string>("upload");
@@ -33,11 +36,18 @@ export default function ParkingDetectionPage() {
     useLicensePlateDetection();
   const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
   const [processing, setProcessing] = useState(false);
+  const [manualPlate, setManualPlate] = useState("");
 
   const handleCapture = async () => {
     setProcessing(true);
     await capture();
     setProcessing(false);
+  };
+
+  const handleManualSearch = () => {
+    if (manualPlate.trim()) {
+      handleLicensePlatesDetected([manualPlate.trim().toUpperCase()]);
+    }
   };
 
   return (
@@ -69,35 +79,67 @@ export default function ParkingDetectionPage() {
               License Plate Scanner
             </CardTitle>
             <CardDescription>
-              Upload an image to detect the license plates and find vehicle
-              owners.
+              Find vehicle owners by license plate using of the methods below.
             </CardDescription>
           </CardHeader>
 
           <Tabs
-            defaultValue="upload"
+            defaultValue="manual"
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
             <div className="border-b px-6 py-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upload" className="flex items-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload Image
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="manual" className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  Search License Plate
                 </TabsTrigger>
                 <TabsTrigger value="camera" className="flex items-center gap-2">
                   <Camera className="h-4 w-4" />
                   Use Camera
                 </TabsTrigger>
+                <TabsTrigger value="upload" className="flex items-center gap-2">
+                  <Upload className="h-4 w-4" />
+                  Upload Image
+                </TabsTrigger>
               </TabsList>
             </div>
 
             <CardContent className="p-6">
-              <TabsContent value="upload" className="mt-0">
-                <LicensePlateUpload
-                  onLicensePlatesDetected={handleLicensePlatesDetected}
-                />
+              <TabsContent className="mt-0" value="manual">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="license-plate"
+                      className="text-sm font-medium"
+                    >
+                      License Plate Number
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="license-plate"
+                        value={manualPlate}
+                        onChange={(e) =>
+                          setManualPlate(e.target.value.toUpperCase())
+                        }
+                        placeholder="Enter License Plate (e.g., AB12345)"
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={handleManualSearch}
+                        disabled={!manualPlate.trim()}
+                        className="bg-neutral-900 hover:bg-neutral-800"
+                      >
+                        <Search className="mr-2 h-4 w-4" />
+                        Search
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Enter the license plate number in the format "AB12345"
+                    </p>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="camera" className="mt-0">
@@ -143,6 +185,12 @@ export default function ParkingDetectionPage() {
                     the capture button.
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="upload" className="mt-0">
+                <LicensePlateUpload
+                  onLicensePlatesDetected={handleLicensePlatesDetected}
+                />
               </TabsContent>
 
               {platesInfo.length > 0 && (
