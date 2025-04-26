@@ -24,7 +24,16 @@ import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { ParkingSpotCard } from "./parkingspot-card";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import Link from "next/link";
-import { Camera, CircleParking } from "lucide-react";
+import {
+  Camera,
+  Car,
+  CircleParking,
+  LayoutDashboard,
+  Mail,
+  MessageCircle,
+  Phone,
+  Users,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Select,
@@ -35,6 +44,7 @@ import {
 } from "./ui/select";
 import { ParkingSpot, ParkingSpotBoundary, Vehicle } from "@/utils/types";
 import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
+import { Badge } from "./ui/badge";
 
 /*
  * GarageLayout component:
@@ -254,7 +264,7 @@ export function GarageLayout() {
       {/* Header */}
       <div className="mb-6 flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
-        <p className="text-gray-500">Reserve your parking spot</p>
+        <p className="text-gray-500">Manage Parking Spot</p>
         <div className="flex w-full max-w-md justify-center space-x-4">
           <Link href="/plate-recognition" className="w-full">
             <Button variant="outline" className="w-full">
@@ -267,11 +277,15 @@ export function GarageLayout() {
 
       {/* Tabs */}
       <Tabs
-        defaultValue="garage"
+        defaultValue="dashboard"
         className="w-full"
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="dashboard" className="flex items-center">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
           <TabsTrigger value="garage" className="flex items-center">
             <CircleParking className="mr-2 h-4 w-4" />
             Garage Layout
@@ -282,6 +296,152 @@ export function GarageLayout() {
           </TabsTrigger>
         </TabsList>
 
+        {/* Dashboard Tab */}
+        <TabsContent value="dashboard" className="mt-6">
+          <Card className="border-0 bg-gray-50 shadow-sm">
+            <CardContent>
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Parking Status */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">Your Parking Status</h2>
+
+                  {/* Static for now - will be dynamic later */}
+                  <div className="rounded-lg border-2 border-red-500 bg-white p-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-red-600">
+                        Inneparkert
+                      </h3>
+                      <Badge className="bg-red-500">Parked In</Badge>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Your vehicle is currently parked in spot 2A
+                    </p>
+
+                    <div className="mt-4 flex items-center gap-2">
+                      <Car className="h-5 w-5 text-gray-500" />
+                      <span className="text-sm font-medium">AB12345</span>
+                    </div>
+                  </div>
+
+                  {/* Garage Stats */}
+                  <div className="mt-6 rounded-lg bg-white p-4 shadow-sm">
+                    <h3 className="mb-3 text-lg font-semibold">
+                      Garage Status
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="rounded-md bg-green-50 p-3 text-center">
+                        <p className="text-sm text-gray-600">Available Spots</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {
+                            parkingSpots.filter((spot) => !spot.isOccupied)
+                              .length
+                          }
+                        </p>
+                      </div>
+                      <div className="rounded-md bg-red-50 p-3 text-center">
+                        <p className="text-sm text-gray-600">Occupied Spots</p>
+                        <p className="text-2xl font-bold text-red-600">
+                          {
+                            parkingSpots.filter((spot) => spot.isOccupied)
+                              .length
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nearby Vehicles */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">Nearby Vehicles</h2>
+                  <div className="rounded-lg bg-white p-4 shadow-sm">
+                    <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+                      <Users className="h-5 w-5" />
+                      Vehicles Around You
+                    </h3>
+
+                    {/* Example vehicle - will be dynamic later */}
+                    <div className="space-y-3">
+                      <div className="rounded-md border p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white">
+                              ON
+                            </div>
+                            <div>
+                              <p className="font-medium">Ola Nordmann</p>
+                              <p className="text-xs text-gray-500">
+                                Spot 1A (In front of you)
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <a
+                              href="tel:12345678"
+                              className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                            >
+                              <Phone className="h-4 w-4" />
+                            </a>
+                            <a
+                              href="mailto:ola@example.com"
+                              className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </a>
+                            <a
+                              href="sms:12345678"
+                              className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-md border p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white">
+                              KL
+                            </div>
+                            <div>
+                              <p className="font-medium">Kari Larsen</p>
+                              <p className="text-xs text-gray-500">
+                                Spot 3A (Behind you)
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <a
+                              href="tel:87654321"
+                              className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                            >
+                              <Phone className="h-4 w-4" />
+                            </a>
+                            <a
+                              href="mailto:kari@example.com"
+                              className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </a>
+                            <a
+                              href="sms:87654321"
+                              className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Garage Layout Tab */}
         <TabsContent value="garage" className="mt-6">
           <Card className="border-0 bg-gray-50 shadow-sm">
             <CardContent className="p-6">
