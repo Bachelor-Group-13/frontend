@@ -10,6 +10,16 @@ export function useGarageReservations() {
     try {
       const userRes = await api.get("/api/auth/me");
       const userDetails = userRes.data;
+
+      const today = new Date().toISOString().split("T")[0];
+      const reservationsRes = await api.get(`/api/reservations/date/${today}`);
+      const reservations = reservationsRes.data;
+
+      // Find the user's current reservation
+      const userReservation = reservations.find(
+        (res: any) => res.userId === userDetails.id
+      );
+
       setUser({
         id: userDetails.id,
         license_plate: userDetails.licensePlate,
@@ -17,11 +27,13 @@ export function useGarageReservations() {
         email: userDetails.email,
         phone_number: userDetails.phoneNumber,
         name: userDetails.name,
+        current_reservation: userReservation
+          ? {
+              spotNumber: userReservation.spotNumber,
+              licensePlate: userReservation.licensePlate,
+            }
+          : null,
       });
-
-      const today = new Date().toISOString().split("T")[0];
-      const reservationsRes = await api.get(`/api/reservations/date/${today}`);
-      const reservations = reservationsRes.data;
 
       const spots = Array.from({ length: 10 }, (_, i) => {
         const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
