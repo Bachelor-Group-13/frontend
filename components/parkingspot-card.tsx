@@ -6,16 +6,27 @@ import CarspotVisuals from "./carspot-visuals";
 export function ParkingSpotCard({
   spot,
   onClick,
+  currentUserId,
 }: {
   spot: ParkingSpot;
   onClick: () => void;
+  currentUserId: string | null;
 }) {
+  const isOwnSpot =
+    spot.isOccupied && spot.occupiedBy?.user_id === currentUserId;
+
+  const getSpotColor = () => {
+    if (!spot.isOccupied) return "bg-green-600";
+    if (isOwnSpot) return "bg-orange-500";
+    return "bg-red-600";
+  };
+
   return (
     <HoverCard key={spot.id}>
       <HoverCardTrigger asChild>
         <div
           className={`flex h-24 cursor-pointer items-center justify-center rounded font-bold
-            text-white ${spot.isOccupied ? "bg-red-600" : "bg-green-600"}`}
+            text-white ${getSpotColor()}`}
           onClick={onClick}
         >
           <span className="ml-2 items-center justify-center text-sm font-bold">

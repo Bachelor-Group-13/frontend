@@ -31,7 +31,7 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 
 export default function ParkingDetectionPage() {
-  const [activeTab, setActiveTab] = useState<string>("upload");
+  const [activeTab, setActiveTab] = useState<string>("manual");
   const { platesInfo, handleLicensePlatesDetected } =
     useLicensePlateDetection();
   const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
@@ -61,14 +61,8 @@ export default function ParkingDetectionPage() {
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">
-            License Plate Recognition
-          </h1>
           <div className="w-8" />
         </div>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-gray-500">
-          Identify license plates and find associated user information
-        </p>
       </div>
 
       {/* Card Section */}
@@ -76,10 +70,11 @@ export default function ParkingDetectionPage() {
         <Card className="overflow-hidden shadow-lg">
           <CardHeader className="pb-8">
             <CardTitle className="flex items-center gap-2 text-2xl">
-              License Plate Scanner
+              License Plate Recognition
             </CardTitle>
             <CardDescription>
-              Find vehicle owners by license plate using of the methods below.
+              Find vehicle owners by license plate using one of the methods
+              below.
             </CardDescription>
           </CardHeader>
 

@@ -22,9 +22,17 @@ import {
 } from "./ui/card";
 import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { ParkingSpotCard } from "./parkingspot-card";
-import { ParkingSpotDetection } from "./parking-spot-detection";
 import Link from "next/link";
-import { Camera, CircleParking } from "lucide-react";
+import {
+  Camera,
+  Car,
+  CircleParking,
+  LayoutDashboard,
+  Mail,
+  MessageCircle,
+  Phone,
+  Users,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Select,
@@ -33,8 +41,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { ParkingSpot, ParkingSpotBoundary, Vehicle } from "@/utils/types";
-import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
+import { ParkingSpot } from "@/utils/types";
+import { Badge } from "./ui/badge";
+import { ParkingSpotDetection } from "./parking-spot-detection";
+import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
 
 /*
  * GarageLayout component:
@@ -44,123 +54,22 @@ import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
  * parking spots and integrates with the Spring Boot backend
  */
 export function GarageLayout() {
-  // State variables using the useState hook
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
   const [selectedLicensePlate, setSelectedLicensePlate] = useState<
     string | null
   >(null);
-  const [detectedSpots, setDetectedSpots] = useState<ParkingSpotBoundary[]>([]);
-  const [visualGarageSpots, setVisualGarageSpots] = useState<ParkingSpot[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("garage");
-  const [detectedVehicles, setDetectedVehicles] = useState<Vehicle[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
   const { parkingSpots, user, fetchUserAndReservations } =
     useGarageReservations();
 
-  const { platesInfo } = useLicensePlateDetection();
-
   useEffect(() => {
-    if (
-      detectedVehicles.length === 0 ||
-      detectedSpots.length === 0 ||
-      activeTab !== "detection"
-    )
-      return;
-
-    const matchedSpots: ParkingSpotBoundary[] = detectedSpots.map((spot) => {
-      const vehicleMatch = detectedVehicles.find((vehicle) => {
-        const [cx, cy] = vehicle.center;
-        const [x1, y1, x2, y2] = spot.boundingBox;
-        return cx >= x1 && cx <= x2 && cy >= y1 && cy <= y2;
-      });
-
-      return {
-        ...spot,
-        isOccupied: !!vehicleMatch,
-        vehicle: vehicleMatch ?? null,
-      };
-    });
-
-    const detectedSpotNumbers = matchedSpots
-      .filter((spot) => spot.vehicle?.licensePlate)
-      .map((spot) => ({
-        spotNumber: spot.spotNumber,
-        licensePlate: spot.vehicle!.licensePlate!,
-      }));
-
-    if (detectedSpotNumbers.length === 0) return;
-
-    const reserveDetected = async () => {
-      try {
-        const today = new Date().toISOString().split("T")[0];
-
-        for (const { spotNumber, licensePlate } of detectedSpotNumbers) {
-          try {
-            await api.post("/api/reservations", {
-              spotNumber,
-              licensePlate,
-              reservationDate: today,
-            });
-          } catch (error) {
-            console.error(`Failed to reserve spot ${spotNumber}`, error);
-          }
-        }
-
-        await fetchUserAndReservations();
-      } catch (error) {
-        console.error("Batch reservation error", error);
-      }
-    };
-
-    reserveDetected();
-  }, [detectedVehicles, activeTab]);
-
-  function isInsideBox(
-    center: [number, number],
-    box: [number, number, number, number]
-  ) {
-    const [x, y] = center;
-    const [x1, y1, x2, y2] = box;
-    return x >= x1 && x <= x2 && y >= y1 && y <= y2;
-  }
-
-  useEffect(() => {
-    if (detectedVehicles.length === 0 || platesInfo.length === 0) return;
-
-    const enrichedVehicles = detectedVehicles.map((vehicle) => {
-      const matchingPlate = platesInfo.find((plateInfo: any) =>
-        isInsideBox(vehicle.center, plateInfo.boundingBox)
-      );
-
-      return {
-        ...vehicle,
-        licensePlate: matchingPlate?.plate || null,
-      };
-    });
-
-    setDetectedVehicles(enrichedVehicles);
-  }, [detectedVehicles, platesInfo]);
-
-  useEffect(() => {
-    if (activeTab === "garage") {
+    // Fetch data on initial load and when switching to either dashboard or garage tab
+    if (activeTab === "garage" || activeTab === "dashboard") {
       fetchUserAndReservations();
     }
   }, [activeTab, fetchUserAndReservations]);
-
-  useEffect(() => {
-    if (activeTab !== "garage") return;
-
-    const updated = parkingSpots.map((spot) => {
-      const match = detectedSpots.find((d) => d.spotNumber === spot.spotNumber);
-      return {
-        ...spot,
-        isOccupied: match?.isOccupied ?? spot.isOccupied,
-      };
-    });
-
-    setVisualGarageSpots(updated);
-  }, [parkingSpots, detectedSpots, activeTab]);
 
   /*
    * handleReservation function:
@@ -239,6 +148,8 @@ export function GarageLayout() {
       console.log("Spot reserved/unreserved successfully");
       await fetchUserAndReservations();
       setSelectedSpot(null);
+      // Switch to dashboard after successful reservation/unreservation
+      setActiveTab("dashboard");
     } catch (error) {
       console.error("Failed to reserve/unreserve spot", error);
       if (error instanceof Error) {
@@ -249,12 +160,46 @@ export function GarageLayout() {
     }
   };
 
+  const isParkedIn = (spotNumber: string, spots: ParkingSpot[]): boolean => {
+    // Find your spot's position
+    const spotIndex = spots.findIndex((spot) => spot.spotNumber === spotNumber);
+    if (spotIndex === -1) return false;
+
+    // Get row and column from spot number (e.g., "1A" -> row 1, col 0)
+    const row = Math.floor(spotIndex / 2);
+    const col = spotIndex % 2;
+
+    // Check spots around your spot
+    const adjacentSpots = [];
+
+    // Check spot in front (if not in front row)
+    if (row > 0) {
+      const frontSpotIndex = (row - 1) * 2 + col;
+      adjacentSpots.push(spots[frontSpotIndex]);
+    }
+
+    // Check spot behind (if not in back row)
+    if (row < 4) {
+      // 5 rows total (0-4)
+      const backSpotIndex = (row + 1) * 2 + col;
+      adjacentSpots.push(spots[backSpotIndex]);
+    }
+
+    // Check spot to the side (if exists)
+    const sideSpotIndex = row * 2 + (col === 0 ? 1 : 0);
+    adjacentSpots.push(spots[sideSpotIndex]);
+
+    // You're parked in if any adjacent spot is occupied
+    return adjacentSpots.some((spot) => spot && spot.isOccupied);
+  };
+
+  // TODO: Make the dashboard usable, not just static info
   return (
     <div className="container mx-auto px-4 py-6">
       {/* Header */}
       <div className="mb-6 flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
-        <p className="text-gray-500">Reserve your parking spot</p>
+        <p className="text-gray-500">Manage Parking Spot</p>
         <div className="flex w-full max-w-md justify-center space-x-4">
           <Link href="/plate-recognition" className="w-full">
             <Button variant="outline" className="w-full">
@@ -267,31 +212,213 @@ export function GarageLayout() {
 
       {/* Tabs */}
       <Tabs
-        defaultValue="garage"
+        defaultValue="dashboard"
         className="w-full"
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="dashboard" className="flex items-center">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
           <TabsTrigger value="garage" className="flex items-center">
             <CircleParking className="mr-2 h-4 w-4" />
             Garage Layout
           </TabsTrigger>
           <TabsTrigger value="detection" className="flex items-center">
             <Camera className="mr-2 h-4 w-4" />
-            Detect Parking Spots
+            Detect Spots
           </TabsTrigger>
         </TabsList>
 
+        {/* Dashboard Tab */}
+        <TabsContent value="dashboard" className="mt-6">
+          <Card className="border-0 bg-gray-50 shadow-sm">
+            <CardContent>
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Parking Status */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">Your Parking Status</h2>
+
+                  {user && user.current_reservation ? (
+                    <div className="rounded-lg border-2 border-red-500 bg-white p-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-red-600">
+                          {isParkedIn(
+                            user.current_reservation.spotNumber,
+                            parkingSpots
+                          )
+                            ? "Inneparkert"
+                            : "Parkert"}
+                        </h3>
+                        <Badge
+                          className={
+                            isParkedIn(
+                              user.current_reservation.spotNumber,
+                              parkingSpots
+                            )
+                              ? "bg-red-500"
+                              : "bg-orange-500"
+                          }
+                        >
+                          {isParkedIn(
+                            user.current_reservation.spotNumber,
+                            parkingSpots
+                          )
+                            ? "Parked In"
+                            : "Parked"}
+                        </Badge>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-600">
+                        Your vehicle is currently parked in spot{" "}
+                        {user.current_reservation.spotNumber}
+                      </p>
+
+                      <div className="mt-4 flex items-center gap-2">
+                        <Car className="h-5 w-5 text-gray-500" />
+                        <span className="text-sm font-medium">
+                          {user.current_reservation.licensePlate}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border-2 border-green-500 bg-white p-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-green-600">
+                          Not Parked
+                        </h3>
+                        <Badge className="bg-green-500">Available</Badge>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-600">
+                        You currently don't have any active parking reservations
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Garage Stats */}
+                  <div className="mt-6 rounded-lg bg-white p-4 shadow-sm">
+                    <h3 className="mb-3 text-lg font-semibold">
+                      Garage Status
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="rounded-md bg-green-50 p-3 text-center">
+                        <p className="text-sm text-gray-600">Available Spots</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {
+                            parkingSpots.filter((spot) => !spot.isOccupied)
+                              .length
+                          }
+                        </p>
+                      </div>
+                      <div className="rounded-md bg-red-50 p-3 text-center">
+                        <p className="text-sm text-gray-600">Occupied Spots</p>
+                        <p className="text-2xl font-bold text-red-600">
+                          {
+                            parkingSpots.filter((spot) => spot.isOccupied)
+                              .length
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nearby Vehicles */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">Nearby Vehicles</h2>
+                  <div className="rounded-lg bg-white p-4 shadow-sm">
+                    <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+                      <Users className="h-5 w-5" />
+                      Vehicles Around You
+                    </h3>
+
+                    <div className="space-y-3">
+                      {parkingSpots
+                        .filter(
+                          (spot) =>
+                            spot.isOccupied &&
+                            spot.occupiedBy &&
+                            spot.occupiedBy.user_id !== user?.id
+                        )
+                        .map((spot) => (
+                          <div key={spot.id} className="rounded-md border p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white">
+                                  {spot.occupiedBy?.name
+                                    ?.split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    {spot.occupiedBy?.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    Spot {spot.spotNumber}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {spot.occupiedBy?.phone_number && (
+                                  <a
+                                    href={`tel:${spot.occupiedBy.phone_number}`}
+                                    className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                                  >
+                                    <Phone className="h-4 w-4" />
+                                  </a>
+                                )}
+                                {spot.occupiedBy?.email && (
+                                  <a
+                                    href={`mailto:${spot.occupiedBy.email}`}
+                                    className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                                  >
+                                    <Mail className="h-4 w-4" />
+                                  </a>
+                                )}
+                                {spot.occupiedBy?.phone_number && (
+                                  <a
+                                    href={`sms:${spot.occupiedBy.phone_number}`}
+                                    className="rounded-full p-2 text-neutral-900 hover:bg-gray-100"
+                                  >
+                                    <MessageCircle className="h-4 w-4" />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                      {parkingSpots.filter(
+                        (spot) =>
+                          spot.isOccupied &&
+                          spot.occupiedBy &&
+                          spot.occupiedBy.user_id !== user?.id
+                      ).length === 0 && (
+                        <p className="text-center text-gray-500">
+                          No other vehicles currently parked
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Garage Layout Tab */}
         <TabsContent value="garage" className="mt-6">
           <Card className="border-0 bg-gray-50 shadow-sm">
             <CardContent className="p-6">
               <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
-                  {visualGarageSpots.map((spot) => (
+                  {parkingSpots.map((spot) => (
                     <ParkingSpotCard
                       key={spot.id}
                       spot={spot}
                       onClick={() => setSelectedSpot(spot)}
+                      currentUserId={user?.id || null}
                     />
                   ))}
                 </div>
@@ -319,6 +446,10 @@ export function GarageLayout() {
                   <span>Available</span>
                 </div>
                 <div className="flex items-center">
+                  <div className="mr-2 h-4 w-4 rounded-full bg-orange-500"></div>
+                  <span>Your Spot</span>
+                </div>
+                <div className="flex items-center">
                   <div className="mr-2 h-4 w-4 rounded-full bg-red-500"></div>
                   <span>Occupied</span>
                 </div>
@@ -327,50 +458,32 @@ export function GarageLayout() {
           </Card>
         </TabsContent>
 
+        {/* Detection Tab - Will be role-based later */}
         <TabsContent value="detection" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Detect Parking Spots</CardTitle>
+              <CardTitle>Parking Spot Detection</CardTitle>
               <CardDescription>
-                Upload an image of the garage to automatically detect available
-                spots.
+                Developer tool for detecting parking spots and vehicles in the
+                garage.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <ParkingSpotDetection
-                onSpotsDetected={(spots, vehicles) => {
+                onSpotsDetected={(
+                  spots: ParkingSpotBoundary[],
+                  vehicles: Vehicle[]
+                ) => {
                   console.log("Detected spots:", spots);
-                  setDetectedSpots(spots);
-                  setDetectedVehicles(vehicles);
+                  console.log("Detected vehicles:", vehicles);
                 }}
               />
-
-              {detectedSpots.length > 0 && (
-                <div className="mt-8">
-                  <h2 className="mb-4 text-xl font-semibold">
-                    Detected Parking Spots
-                  </h2>
-                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                    {detectedSpots.map((spot) => (
-                      <div
-                        key={spot.id}
-                        className="rounded-md border bg-white p-4 shadow-sm transition-all hover:shadow-md"
-                      >
-                        <p className="text-lg font-bold">{spot.spotNumber}</p>
-                        <p className="text-sm text-gray-600">
-                          Position: [{spot.boundingBox.join(", ")}]
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Reservasjon */}
+      {/* Reservation Dialog */}
       {selectedSpot && (
         <AlertDialog
           open={!!selectedSpot}
@@ -378,7 +491,7 @@ export function GarageLayout() {
         >
           <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center">
+              <AlertDialogTitle>
                 {selectedSpot.isOccupied &&
                 selectedSpot.occupiedBy?.user_id === user?.id
                   ? `Unreserve Spot ${selectedSpot.spotNumber}?`
@@ -449,7 +562,7 @@ export function GarageLayout() {
         </AlertDialog>
       )}
 
-      {/* Unauthorized */}
+      {/* Unauthorized Alert */}
       <AlertDialog
         open={showUnauthorizedAlert}
         onOpenChange={setShowUnauthorizedAlert}
