@@ -31,7 +31,7 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 
 export default function ParkingDetectionPage() {
-  const [activeTab, setActiveTab] = useState<string>("upload");
+  const [activeTab, setActiveTab] = useState<string>("manual");
   const { platesInfo, handleLicensePlatesDetected } =
     useLicensePlateDetection();
   const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
