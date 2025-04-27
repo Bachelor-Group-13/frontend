@@ -1,3 +1,17 @@
+// Defines the type for the user
+export type User = {
+  id: string;
+  email: string;
+  name: string;
+  phone_number?: string;
+  license_plate?: string;
+  second_license_plate?: string;
+  role: string;
+  current_reservation?: {
+    spotNumber: string;
+    licensePlate: string;
+  } | null;
+};
 // Defines the type for parking spot
 export type ParkingSpot = {
   id: number;

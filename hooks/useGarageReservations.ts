@@ -27,6 +27,7 @@ export function useGarageReservations() {
         email: userDetails.email,
         phone_number: userDetails.phoneNumber,
         name: userDetails.name,
+        role: userDetails.role,
         current_reservation: userReservation
           ? {
               spotNumber: userReservation.spotNumber,

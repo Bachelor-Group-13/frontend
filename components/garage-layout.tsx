@@ -169,31 +169,14 @@ export function GarageLayout() {
     const row = Math.floor(spotIndex / 2);
     const col = spotIndex % 2;
 
-    // Check spots around your spot
-    const adjacentSpots = [];
+    // Only check the adjacent spot in the same row (A checks B, B checks A)
+    const adjacentSpotIndex = row * 2 + (col === 0 ? 1 : 0); // If in A (col 0), check B (col 1), and vice versa
+    const adjacentSpot = spots[adjacentSpotIndex];
 
-    // Check spot in front (if not in front row)
-    if (row > 0) {
-      const frontSpotIndex = (row - 1) * 2 + col;
-      adjacentSpots.push(spots[frontSpotIndex]);
-    }
-
-    // Check spot behind (if not in back row)
-    if (row < 4) {
-      // 5 rows total (0-4)
-      const backSpotIndex = (row + 1) * 2 + col;
-      adjacentSpots.push(spots[backSpotIndex]);
-    }
-
-    // Check spot to the side (if exists)
-    const sideSpotIndex = row * 2 + (col === 0 ? 1 : 0);
-    adjacentSpots.push(spots[sideSpotIndex]);
-
-    // You're parked in if any adjacent spot is occupied
-    return adjacentSpots.some((spot) => spot && spot.isOccupied);
+    // You're only parked in if the adjacent spot in your row is occupied
+    return adjacentSpot && adjacentSpot.isOccupied;
   };
 
-  // TODO: Make the dashboard usable, not just static info
   return (
     <div className="container mx-auto px-4 py-6">
       {/* Header */}
@@ -216,7 +199,9 @@ export function GarageLayout() {
         className="w-full"
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList
+          className={`grid w-full ${user?.role === "DEVELOPER" ? "grid-cols-3" : "grid-cols-2"}`}
+        >
           <TabsTrigger value="dashboard" className="flex items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             Dashboard
@@ -225,10 +210,12 @@ export function GarageLayout() {
             <CircleParking className="mr-2 h-4 w-4" />
             Garage Layout
           </TabsTrigger>
-          <TabsTrigger value="detection" className="flex items-center">
-            <Camera className="mr-2 h-4 w-4" />
-            Detect Spots
-          </TabsTrigger>
+          {user?.role === "DEVELOPER" && (
+            <TabsTrigger value="detection" className="flex items-center">
+              <Camera className="mr-2 h-4 w-4" />
+              Detect Spots
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Dashboard Tab */}
@@ -458,29 +445,31 @@ export function GarageLayout() {
           </Card>
         </TabsContent>
 
-        {/* Detection Tab - Will be role-based later */}
-        <TabsContent value="detection" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Parking Spot Detection</CardTitle>
-              <CardDescription>
-                Developer tool for detecting parking spots and vehicles in the
-                garage.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <ParkingSpotDetection
-                onSpotsDetected={(
-                  spots: ParkingSpotBoundary[],
-                  vehicles: Vehicle[]
-                ) => {
-                  console.log("Detected spots:", spots);
-                  console.log("Detected vehicles:", vehicles);
-                }}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Detection Tab - Developers only tab */}
+        {user?.role === "DEVELOPER" && (
+          <TabsContent value="detection" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Parking Spot Detection</CardTitle>
+                <CardDescription>
+                  Developer tool for detecting parking spots and vehicles in the
+                  garage.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <ParkingSpotDetection
+                  onSpotsDetected={(
+                    spots: ParkingSpotBoundary[],
+                    vehicles: Vehicle[]
+                  ) => {
+                    console.log("Detected spots:", spots);
+                    console.log("Detected vehicles:", vehicles);
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* Reservation Dialog */}

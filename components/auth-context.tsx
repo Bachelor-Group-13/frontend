@@ -5,13 +5,14 @@ import { api } from "@/utils/auth";
 import { useRouter, usePathname } from "next/navigation";
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   name: string;
   licensePlate: string;
   secondLicensePlate: string;
   phoneNumber: string;
   avatar_url?: string;
+  role: "USER" | "DEVELOPER";
 }
 interface AuthContextType {
   isAuthenticated: boolean;
