@@ -3,23 +3,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "@/utils/auth";
 import { useRouter, usePathname } from "next/navigation";
+import { AuthContextType, UserContext } from "@/utils/types";
 
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  licensePlate: string;
-  secondLicensePlate: string;
-  phoneNumber: string;
-  avatar_url?: string;
-  role: "USER" | "DEVELOPER";
-}
-interface AuthContextType {
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  user: User | null;
-  setUser: (user: User | null) => void;
-}
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
@@ -31,7 +16,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserContext | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
