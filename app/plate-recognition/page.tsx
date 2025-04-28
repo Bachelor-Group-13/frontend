@@ -29,14 +29,16 @@ import Webcam from "react-webcam";
 import Link from "next/link";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/components/auth-context";
 
-export default function ParkingDetectionPage() {
+export default function PlateRecognitionPage() {
   const [activeTab, setActiveTab] = useState<string>("manual");
   const { platesInfo, handleLicensePlatesDetected } =
     useLicensePlateDetection();
   const { webcamRef, capture } = useWebcamCapture(handleLicensePlatesDetected);
   const [processing, setProcessing] = useState(false);
   const [manualPlate, setManualPlate] = useState("");
+  const { user } = useAuth();
 
   const handleCapture = async () => {
     setProcessing(true);
@@ -85,7 +87,9 @@ export default function ParkingDetectionPage() {
             className="w-full"
           >
             <div className="border-b px-6 py-4">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList
+                className={`grid w-full ${user?.role === "DEVELOPER" ? "grid-cols-3" : "grid-cols-2"}`}
+              >
                 <TabsTrigger value="manual" className="flex items-center gap-2">
                   <Search className="h-4 w-4" />
                   Search License Plate
@@ -94,10 +98,15 @@ export default function ParkingDetectionPage() {
                   <Camera className="h-4 w-4" />
                   Use Camera
                 </TabsTrigger>
-                <TabsTrigger value="upload" className="flex items-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload Image
-                </TabsTrigger>
+                {user?.role === "DEVELOPER" && (
+                  <TabsTrigger
+                    value="upload"
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload Image
+                  </TabsTrigger>
+                )}
               </TabsList>
             </div>
 

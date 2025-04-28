@@ -1,3 +1,38 @@
+// Defines the type for the user
+export type User = {
+  id: string;
+  email: string;
+  name: string;
+  phone_number?: string;
+  license_plate?: string;
+  second_license_plate?: string;
+  role: string;
+  current_reservation?: {
+    spotNumber: string;
+    licensePlate: string;
+  } | null;
+};
+
+// Defines the type for the user context
+export interface UserContext {
+  id: string;
+  email: string;
+  name: string;
+  licensePlate: string;
+  secondLicensePlate: string;
+  phoneNumber: string;
+  avatar_url?: string;
+  role: "USER" | "DEVELOPER";
+}
+
+// Defines the type for the auth context
+export interface AuthContextType {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: UserContext | null;
+  setUser: (user: UserContext | null) => void;
+}
+
 // Defines the type for parking spot
 export type ParkingSpot = {
   id: number;
