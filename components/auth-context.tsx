@@ -5,7 +5,6 @@ import { api } from "@/utils/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthContextType, UserContext } from "@/utils/types";
 
-
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,

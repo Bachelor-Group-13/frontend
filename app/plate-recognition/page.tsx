@@ -88,7 +88,8 @@ export default function PlateRecognitionPage() {
           >
             <div className="border-b px-6 py-4">
               <TabsList
-                className={`grid w-full ${user?.role === "DEVELOPER" ? "grid-cols-3" : "grid-cols-2"}`}
+                className={`grid w-full
+                  ${user && user?.role === "ROLE_DEVELOPER" ? "grid-cols-3" : "grid-cols-2"}`}
               >
                 <TabsTrigger value="manual" className="flex items-center gap-2">
                   <Search className="h-4 w-4" />
@@ -98,7 +99,7 @@ export default function PlateRecognitionPage() {
                   <Camera className="h-4 w-4" />
                   Use Camera
                 </TabsTrigger>
-                {user?.role === "DEVELOPER" && (
+                {user && user?.role === "ROLE_DEVELOPER" && (
                   <TabsTrigger
                     value="upload"
                     className="flex items-center gap-2"
@@ -191,11 +192,13 @@ export default function PlateRecognitionPage() {
                 </div>
               </TabsContent>
 
+              {user && user?.role === "ROLE_DEVELOPER" && (
               <TabsContent value="upload" className="mt-0">
                 <LicensePlateUpload
                   onLicensePlatesDetected={handleLicensePlatesDetected}
                 />
               </TabsContent>
+              )}
 
               {platesInfo.length > 0 && (
                 <div className="mt-6 space-y-4">

@@ -22,7 +22,7 @@ export interface UserContext {
   secondLicensePlate: string;
   phoneNumber: string;
   avatar_url?: string;
-  role: "USER" | "DEVELOPER";
+  role: "ROLE_USER" | "ROLE_DEVELOPER";
 }
 
 // Defines the type for the auth context

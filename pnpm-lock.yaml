@@ -3569,7 +3569,6 @@ packages:
       }
     engines: { node: ">=8.0" }
 
-
   ts-api-utils@2.0.1:
     resolution:
       {
@@ -3747,7 +3746,6 @@ packages:
         integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==,
       }
     engines: { node: ">=12" }
-
 
   yaml@2.7.0:
     resolution:

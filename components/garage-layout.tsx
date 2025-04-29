@@ -23,7 +23,16 @@ import {
 import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { ParkingSpotCard } from "./parkingspot-card";
 import Link from "next/link";
-import { Camera, Car, CircleParking, LayoutDashboard, Mail, MessageCircle, Phone, Users } from "lucide-react";
+import {
+  Camera,
+  Car,
+  CircleParking,
+  LayoutDashboard,
+  Mail,
+  MessageCircle,
+  Phone,
+  Users,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Select,
@@ -190,7 +199,10 @@ export function GarageLayout() {
         className="w-full"
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList
+          className={`grid w-full
+            ${user && user.role === "ROLE_DEVELOPER" ? "grid-cols-3" : "grid-cols-2"}`}
+        >
           <TabsTrigger value="dashboard" className="flex items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             Dashboard
@@ -199,10 +211,12 @@ export function GarageLayout() {
             <CircleParking className="mr-2 h-4 w-4" />
             Garage Layout
           </TabsTrigger>
+          {user && user.role === "ROLE_DEVELOPER" && (
             <TabsTrigger value="detection" className="flex items-center">
               <Camera className="mr-2 h-4 w-4" />
               Detect Spots
             </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Dashboard Tab */}
@@ -433,6 +447,7 @@ export function GarageLayout() {
         </TabsContent>
 
         {/* Detection Tab - Developers only tab */}
+        {user && user.role === "ROLE_DEVELOPER" && (
           <TabsContent value="detection" className="mt-6">
             <Card>
               <CardHeader>
@@ -455,6 +470,7 @@ export function GarageLayout() {
               </CardContent>
             </Card>
           </TabsContent>
+        )}
       </Tabs>
 
       {/* Reservation Dialog */}
