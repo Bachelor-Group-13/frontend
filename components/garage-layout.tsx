@@ -161,24 +161,25 @@ export function GarageLayout() {
   };
 
   const isParkedIn = (spotNumber: string, spots: ParkingSpot[]): boolean => {
-    // Find your spot's position
-    const spotIndex = spots.findIndex((spot) => spot.spotNumber === spotNumber);
-    if (spotIndex === -1) return false;
+    const spotLetter = spotNumber.slice(-1);
 
-    // Get row and column from spot number (e.g., "1A" -> row 1, col 0)
-    const row = Math.floor(spotIndex / 2);
-    const col = spotIndex % 2;
+    if (spotLetter !== "A") {
+      return false;
+    }
 
-    // Only check the adjacent spot in the same row (A checks B, B checks A)
-    const adjacentSpotIndex = row * 2 + (col === 0 ? 1 : 0); // If in A (col 0), check B (col 1), and vice versa
-    const adjacentSpot = spots[adjacentSpotIndex];
+    const rowNumber = spotNumber.slice(0, -1);
+    const correspondingBSpot = `${rowNumber}B`;
 
-    // You're only parked in if the adjacent spot in your row is occupied
-    return adjacentSpot && adjacentSpot.isOccupied;
+    const bSpot = spots.find((spot) => spot.spotNumber === correspondingBSpot);
+
+    return bSpot ? bSpot.isOccupied : false;
   };
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <div className="mt-2 text-xs text-gray-500">
+        User role: {user?.role || "Not loaded"}
+      </div>
       {/* Header */}
       <div className="mb-6 flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Garage</h1>

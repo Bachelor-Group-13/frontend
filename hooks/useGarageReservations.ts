@@ -11,6 +11,8 @@ export function useGarageReservations() {
       const userRes = await api.get("/api/auth/me");
       const userDetails = userRes.data;
 
+      console.log("User details from API:", userDetails);
+
       const today = new Date().toISOString().split("T")[0];
       const reservationsRes = await api.get(`/api/reservations/date/${today}`);
       const reservations = reservationsRes.data;
