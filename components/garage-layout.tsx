@@ -23,16 +23,7 @@ import {
 import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { ParkingSpotCard } from "./parkingspot-card";
 import Link from "next/link";
-import {
-  Camera,
-  Car,
-  CircleParking,
-  LayoutDashboard,
-  Mail,
-  MessageCircle,
-  Phone,
-  Users,
-} from "lucide-react";
+import { Camera, Car, CircleParking, Mail, MessageCircle, Phone, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Select,
@@ -182,7 +173,7 @@ export function GarageLayout() {
       {/* Header */}
       <div className="mb-6 flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
-        <p className="text-gray-500">Manage Parking Spot</p>
+        <p className="text-gray-500">Reserve your parking spot</p>
         <div className="flex w-full max-w-md justify-center space-x-4">
           <Link href="/plate-recognition" className="w-full">
             <Button variant="outline" className="w-full">
@@ -195,17 +186,11 @@ export function GarageLayout() {
 
       {/* Tabs */}
       <Tabs
-        defaultValue="dashboard"
+        defaultValue="garage"
         className="w-full"
         onValueChange={setActiveTab}
       >
-        <TabsList
-          className={`grid w-full ${user?.role === "DEVELOPER" ? "grid-cols-3" : "grid-cols-2"}`}
-        >
-          <TabsTrigger value="dashboard" className="flex items-center">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            Dashboard
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="garage" className="flex items-center">
             <CircleParking className="mr-2 h-4 w-4" />
             Garage Layout
