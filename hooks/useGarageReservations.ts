@@ -17,7 +17,6 @@ export function useGarageReservations() {
       const reservationsRes = await api.get(`/api/reservations/date/${today}`);
       const reservations = reservationsRes.data;
 
-      // Find the user's current reservation
       const userReservation = reservations.find(
         (res: any) => res.userId === userDetails.id
       );
@@ -36,39 +35,88 @@ export function useGarageReservations() {
               licensePlate: userReservation.licensePlate,
             }
           : null,
+        vehicle: null,
       });
 
-      const spots = Array.from({ length: 10 }, (_, i) => {
-        const spotNumber = `${Math.floor(i / 2) + 1}${String.fromCharCode(
-          65 + (i % 2)
-        )}`;
-        const reservation = reservations.find(
-          (res: any) => res.spotNumber === spotNumber
-        );
+      setParkingSpots((currentSpots) => {
+        if (currentSpots.length === 0) {
+          return Array.from({ length: 10 }, (_, i) => {
+            const row = Math.floor(i / 2) + 1;
+            const col = i % 2 === 0 ? "A" : "B";
+            const spotNumber = `${row}${col}`;
 
-        return {
-          id: i + 1,
-          spotNumber,
-          isOccupied: !!reservation,
-          occupiedBy: reservation
-            ? {
+            const reservation = reservations.find(
+              (res: any) => res.spotNumber === spotNumber
+            );
+
+            return {
+              id: i + 1,
+              spotNumber,
+              isOccupied: !!reservation,
+              occupiedBy: reservation
+                ? {
+                    license_plate: reservation.licensePlate,
+                    second_license_plate: null,
+                    name: reservation.user?.name || null,
+                    email: reservation.user?.email,
+                    phone_number: reservation.user?.phoneNumber,
+                    user_id: reservation.userId,
+                  }
+                : null,
+              vehicle: null,
+            };
+          });
+        }
+
+        return currentSpots.map((spot) => {
+          const reservation = reservations.find(
+            (res: any) => res.spotNumber === spot.spotNumber
+          );
+
+          if (reservation) {
+            return {
+              ...spot,
+              isOccupied: true,
+              occupiedBy: {
                 license_plate: reservation.licensePlate,
                 second_license_plate: null,
                 name: reservation.user?.name || null,
                 email: reservation.user?.email,
                 phone_number: reservation.user?.phoneNumber,
                 user_id: reservation.userId,
-              }
-            : null,
-        };
-      });
+              },
+              vehicle: null,
+            };
+          }
 
-      setParkingSpots(spots);
+          if (spot.isOccupied && spot.vehicle) {
+            return {
+              ...spot,
+              isOccupied: true,
+              occupiedBy: {
+                license_plate: spot.vehicle.licensePlate || null,
+                second_license_plate: null,
+                name: null,
+                email: null,
+                phone_number: null,
+                user_id: null,
+              },
+              vehicle: null,
+            };
+          }
+
+          return {
+            ...spot,
+            isOccupied: false,
+            occupiedBy: null,
+            vehicle: null,
+          };
+        });
+      });
     } catch (err) {
       console.error("Error fetching reservations", err);
     }
   }, []);
-
   return {
     parkingSpots,
     setParkingSpots,

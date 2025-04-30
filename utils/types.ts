@@ -46,6 +46,7 @@ export type ParkingSpot = {
     phone_number: string | null;
     user_id: string | null;
   } | null;
+  vehicle?: Vehicle | null;
   detectedVehicle?: {
     confidence: number;
     boundingBox: [number, number, number, number];
@@ -92,4 +93,10 @@ export interface Vehicle {
   area: number;
   position: "front" | "back";
   licensePlate?: string | null;
+}
+
+export interface DetectedSpot {
+  spotNumber: string;
+  isOccupied: boolean;
+  vehicle: Vehicle | null;
 }

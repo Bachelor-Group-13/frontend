@@ -7,7 +7,7 @@ import {
   matchLicensePlates,
   integrateWithDatabaseData,
 } from "./gemini";
-import { ParkingSpot, ParkingSpotBoundary } from "./types";
+import { DetectedSpot, ParkingSpot, ParkingSpotBoundary } from "./types";
 
 export async function detectParkingSpotsWithAI(imageFile: File) {
   try {
@@ -42,6 +42,22 @@ export async function detectParkingSpotsWithAI(imageFile: File) {
         vehicles: vehiclesWithPlates,
       };
     }
+    if (enhancedData?.vehicles?.length && enhancedData?.mappedSpots?.length) {
+      for (const spot of enhancedData.mappedSpots) {
+        if (!spot.vehicle) continue;
+
+        const match = enhancedData.vehicles.find((v: any) => {
+          return (
+            v.center?.[0] === spot.vehicle.center?.[0] &&
+            v.center?.[1] === spot.vehicle.center?.[1]
+          );
+        });
+
+        if (match?.licensePlate) {
+          spot.vehicle.licensePlate = match.licensePlate;
+        }
+      }
+    }
 
     return {
       ...enhancedData,
@@ -64,7 +80,12 @@ export async function updateParkingSpotsWithAI(
       existingSpots
     );
 
-    return updatedSpots;
+    return updatedSpots.sort((a: DetectedSpot, b: DetectedSpot) => {
+      const aNum = parseInt(a.spotNumber.replace(/[AB]/, ""));
+      const bNum = parseInt(b.spotNumber.replace(/[AB]/, ""));
+      if (aNum !== bNum) return aNum - bNum;
+      return a.spotNumber.endsWith("A") ? -1 : 1;
+    });
   } catch (error) {
     console.error("Error updating parking spots with AI:", error);
     return existingSpots;

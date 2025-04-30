@@ -80,8 +80,8 @@ ${JSON.stringify(detectionData, null, 2)}
 
 The data contains vehicle detections with positions marked as "front" or "back".
 In our parking garage, spots are arranged in rows with A and B positions.
-- "front" vehicles are likely parked in A spots (closer to entrance)
-- "back" vehicles are likely parked in B spots (further from entrance)
+- "back" vehicles are likely parked in A spots (closer to wall)
+- "front" vehicles are likely parked in B spots (further from wall/closer to entrance)
 
 Return a JSON object with:
 1. "mappedSpots": Array of parking spots with:
@@ -116,7 +116,7 @@ For mapping vehicles to spots:
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.0-flash-lite",
         contents: prompt,
         config: {
           temperature: 0.2,
@@ -183,7 +183,7 @@ Use these rules for matching:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash-lite",
       contents: prompt,
       config: {
         temperature: 0.2,
@@ -234,7 +234,7 @@ Return a JSON array of updated parking spots that combines both data sources:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash-lite",
       contents: prompt,
       config: {
         temperature: 0.2,
@@ -274,7 +274,7 @@ Return the enhanced vehicle data as a JSON array.
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash-lite",
       contents: prompt,
       config: {
         temperature: 0.3,
@@ -320,7 +320,7 @@ function fallbackParkingAnalysis(detectionData: any) {
 
     sortedVehicles.forEach((vehicle) => {
       const position = vehicle.position || "front";
-      const preferredCol = position === "front" ? "A" : "B";
+      const preferredCol = position === "front" ? "B" : "A";
 
       const emptySpot = mappedSpots.find(
         (spot) => !spot.isOccupied && spot.spotNumber.endsWith(preferredCol)

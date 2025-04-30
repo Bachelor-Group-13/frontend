@@ -42,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { ParkingSpot } from "@/utils/types";
+import { DetectedSpot, ParkingSpot } from "@/utils/types";
 import { Badge } from "./ui/badge";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
@@ -151,7 +151,6 @@ export function GarageLayout() {
       console.log("Spot reserved/unreserved successfully");
       await fetchUserAndReservations();
       setSelectedSpot(null);
-      // Switch to dashboard after successful reservation/unreservation
       setActiveTab("dashboard");
     } catch (error) {
       console.error("Failed to reserve/unreserve spot", error);
@@ -165,10 +164,9 @@ export function GarageLayout() {
 
   const handleSpotsDetected = useCallback(
     async (spots: ParkingSpotBoundary[], vehicles: Vehicle[]) => {
-      console.log("Detected spots:", spots);
-      console.log("Detected vehicles:", vehicles);
-
       try {
+        setIsUpdating(true);
+
         const detectionResults = {
           mappedSpots: spots.map((spot) => ({
             spotNumber: spot.spotNumber,
@@ -178,52 +176,98 @@ export function GarageLayout() {
           vehicles: vehicles,
         };
 
-        setIsUpdating(true);
-
         const updatedSpots = await updateParkingSpotsWithAI(
           parkingSpots,
           detectionResults
         );
 
-        setParkingSpots(updatedSpots);
+        const detectedSpotsMap = new Map<string, DetectedSpot>(
+          (updatedSpots as DetectedSpot[]).map((spot) => [
+            spot.spotNumber,
+            spot,
+          ])
+        );
+
+        setParkingSpots((currentSpots) =>
+          currentSpots.map((spot) => {
+            const detectedSpot = detectedSpotsMap.get(spot.spotNumber);
+
+            if (!detectedSpot) {
+              return {
+                ...spot,
+                isOccupied: false,
+                vehicle: null,
+                occupiedBy: null,
+              };
+            }
+
+            return {
+              ...spot,
+              isOccupied: detectedSpot.isOccupied,
+              vehicle: detectedSpot.vehicle,
+              occupiedBy: detectedSpot.vehicle
+                ? {
+                    license_plate: detectedSpot.vehicle.licensePlate || null,
+                    second_license_plate: null,
+                    name: null,
+                    email: null,
+                    phone_number: null,
+                    user_id: null,
+                  }
+                : null,
+            };
+          })
+        );
 
         const today = new Date().toISOString().split("T")[0];
+        const reservationPromises = [];
 
         for (const spot of updatedSpots) {
-          const plate = spot.vehicle?.licensePlate;
+          if (!spot.isOccupied || !spot.vehicle?.licensePlate) continue;
 
-          if (plate) {
-            try {
-              const userRes = await api.get(`/api/auth/license-plate/${plate}`);
-              const userInfo = userRes.data;
+          try {
+            const userRes = await api.get(
+              `/api/auth/license-plate/${spot.vehicle.licensePlate}`
+            );
+            const userInfo = userRes.data;
 
-              if (userInfo?.id) {
-                const alreadyHasReservation = await api.get(
-                  `/api/reservations/user/${userInfo.id}`
-                );
-                const hasToday = alreadyHasReservation.data.some(
-                  (r: any) => r.reservationDate === today
-                );
+            if (userInfo?.id) {
+              const existingReservations = await api.get(
+                `/api/reservations/user/${userInfo.id}`
+              );
+              const hasToday = existingReservations.data.some(
+                (r: any) => r.reservationDate === today
+              );
 
-                if (!hasToday) {
-                  await api.post("/api/reservations", {
+              if (!hasToday) {
+                reservationPromises.push(
+                  api.post("/api/reservations", {
                     userId: userInfo.id,
-                    licensePlate: plate,
+                    licensePlate: spot.vehicle.licensePlate,
                     spotNumber: spot.spotNumber,
                     reservationDate: today,
-                  });
-                }
+                  })
+                );
+
+                console.log(
+                  `Creating reservation for spot ${spot.spotNumber} with plate ${spot.vehicle.licensePlate}`
+                );
               }
-            } catch (err) {
-              console.error(`Failed to auto-reserve for plate ${plate}`, err);
             }
+          } catch (err) {
+            console.error(
+              `Failed to process reservation for plate ${spot.vehicle.licensePlate}:`,
+              err
+            );
+          } finally {
+            setIsUpdating(false);
           }
         }
 
+        await Promise.all(reservationPromises);
         await fetchUserAndReservations();
 
         alert("Parking spots updated successfully with AI detection!");
-
         setActiveTab("dashboard");
       } catch (error) {
         console.error("Error processing AI detection results:", error);
@@ -232,7 +276,7 @@ export function GarageLayout() {
         setIsUpdating(false);
       }
     },
-    [parkingSpots, setParkingSpots, setActiveTab]
+    [parkingSpots, setParkingSpots, setActiveTab, fetchUserAndReservations]
   );
 
   const isParkedIn = (spotNumber: string, spots: ParkingSpot[]): boolean => {
@@ -542,8 +586,37 @@ export function GarageLayout() {
                     </div>
                   </div>
                 )}
+
+                <div className="flex items-center justify-between border-b pb-4">
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      Clear all reservations from the system
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={async () => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to clear ALL reservations? This action cannot be undone."
+                        )
+                      ) {
+                        try {
+                          await api.delete("/api/reservations/all");
+                          await fetchUserAndReservations();
+                          alert("All reservations cleared successfully");
+                        } catch (error) {
+                          console.error("Failed to clear reservations:", error);
+                          alert("Failed to clear reservations");
+                        }
+                      }
+                    }}
+                  >
+                    Clear All Reservations
+                  </Button>
+                </div>
                 <ParkingSpotDetection onSpotsDetected={handleSpotsDetected} />
-              </CardContent>{" "}
+              </CardContent>
             </Card>
           </TabsContent>
         )}

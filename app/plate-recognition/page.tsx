@@ -193,11 +193,11 @@ export default function PlateRecognitionPage() {
               </TabsContent>
 
               {user && user?.role === "ROLE_DEVELOPER" && (
-              <TabsContent value="upload" className="mt-0">
-                <LicensePlateUpload
-                  onLicensePlatesDetected={handleLicensePlatesDetected}
-                />
-              </TabsContent>
+                <TabsContent value="upload" className="mt-0">
+                  <LicensePlateUpload
+                    onLicensePlatesDetected={handleLicensePlatesDetected}
+                  />
+                </TabsContent>
               )}
 
               {platesInfo.length > 0 && (
