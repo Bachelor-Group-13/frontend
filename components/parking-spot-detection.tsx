@@ -2,11 +2,14 @@ import { useRef, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
-import { detectParkingSpots } from "@/utils/vision";
 import { cn } from "@/lib/utils";
 import { Car, AlertCircle, ArrowRight, Loader2, ImageIcon } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { Alert, AlertDescription } from "./ui/alert";
+import {
+  convertToParkingSpotBoundaries,
+  detectParkingSpotsWithAI,
+} from "@/utils/parkingAI";
 
 interface ParkingDetectionProps {
   onSpotsDetected?: (spots: ParkingSpotBoundary[], vehicles: Vehicle[]) => void;
@@ -114,7 +117,6 @@ export function ParkingSpotDetection({
     setError(null);
     setProgress(0);
 
-    // Simulate progress for better UX
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         const newProgress = prev + 5;
@@ -123,21 +125,16 @@ export function ParkingSpotDetection({
     }, 200);
 
     try {
-      const data = await detectParkingSpots(selectedImage);
+      const data = await detectParkingSpotsWithAI(selectedImage);
+      console.log("Enhanced detection data:", data);
 
-      console.log("Raw API response:", data);
-      const vehicles = data.vehicles || [];
-      const spots = vehicles.map(
-        (vehicle: any, index: number): ParkingSpotBoundary => ({
-          id: index,
-          spotNumber: `Detected-${index + 1}`,
-          boundingBox: vehicle.boundingBox,
-        })
-      );
+      const spots = convertToParkingSpotBoundaries(data);
+
       clearInterval(progressInterval);
       setProgress(100);
       setProcessedImage(data.processedImage || null);
-      onSpotsDetected?.(spots, vehicles);
+
+      onSpotsDetected?.(spots, data.vehicles || []);
     } catch (error) {
       clearInterval(progressInterval);
       console.error("Error detecting vehicles:", error);

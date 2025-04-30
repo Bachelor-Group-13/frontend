@@ -46,6 +46,13 @@ export type ParkingSpot = {
     phone_number: string | null;
     user_id: string | null;
   } | null;
+  detectedVehicle?: {
+    confidence: number;
+    boundingBox: [number, number, number, number];
+    type: string;
+    area: number;
+    licensePlate?: string | null;
+  } | null;
 };
 
 // Defines the type for the reservation response
@@ -80,7 +87,7 @@ export interface ParkingSpotBoundary {
 export interface Vehicle {
   type: string;
   confidence: number;
-  boudingBox: [number, number, number, number];
+  boundingBox: [number, number, number, number];
   center: [number, number];
   area: number;
   position: "front" | "back";

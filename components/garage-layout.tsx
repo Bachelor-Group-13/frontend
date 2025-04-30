@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -28,6 +28,7 @@ import {
   Car,
   CircleParking,
   LayoutDashboard,
+  Loader2,
   Mail,
   MessageCircle,
   Phone,
@@ -45,6 +46,7 @@ import { ParkingSpot } from "@/utils/types";
 import { Badge } from "./ui/badge";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
+import { updateParkingSpotsWithAI } from "@/utils/parkingAI";
 
 /*
  * GarageLayout component:
@@ -60,8 +62,9 @@ export function GarageLayout() {
     string | null
   >(null);
   const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const { parkingSpots, user, fetchUserAndReservations } =
+  const { parkingSpots, user, fetchUserAndReservations, setParkingSpots } =
     useGarageReservations();
 
   useEffect(() => {
@@ -159,6 +162,78 @@ export function GarageLayout() {
       }
     }
   };
+
+  const handleSpotsDetected = useCallback(
+    async (spots: ParkingSpotBoundary[], vehicles: Vehicle[]) => {
+      console.log("Detected spots:", spots);
+      console.log("Detected vehicles:", vehicles);
+
+      try {
+        const detectionResults = {
+          mappedSpots: spots.map((spot) => ({
+            spotNumber: spot.spotNumber,
+            isOccupied: spot.isOccupied === null ? false : spot.isOccupied,
+            vehicle: spot.vehicle || null,
+          })),
+          vehicles: vehicles,
+        };
+
+        setIsUpdating(true);
+
+        const updatedSpots = await updateParkingSpotsWithAI(
+          parkingSpots,
+          detectionResults
+        );
+
+        setParkingSpots(updatedSpots);
+
+        const today = new Date().toISOString().split("T")[0];
+
+        for (const spot of updatedSpots) {
+          const plate = spot.vehicle?.licensePlate;
+
+          if (plate) {
+            try {
+              const userRes = await api.get(`/api/auth/license-plate/${plate}`);
+              const userInfo = userRes.data;
+
+              if (userInfo?.id) {
+                const alreadyHasReservation = await api.get(
+                  `/api/reservations/user/${userInfo.id}`
+                );
+                const hasToday = alreadyHasReservation.data.some(
+                  (r: any) => r.reservationDate === today
+                );
+
+                if (!hasToday) {
+                  await api.post("/api/reservations", {
+                    userId: userInfo.id,
+                    licensePlate: plate,
+                    spotNumber: spot.spotNumber,
+                    reservationDate: today,
+                  });
+                }
+              }
+            } catch (err) {
+              console.error(`Failed to auto-reserve for plate ${plate}`, err);
+            }
+          }
+        }
+
+        await fetchUserAndReservations();
+
+        alert("Parking spots updated successfully with AI detection!");
+
+        setActiveTab("dashboard");
+      } catch (error) {
+        console.error("Error processing AI detection results:", error);
+        alert("Failed to process AI detection results. Please try again.");
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [parkingSpots, setParkingSpots, setActiveTab]
+  );
 
   const isParkedIn = (spotNumber: string, spots: ParkingSpot[]): boolean => {
     const spotLetter = spotNumber.slice(-1);
@@ -459,16 +534,16 @@ export function GarageLayout() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <ParkingSpotDetection
-                  onSpotsDetected={(
-                    spots: ParkingSpotBoundary[],
-                    vehicles: Vehicle[]
-                  ) => {
-                    console.log("Detected spots:", spots);
-                    console.log("Detected vehicles:", vehicles);
-                  }}
-                />
-              </CardContent>
+                {isUpdating && (
+                  <div className="mb-4 rounded-md bg-blue-50 p-4 text-blue-800">
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <p>Updating parking spots with AI detection...</p>
+                    </div>
+                  </div>
+                )}
+                <ParkingSpotDetection onSpotsDetected={handleSpotsDetected} />
+              </CardContent>{" "}
             </Card>
           </TabsContent>
         )}
