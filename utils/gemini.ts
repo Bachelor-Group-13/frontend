@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { Vehicle } from "./types";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || "",
@@ -74,32 +75,6 @@ export async function analyzeParkingData(detectionData: any) {
 
   while (retryCount < maxRetries) {
     try {
-      const prompt = `
-Analyze this parking detection data from YOLOv8:
-${JSON.stringify(detectionData, null, 2)}
-
-The data contains vehicle detections with positions marked as "front" or "back".
-In our parking garage, spots are arranged in rows with A and B positions.
-- "back" vehicles are likely parked in A spots (closer to wall)
-- "front" vehicles are likely parked in B spots (further from wall/closer to entrance)
-
-Return a JSON object with:
-1. "mappedSpots": Array of parking spots with:
-   - spotNumber (string, format: "1A", "1B", "2A", "2B", etc.)
-   - isOccupied (boolean)
-   - vehicle (object with vehicle details if occupied, null if not)
-2. "summary": Object with:
-   - totalSpots (number, should be 10 for our garage)
-   - occupiedSpots (number)
-   - availableSpots (number)
-
-For mapping vehicles to spots:
-- Assign "front" vehicles to A spots (1A, 2A, etc.)
-- Assign "back" vehicles to B spots (1B, 2B, etc.)
-- Use vehicle positions and areas to determine the most likely spot assignment
-- Our garage has 5 rows with 2 spots each (A and B), for a total of 10 spots
-`;
-
       if (!detectionData.vehicles || detectionData.vehicles.length === 0) {
         return {
           mappedSpots: Array.from({ length: 10 }, (_, i) => ({
@@ -115,33 +90,126 @@ For mapping vehicles to spots:
         };
       }
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-lite",
-        contents: prompt,
-        config: {
-          temperature: 0.2,
-          systemInstruction: PARKING_SYSTEM_INSTRUCTION,
-        },
-      });
+      // Sort all vehicles by x-coordinate (right to left)
+      const vehicles = [...detectionData.vehicles].sort(
+        (a, b) => b.center[0] - a.center[0]
+      );
 
-      const text = extractTextFromResponse(response);
-
-      if (!text) {
-        throw new Error("Failed to extract text from Gemini API response");
+      // Create a map of all spots
+      const spotsMap = new Map();
+      for (let i = 1; i <= 5; i++) {
+        spotsMap.set(`${i}A`, {
+          spotNumber: `${i}A`,
+          isOccupied: false,
+          vehicle: null,
+        });
+        spotsMap.set(`${i}B`, {
+          spotNumber: `${i}B`,
+          isOccupied: false,
+          vehicle: null,
+        });
       }
 
-      return parseJsonResponse(text);
+      // First, mark all spots as occupied based on vehicle positions
+      vehicles.forEach((vehicle) => {
+        const isBack = vehicle.position === "back";
+        // Find the first available spot from right to left
+        for (let i = 1; i <= 5; i++) {
+          const spotNumber = `${i}${isBack ? "A" : "B"}`;
+          const spot = spotsMap.get(spotNumber);
+          if (!spot.isOccupied) {
+            spotsMap.set(spotNumber, {
+              spotNumber,
+              isOccupied: true,
+              vehicle: null, // Initially set all vehicles to null
+            });
+            break;
+          }
+        }
+      });
+
+      // Then, assign vehicles with license plates to spots
+      const frontVehicles = vehicles
+        .filter((v) => v.position === "front" && v.licensePlate)
+        .sort((a, b) => b.center[0] - a.center[0]);
+
+      const backVehicles = vehicles
+        .filter((v) => v.position === "back" && v.licensePlate)
+        .sort((a, b) => b.center[0] - a.center[0]);
+
+      // Map front vehicles to B spots first (rightmost to leftmost)
+      let frontSpotIndex = 1;
+      frontVehicles.forEach((vehicle) => {
+        while (frontSpotIndex <= 5) {
+          const spotNumber = `${frontSpotIndex}B`;
+          const spot = spotsMap.get(spotNumber);
+          if (spot.isOccupied && !spot.vehicle) {
+            spotsMap.set(spotNumber, {
+              ...spot,
+              vehicle: vehicle,
+            });
+            frontSpotIndex++;
+            break;
+          }
+          frontSpotIndex++;
+        }
+      });
+
+      // Map back vehicles to A spots (rightmost to leftmost)
+      let backSpotIndex = 1;
+      backVehicles.forEach((vehicle) => {
+        while (backSpotIndex <= 5) {
+          const spotNumber = `${backSpotIndex}A`;
+          const spot = spotsMap.get(spotNumber);
+          if (spot.isOccupied && !spot.vehicle) {
+            spotsMap.set(spotNumber, {
+              ...spot,
+              vehicle: vehicle,
+            });
+            backSpotIndex++;
+            break;
+          }
+          backSpotIndex++;
+        }
+      });
+
+      // Convert map to array and sort
+      const mappedSpots = Array.from(spotsMap.values()).sort((a, b) => {
+        const aNum = parseInt(a.spotNumber.replace(/[AB]/, ""));
+        const bNum = parseInt(b.spotNumber.replace(/[AB]/, ""));
+        if (aNum !== bNum) return aNum - bNum;
+        return a.spotNumber.endsWith("A") ? -1 : 1;
+      });
+
+      // Only count spots with plates as occupied
+      const occupiedSpots = mappedSpots.filter(
+        (spot) => spot.isOccupied
+      ).length;
+      const spotsWithPlates = mappedSpots.filter(
+        (spot) => spot.vehicle?.licensePlate
+      ).length;
+
+      console.log(
+        `Total occupied spots: ${occupiedSpots}, Spots with plates: ${spotsWithPlates}`
+      );
+
+      return {
+        mappedSpots,
+        summary: {
+          totalSpots: 10,
+          occupiedSpots,
+          availableSpots: 10 - occupiedSpots,
+          spotsWithPlates,
+        },
+      };
     } catch (error: any) {
       console.error(`Attempt ${retryCount + 1} failed:`, error);
-
       if (error.message?.includes("429") || error.message?.includes("503")) {
         retryCount++;
-
         if (retryCount >= maxRetries) {
           console.error("Max retries reached, falling back to basic analysis");
           return fallbackParkingAnalysis(detectionData);
         }
-
         console.log(`Retrying in ${delay / 1000} seconds...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         delay *= 2;
@@ -151,7 +219,6 @@ For mapping vehicles to spots:
       }
     }
   }
-
   return fallbackParkingAnalysis(detectionData);
 }
 
@@ -160,54 +227,79 @@ For mapping vehicles to spots:
  */
 export async function matchLicensePlates(
   licensePlates: string[],
-  vehicleData: any
+  vehicleData: Vehicle[]
 ) {
   try {
     if (!licensePlates.length || !vehicleData || !vehicleData.length) {
       return vehicleData;
     }
 
-    const prompt = `
-Match these detected license plates to vehicles:
+    // Create a deep copy of the vehicles array to avoid modifying the original
+    const vehicles = JSON.parse(JSON.stringify(vehicleData));
 
-License plates: ${JSON.stringify(licensePlates)}
-Vehicle data: ${JSON.stringify(vehicleData, null, 2)}
+    // Sort vehicles by x-coordinate (right to left)
+    const sortedVehicles = vehicles.sort(
+      (a: Vehicle, b: Vehicle) => b.center[0] - a.center[0]
+    );
 
-Return a JSON object with the same structure as the vehicle data, but add a "licensePlate" field
-to each vehicle with the most likely license plate match. If no match is likely, set it to null.
-
-Use these rules for matching:
-1. Front vehicles are more likely to have visible license plates
-2. If there are fewer license plates than vehicles, assign plates to the most confident detections first
-3. If there are more license plates than vehicles, only use the most confident license plate detections
-`;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: prompt,
-      config: {
-        temperature: 0.2,
-        systemInstruction: PARKING_SYSTEM_INSTRUCTION,
-      },
+    // Create a map to store the original indices
+    const originalIndices = new Map();
+    vehicles.forEach((v: Vehicle, i: number) => {
+      originalIndices.set(v, i);
     });
 
-    const text = extractTextFromResponse(response);
+    // Initialize all vehicles with null license plates
+    sortedVehicles.forEach((vehicle: Vehicle) => {
+      vehicle.licensePlate = null;
+    });
 
-    if (!text) {
-      throw new Error("Failed to extract text from Gemini API response");
+    // Find the rightmost front vehicle (should be in 1B)
+    const frontVehicle = sortedVehicles.find(
+      (v: Vehicle) => v.position === "front"
+    );
+
+    // Find the rightmost back vehicles
+    const backVehicles = sortedVehicles
+      .filter((v: Vehicle) => v.position === "back")
+      .sort((a: Vehicle, b: Vehicle) => b.center[0] - a.center[0]); // Sort right to left
+
+    // Reverse the license plates array to get the correct order
+    const reversedPlates = [...licensePlates].reverse();
+    let plateIndex = 0;
+
+    // First, assign plate to the front vehicle (1B)
+    if (frontVehicle && plateIndex < reversedPlates.length) {
+      frontVehicle.licensePlate = reversedPlates[plateIndex];
+      console.log(
+        `Assigning ${reversedPlates[plateIndex]} to front vehicle (1B)`
+      );
+      plateIndex++;
     }
 
-    return parseJsonResponse(text);
-  } catch (error) {
-    console.error("Error matching license plates with Gemini:", error);
-
-    return vehicleData.map((vehicle: any, index: number) => {
-      return {
-        ...vehicle,
-        licensePlate:
-          index < licensePlates.length ? licensePlates[index] : null,
-      };
+    // Then assign remaining plates to back vehicles from right to left
+    backVehicles.forEach((vehicle: Vehicle, index: number) => {
+      if (plateIndex < reversedPlates.length) {
+        vehicle.licensePlate = reversedPlates[plateIndex];
+        console.log(
+          `Assigning ${reversedPlates[plateIndex]} to back vehicle at position ${index + 1}`
+        );
+        plateIndex++;
+      } else {
+        vehicle.licensePlate = null;
+        console.log(
+          `No plate visible for back vehicle at position ${index + 1}`
+        );
+      }
     });
+
+    // Restore original order
+    return vehicles.sort(
+      (a: Vehicle, b: Vehicle) =>
+        originalIndices.get(a) - originalIndices.get(b)
+    );
+  } catch (error) {
+    console.error("Error matching license plates:", error);
+    return vehicleData;
   }
 }
 
@@ -234,7 +326,7 @@ Return a JSON array of updated parking spots that combines both data sources:
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-1.5-flash",
       contents: prompt,
       config: {
         temperature: 0.2,
@@ -274,7 +366,7 @@ Return the enhanced vehicle data as a JSON array.
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-1.5-flash",
       contents: prompt,
       config: {
         temperature: 0.3,
@@ -305,30 +397,31 @@ function fallbackParkingAnalysis(detectionData: any) {
     const row = Math.floor(i / 2) + 1;
     const col = i % 2 === 0 ? "A" : "B";
     const spotNumber = `${row}${col}`;
-
-    return {
-      spotNumber,
-      isOccupied: false,
-      vehicle: null,
-    };
+    return { spotNumber, isOccupied: false, vehicle: null };
   });
 
   if (detectionData.vehicles && detectionData.vehicles.length > 0) {
     const sortedVehicles = [...detectionData.vehicles].sort(
-      (a, b) => (b.confidence || 0) - (a.confidence || 0)
+      (a, b) => (b.center?.[0] || 0) - (a.center?.[0] || 0)
     );
 
-    sortedVehicles.forEach((vehicle) => {
-      const position = vehicle.position || "front";
-      const preferredCol = position === "front" ? "B" : "A";
+    const backVehicles = sortedVehicles.filter((v) => v.position === "back");
+    backVehicles.forEach((vehicle, index) => {
+      const spotNumber = `${index + 1}A`;
+      const spot = mappedSpots.find((s) => s.spotNumber === spotNumber);
+      if (spot) {
+        spot.isOccupied = true;
+        spot.vehicle = vehicle;
+      }
+    });
 
-      const emptySpot = mappedSpots.find(
-        (spot) => !spot.isOccupied && spot.spotNumber.endsWith(preferredCol)
-      );
-
-      if (emptySpot) {
-        emptySpot.isOccupied = true;
-        emptySpot.vehicle = vehicle;
+    const frontVehicles = sortedVehicles.filter((v) => v.position === "front");
+    frontVehicles.forEach((vehicle, index) => {
+      const spotNumber = `${index + 1}B`;
+      const spot = mappedSpots.find((s) => s.spotNumber === spotNumber);
+      if (spot) {
+        spot.isOccupied = true;
+        spot.vehicle = vehicle;
       }
     });
   }
@@ -363,14 +456,18 @@ function fallbackIntegration(geminiData: any, existingSpots: any[]) {
       return spot;
     }
 
+    // Only include vehicle data if there's a license plate
+    const vehicle = aiSpot.vehicle;
+    const hasLicensePlate = vehicle?.licensePlate != null;
+
     return {
       ...spot,
       isOccupied: aiSpot.isOccupied,
-      detectedVehicle: aiSpot.vehicle
+      detectedVehicle: hasLicensePlate
         ? {
-            ...aiSpot.vehicle,
-            confidence: aiSpot.vehicle.confidence || 0,
-            licensePlate: aiSpot.vehicle.licensePlate || null,
+            ...vehicle,
+            confidence: vehicle.confidence || 0,
+            licensePlate: vehicle.licensePlate,
           }
         : null,
     };
@@ -380,6 +477,6 @@ function fallbackIntegration(geminiData: any, existingSpots: any[]) {
 export default {
   analyzeParkingData,
   matchLicensePlates,
-  integrateWithDatabaseData,
-  enhanceVehicleDetection,
+  integrateWithDatabaseData: fallbackIntegration,
+  enhanceVehicleDetection: (vehicleData: any) => vehicleData,
 };

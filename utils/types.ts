@@ -100,3 +100,8 @@ export interface DetectedSpot {
   isOccupied: boolean;
   vehicle: Vehicle | null;
 }
+
+export interface PlateDto {
+  text: string;
+  bbox: number[];
+}

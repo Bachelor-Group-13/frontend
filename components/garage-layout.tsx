@@ -42,11 +42,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { DetectedSpot, ParkingSpot } from "@/utils/types";
+import { ParkingSpot } from "@/utils/types";
 import { Badge } from "./ui/badge";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
-import { updateParkingSpotsWithAI } from "@/utils/parkingAI";
 
 /*
  * GarageLayout component:
@@ -163,51 +162,27 @@ export function GarageLayout() {
   };
 
   const handleSpotsDetected = useCallback(
-    async (spots: ParkingSpotBoundary[], vehicles: Vehicle[]) => {
-      try {
-        setIsUpdating(true);
+    async (boundaries: ParkingSpotBoundary[], _vehicles: Vehicle[]) => {
+      setIsUpdating(true);
 
-        const detectionResults = {
-          mappedSpots: spots.map((spot) => ({
-            spotNumber: spot.spotNumber,
-            isOccupied: spot.isOccupied === null ? false : spot.isOccupied,
-            vehicle: spot.vehicle || null,
-          })),
-          vehicles: vehicles,
-        };
+      // 1) Merge AI boundaries into your ParkingSpot[] state
+      setParkingSpots((currentSpots) =>
+        currentSpots.map((dbSpot) => {
+          const match = boundaries.find(
+            (b) => b.spotNumber === dbSpot.spotNumber
+          );
 
-        const updatedSpots = await updateParkingSpotsWithAI(
-          parkingSpots,
-          detectionResults
-        );
-
-        const detectedSpotsMap = new Map<string, DetectedSpot>(
-          (updatedSpots as DetectedSpot[]).map((spot) => [
-            spot.spotNumber,
-            spot,
-          ])
-        );
-
-        setParkingSpots((currentSpots) =>
-          currentSpots.map((spot) => {
-            const detectedSpot = detectedSpotsMap.get(spot.spotNumber);
-
-            if (!detectedSpot) {
-              return {
-                ...spot,
-                isOccupied: false,
-                vehicle: null,
-                occupiedBy: null,
-              };
-            }
-
-            return {
-              ...spot,
-              isOccupied: detectedSpot.isOccupied,
-              vehicle: detectedSpot.vehicle,
-              occupiedBy: detectedSpot.vehicle
+          return {
+            ...dbSpot,
+            // always boolean
+            isOccupied: match?.isOccupied ?? false,
+            // always Vehicle|null
+            vehicle: match?.vehicle ?? null,
+            // occupiedBy: only if there’s a plate, else null
+            occupiedBy:
+              match?.vehicle?.licensePlate != null
                 ? {
-                    license_plate: detectedSpot.vehicle.licensePlate || null,
+                    license_plate: match.vehicle.licensePlate,
                     second_license_plate: null,
                     name: null,
                     email: null,
@@ -215,68 +190,62 @@ export function GarageLayout() {
                     user_id: null,
                   }
                 : null,
-            };
-          })
-        );
+            // detectedVehicle is optional, so undefined or full object
+            detectedVehicle: match?.vehicle
+              ? {
+                  confidence: match.vehicle.confidence,
+                  boundingBox: match.vehicle.boundingBox,
+                  type: match.vehicle.type,
+                  area: match.vehicle.area,
+                  licensePlate: match.vehicle.licensePlate,
+                }
+              : undefined,
+          };
+        })
+      );
 
+      // 2) Now create reservations for any plates that match real users…
+      try {
         const today = new Date().toISOString().split("T")[0];
-        const reservationPromises = [];
+        const reservationPromises: Promise<any>[] = [];
 
-        for (const spot of updatedSpots) {
-          if (!spot.isOccupied || !spot.vehicle?.licensePlate) continue;
+        for (const b of boundaries) {
+          if (!b.isOccupied || !b.vehicle?.licensePlate) continue;
 
-          try {
-            const userRes = await api.get(
-              `/api/auth/license-plate/${spot.vehicle.licensePlate}`
+          const userRes = await api.get(
+            `/api/auth/license-plate/${b.vehicle.licensePlate}`
+          );
+          const u = userRes.data;
+          if (u?.id) {
+            const existing = await api.get(`/api/reservations/user/${u.id}`);
+            const hasToday = existing.data.some(
+              (r: any) => r.reservationDate === today
             );
-            const userInfo = userRes.data;
-
-            if (userInfo?.id) {
-              const existingReservations = await api.get(
-                `/api/reservations/user/${userInfo.id}`
+            if (!hasToday) {
+              reservationPromises.push(
+                api.post("/api/reservations", {
+                  userId: u.id,
+                  licensePlate: b.vehicle.licensePlate,
+                  spotNumber: b.spotNumber,
+                  reservationDate: today,
+                })
               );
-              const hasToday = existingReservations.data.some(
-                (r: any) => r.reservationDate === today
-              );
-
-              if (!hasToday) {
-                reservationPromises.push(
-                  api.post("/api/reservations", {
-                    userId: userInfo.id,
-                    licensePlate: spot.vehicle.licensePlate,
-                    spotNumber: spot.spotNumber,
-                    reservationDate: today,
-                  })
-                );
-
-                console.log(
-                  `Creating reservation for spot ${spot.spotNumber} with plate ${spot.vehicle.licensePlate}`
-                );
-              }
             }
-          } catch (err) {
-            console.error(
-              `Failed to process reservation for plate ${spot.vehicle.licensePlate}:`,
-              err
-            );
-          } finally {
-            setIsUpdating(false);
           }
         }
 
         await Promise.all(reservationPromises);
         await fetchUserAndReservations();
-
         alert("Parking spots updated successfully with AI detection!");
         setActiveTab("dashboard");
-      } catch (error) {
-        console.error("Error processing AI detection results:", error);
-        alert("Failed to process AI detection results. Please try again.");
+      } catch (err) {
+        console.error("Reservation flow failed:", err);
+        alert("Failed to process reservations. See console.");
       } finally {
         setIsUpdating(false);
       }
     },
-    [parkingSpots, setParkingSpots, setActiveTab, fetchUserAndReservations]
+    [fetchUserAndReservations]
   );
 
   const isParkedIn = (spotNumber: string, spots: ParkingSpot[]): boolean => {

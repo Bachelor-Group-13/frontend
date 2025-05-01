@@ -1,111 +1,96 @@
+import { PlateDto, Vehicle, DetectedSpot, ParkingSpotBoundary } from "./types";
 import {
-  detectParkingSpots as visionDetectParkingSpots,
   detectLicensePlates,
+  detectParkingSpots as visionDetectParkingSpots,
 } from "./vision";
-import {
-  analyzeParkingData,
-  matchLicensePlates,
-  integrateWithDatabaseData,
-} from "./gemini";
-import { DetectedSpot, ParkingSpot, ParkingSpotBoundary } from "./types";
+
+export function matchLicensePlates(
+  plates: PlateDto[],
+  vehicles: Vehicle[]
+): Vehicle[] {
+  const out: Vehicle[] = vehicles.map((v) => ({ ...v, licensePlate: null }));
+  plates.forEach(({ text, bbox }) => {
+    // pick [x1,y1,x2,y2]
+    const [x1, y1, x2, y2] =
+      bbox.length === 4
+        ? (bbox as [number, number, number, number])
+        : [bbox[0], bbox[1], bbox[4], bbox[5]];
+    const px = (x1 + x2) / 2,
+      py = (y1 + y2) / 2;
+    let best: Vehicle | null = null;
+    let bestDist = Infinity;
+    out.forEach((v) => {
+      const dx = v.center[0] - px,
+        dy = v.center[1] - py,
+        d2 = dx * dx + dy * dy;
+      if (d2 < bestDist) {
+        bestDist = d2;
+        best = v;
+      }
+    });
+    if (best) {
+      (best as Vehicle).licensePlate = text;
+    }
+  });
+  return out;
+}
+
+export function analyzeParkingData({ vehicles }: { vehicles: Vehicle[] }) {
+  const sorted = [...vehicles].sort((a, b) => b.center[0] - a.center[0]);
+  const fronts = sorted.filter((v) => v.position === "front");
+  const backs = sorted.filter((v) => v.position === "back");
+  const mappedSpots: DetectedSpot[] = [];
+  for (let i = 0; i < 5; i++) {
+    mappedSpots.push({
+      spotNumber: `${i + 1}A`,
+      isOccupied: !!backs[i],
+      vehicle: backs[i] || null,
+    });
+    mappedSpots.push({
+      spotNumber: `${i + 1}B`,
+      isOccupied: !!fronts[i],
+      vehicle: fronts[i] || null,
+    });
+  }
+  const occupied = mappedSpots.filter((s) => s.isOccupied).length;
+  const withPlates = mappedSpots.filter(
+    (s) => !!s.vehicle?.licensePlate
+  ).length;
+  return {
+    mappedSpots,
+    summary: {
+      totalSpots: 10,
+      occupiedSpots: occupied,
+      availableSpots: 10 - occupied,
+      spotsWithPlates: withPlates,
+    },
+  };
+}
 
 export async function detectParkingSpotsWithAI(imageFile: File) {
-  try {
-    const formData = new FormData();
-    formData.append("image", imageFile);
+  const detection = await visionDetectParkingSpots(imageFile);
+  const plates = await detectLicensePlates(imageFile);
+  const vehicles1 = matchLicensePlates(plates, detection.vehicles);
+  const { mappedSpots, summary } = analyzeParkingData({ vehicles: vehicles1 });
 
-    const detectionData = await visionDetectParkingSpots(imageFile);
-    console.log("Raw detection data:", detectionData);
-
-    const licensePlates = await detectLicensePlates(imageFile);
-    console.log("Detected license plates:", licensePlates);
-
-    const analyzedData = await analyzeParkingData(detectionData);
-    console.log("Gemini analyzed data:", analyzedData);
-
-    if (analyzedData && analyzedData.mappedSpots) {
-      analyzedData.mappedSpots = analyzedData.mappedSpots.map((spot: any) => ({
-        ...spot,
-        isOccupied: spot.isOccupied === null ? false : spot.isOccupied,
-      }));
-    }
-
-    let enhancedData = analyzedData;
-    if (licensePlates.length > 0) {
-      const vehiclesWithPlates = await matchLicensePlates(
-        licensePlates,
-        detectionData.vehicles
-      );
-
-      enhancedData = {
-        ...analyzedData,
-        vehicles: vehiclesWithPlates,
-      };
-    }
-    if (enhancedData?.vehicles?.length && enhancedData?.mappedSpots?.length) {
-      for (const spot of enhancedData.mappedSpots) {
-        if (!spot.vehicle) continue;
-
-        const match = enhancedData.vehicles.find((v: any) => {
-          return (
-            v.center?.[0] === spot.vehicle.center?.[0] &&
-            v.center?.[1] === spot.vehicle.center?.[1]
-          );
-        });
-
-        if (match?.licensePlate) {
-          spot.vehicle.licensePlate = match.licensePlate;
-        }
-      }
-    }
-
-    return {
-      ...enhancedData,
-      processedImage: detectionData.processedImage,
-      rawDetection: detectionData,
-    };
-  } catch (error) {
-    console.error("Error detecting parking spots with AI:", error);
-    throw error;
-  }
+  return {
+    mappedSpots,
+    summary,
+    vehicles: vehicles1,
+    processedImage: detection.processedImage,
+    rawDetection: detection,
+  };
 }
 
-export async function updateParkingSpotsWithAI(
-  existingSpots: ParkingSpot[],
-  detectionResults: any
-) {
-  try {
-    const updatedSpots = await integrateWithDatabaseData(
-      detectionResults,
-      existingSpots
-    );
-
-    return updatedSpots.sort((a: DetectedSpot, b: DetectedSpot) => {
-      const aNum = parseInt(a.spotNumber.replace(/[AB]/, ""));
-      const bNum = parseInt(b.spotNumber.replace(/[AB]/, ""));
-      if (aNum !== bNum) return aNum - bNum;
-      return a.spotNumber.endsWith("A") ? -1 : 1;
-    });
-  } catch (error) {
-    console.error("Error updating parking spots with AI:", error);
-    return existingSpots;
-  }
-}
-
-export function convertToParkingSpotBoundaries(
-  detectionResults: any
-): ParkingSpotBoundary[] {
-  if (!detectionResults || !detectionResults.mappedSpots) {
-    return [];
-  }
-
-  return detectionResults.mappedSpots.map(
-    (spot: any, index: number): ParkingSpotBoundary => ({
-      id: index,
-      spotNumber: spot.spotNumber,
-      boundingBox: spot.vehicle?.boundingBox || [0, 0, 0, 0],
-      isOccupied: spot.isOccupied,
-      vehicle: spot.vehicle,
-    })
-  );
+export function convertToParkingSpotBoundaries(detectionResults: {
+  mappedSpots: DetectedSpot[];
+  rawDetection?: { vehicles: Vehicle[]; prcessedImage?: string };
+}): ParkingSpotBoundary[] {
+  return detectionResults.mappedSpots.map((spot, index) => ({
+    id: index,
+    spotNumber: spot.spotNumber,
+    boundingBox: spot.vehicle?.boundingBox ?? [0, 0, 0, 0],
+    isOccupied: spot.isOccupied,
+    vehicle: spot.vehicle ?? null,
+  }));
 }

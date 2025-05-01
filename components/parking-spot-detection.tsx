@@ -7,7 +7,7 @@ import { Car, AlertCircle, ArrowRight, Loader2, ImageIcon } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { Alert, AlertDescription } from "./ui/alert";
 import {
-  convertToParkingSpotBoundaries,
+    convertToParkingSpotBoundaries,
   detectParkingSpotsWithAI,
 } from "@/utils/parkingAI";
 
@@ -125,16 +125,22 @@ export function ParkingSpotDetection({
     }, 200);
 
     try {
-      const data = await detectParkingSpotsWithAI(selectedImage);
-      console.log("Enhanced detection data:", data);
-
-      const spots = convertToParkingSpotBoundaries(data);
+      const {
+        mappedSpots,
+        vehicles,
+        processedImage,
+        rawDetection
+      } = await detectParkingSpotsWithAI(selectedImage);
 
       clearInterval(progressInterval);
       setProgress(100);
-      setProcessedImage(data.processedImage || null);
+      setProcessedImage(processedImage);
 
-      onSpotsDetected?.(spots, data.vehicles || []);
+      const boundaries = convertToParkingSpotBoundaries({
+        mappedSpots,
+        rawDetection
+      })
+      onSpotsDetected?.(boundaries, vehicles);
     } catch (error) {
       clearInterval(progressInterval);
       console.error("Error detecting vehicles:", error);
