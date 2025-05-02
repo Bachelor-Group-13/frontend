@@ -1,6 +1,5 @@
 import axios from "axios";
 import { PlateDto } from "./types";
-import { api } from "./auth";
 
 const OPENCV_URL = process.env.NEXT_PUBLIC_VISION_API_URL;
 

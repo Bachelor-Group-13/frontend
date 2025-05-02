@@ -56,6 +56,8 @@ export function analyzeParkingData({ vehicles }: { vehicles: Vehicle[] }) {
   const withPlates = mappedSpots.filter(
     (s) => !!s.vehicle?.licensePlate
   ).length;
+
+  console.log("Occupied spots:", occupied);
   return {
     mappedSpots,
     summary: {
@@ -72,6 +74,11 @@ export async function detectParkingSpotsWithAI(imageFile: File) {
   const plates = await detectLicensePlates(imageFile);
   const vehicles1 = matchLicensePlates(plates, detection.vehicles);
   const { mappedSpots, summary } = analyzeParkingData({ vehicles: vehicles1 });
+
+  console.log("Raw detection data:", detection);
+  console.log("Detected license plates:", plates);
+  console.log("Mapped parking spots:", mappedSpots);
+  console.log("Summary of parking spots:", summary);
 
   return {
     mappedSpots,
