@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -23,7 +23,17 @@ import {
 import { useGarageReservations } from "@/hooks/useGarageReservations";
 import { ParkingSpotCard } from "./parkingspot-card";
 import Link from "next/link";
-import { Camera, Car, CircleParking, LayoutDashboard, Mail, MessageCircle, Phone, Users } from "lucide-react";
+import {
+  Camera,
+  Car,
+  CircleParking,
+  LayoutDashboard,
+  Loader2,
+  Mail,
+  MessageCircle,
+  Phone,
+  Users,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import {
   Select,
@@ -51,8 +61,9 @@ export function GarageLayout() {
     string | null
   >(null);
   const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const { parkingSpots, user, fetchUserAndReservations } =
+  const { parkingSpots, user, fetchUserAndReservations, setParkingSpots } =
     useGarageReservations();
 
   useEffect(() => {
@@ -139,7 +150,6 @@ export function GarageLayout() {
       console.log("Spot reserved/unreserved successfully");
       await fetchUserAndReservations();
       setSelectedSpot(null);
-      // Switch to dashboard after successful reservation/unreservation
       setActiveTab("dashboard");
     } catch (error) {
       console.error("Failed to reserve/unreserve spot", error);
@@ -151,25 +161,113 @@ export function GarageLayout() {
     }
   };
 
+  const handleSpotsDetected = useCallback(
+    async (boundaries: ParkingSpotBoundary[], _vehicles: Vehicle[]) => {
+      setIsUpdating(true);
+
+      // 1) Merge AI boundaries into your ParkingSpot[] state
+      setParkingSpots((currentSpots) =>
+        currentSpots.map((dbSpot) => {
+          const match = boundaries.find(
+            (b) => b.spotNumber === dbSpot.spotNumber
+          );
+
+          return {
+            ...dbSpot,
+            // always boolean
+            isOccupied: match?.isOccupied ?? false,
+            // always Vehicle|null
+            vehicle: match?.vehicle ?? null,
+            // occupiedBy: only if there’s a plate, else null
+            occupiedBy:
+              match?.vehicle?.licensePlate != null
+                ? {
+                    license_plate: match.vehicle.licensePlate,
+                    second_license_plate: null,
+                    name: null,
+                    email: null,
+                    phone_number: null,
+                    user_id: null,
+                  }
+                : null,
+            // detectedVehicle is optional, so undefined or full object
+            detectedVehicle: match?.vehicle
+              ? {
+                  confidence: match.vehicle.confidence,
+                  boundingBox: match.vehicle.boundingBox,
+                  type: match.vehicle.type,
+                  area: match.vehicle.area,
+                  licensePlate: match.vehicle.licensePlate,
+                }
+              : undefined,
+          };
+        })
+      );
+
+      // 2) Now create reservations for any plates that match real users…
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        const reservationPromises: Promise<any>[] = [];
+
+        for (const b of boundaries) {
+          if (!b.isOccupied || !b.vehicle?.licensePlate) continue;
+
+          const userRes = await api.get(
+            `/api/auth/license-plate/${b.vehicle.licensePlate}`
+          );
+          const u = userRes.data;
+          if (u?.id) {
+            const existing = await api.get(`/api/reservations/user/${u.id}`);
+            const hasToday = existing.data.some(
+              (r: any) => r.reservationDate === today
+            );
+            if (!hasToday) {
+              reservationPromises.push(
+                api.post("/api/reservations", {
+                  userId: u.id,
+                  licensePlate: b.vehicle.licensePlate,
+                  spotNumber: b.spotNumber,
+                  reservationDate: today,
+                })
+              );
+            }
+          }
+        }
+
+        await Promise.all(reservationPromises);
+        await fetchUserAndReservations();
+        alert("Parking spots updated successfully with AI detection!");
+        setActiveTab("dashboard");
+      } catch (err) {
+        console.error("Reservation flow failed:", err);
+        alert("Failed to process reservations. See console.");
+      } finally {
+        setIsUpdating(false);
+      }
+    },
+    [fetchUserAndReservations]
+  );
+
   const isParkedIn = (spotNumber: string, spots: ParkingSpot[]): boolean => {
-    // Find your spot's position
-    const spotIndex = spots.findIndex((spot) => spot.spotNumber === spotNumber);
-    if (spotIndex === -1) return false;
+    const spotLetter = spotNumber.slice(-1);
 
-    // Get row and column from spot number (e.g., "1A" -> row 1, col 0)
-    const row = Math.floor(spotIndex / 2);
-    const col = spotIndex % 2;
+    if (spotLetter !== "A") {
+      return false;
+    }
 
-    // Only check the adjacent spot in the same row (A checks B, B checks A)
-    const adjacentSpotIndex = row * 2 + (col === 0 ? 1 : 0); // If in A (col 0), check B (col 1), and vice versa
-    const adjacentSpot = spots[adjacentSpotIndex];
+    const rowNumber = spotNumber.slice(0, -1);
+    const correspondingBSpot = `${rowNumber}B`;
 
-    // You're only parked in if the adjacent spot in your row is occupied
-    return adjacentSpot && adjacentSpot.isOccupied;
+    const bSpot = spots.find((spot) => spot.spotNumber === correspondingBSpot);
+
+    return bSpot ? bSpot.isOccupied : false;
   };
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <div className="mt-2 text-xs text-gray-500">
+        User role: {user?.role || "Not loaded"}
+      </div>
       {/* Header */}
       <div className="mb-6 flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
@@ -190,7 +288,10 @@ export function GarageLayout() {
         className="w-full"
         onValueChange={setActiveTab}
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList
+          className={`grid w-full
+            ${user && user.role === "ROLE_DEVELOPER" ? "grid-cols-3" : "grid-cols-2"}`}
+        >
           <TabsTrigger value="dashboard" className="flex items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             Dashboard
@@ -199,10 +300,12 @@ export function GarageLayout() {
             <CircleParking className="mr-2 h-4 w-4" />
             Garage Layout
           </TabsTrigger>
+          {user && user.role === "ROLE_DEVELOPER" && (
             <TabsTrigger value="detection" className="flex items-center">
               <Camera className="mr-2 h-4 w-4" />
               Detect Spots
             </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Dashboard Tab */}
@@ -433,6 +536,7 @@ export function GarageLayout() {
         </TabsContent>
 
         {/* Detection Tab - Developers only tab */}
+        {user && user.role === "ROLE_DEVELOPER" && (
           <TabsContent value="detection" className="mt-6">
             <Card>
               <CardHeader>
@@ -443,18 +547,48 @@ export function GarageLayout() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <ParkingSpotDetection
-                  onSpotsDetected={(
-                    spots: ParkingSpotBoundary[],
-                    vehicles: Vehicle[]
-                  ) => {
-                    console.log("Detected spots:", spots);
-                    console.log("Detected vehicles:", vehicles);
-                  }}
-                />
+                {isUpdating && (
+                  <div className="mb-4 rounded-md bg-blue-50 p-4 text-blue-800">
+                    <div className="flex items-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <p>Updating parking spots with AI detection...</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between border-b pb-4">
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      Clear all reservations from the system
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={async () => {
+                      if (
+                        window.confirm(
+                          "Are you sure you want to clear ALL reservations? This action cannot be undone."
+                        )
+                      ) {
+                        try {
+                          await api.delete("/api/reservations/all");
+                          await fetchUserAndReservations();
+                          alert("All reservations cleared successfully");
+                        } catch (error) {
+                          console.error("Failed to clear reservations:", error);
+                          alert("Failed to clear reservations");
+                        }
+                      }
+                    }}
+                  >
+                    Clear All Reservations
+                  </Button>
+                </div>
+                <ParkingSpotDetection onSpotsDetected={handleSpotsDetected} />
               </CardContent>
             </Card>
           </TabsContent>
+        )}
       </Tabs>
 
       {/* Reservation Dialog */}

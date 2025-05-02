@@ -22,7 +22,7 @@ export interface UserContext {
   secondLicensePlate: string;
   phoneNumber: string;
   avatar_url?: string;
-  role: "USER" | "DEVELOPER";
+  role: "ROLE_USER" | "ROLE_DEVELOPER";
 }
 
 // Defines the type for the auth context
@@ -45,6 +45,14 @@ export type ParkingSpot = {
     email: string | null;
     phone_number: string | null;
     user_id: string | null;
+  } | null;
+  vehicle?: Vehicle | null;
+  detectedVehicle?: {
+    confidence: number;
+    boundingBox: [number, number, number, number];
+    type: string;
+    area: number;
+    licensePlate?: string | null;
   } | null;
 };
 
@@ -80,9 +88,20 @@ export interface ParkingSpotBoundary {
 export interface Vehicle {
   type: string;
   confidence: number;
-  boudingBox: [number, number, number, number];
+  boundingBox: [number, number, number, number];
   center: [number, number];
   area: number;
   position: "front" | "back";
   licensePlate?: string | null;
+}
+
+export interface DetectedSpot {
+  spotNumber: string;
+  isOccupied: boolean;
+  vehicle: Vehicle | null;
+}
+
+export interface PlateDto {
+  text: string;
+  bbox: number[];
 }

@@ -123,14 +123,14 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     formData.append("image", image);
 
     try {
-      const platesFromOpenCV = await detectLicensePlates(formData);
+      const platesFromOpenCV = await detectLicensePlates(image);
+      console.log("Plates from OpenCV:", platesFromOpenCV);
 
       if (platesFromOpenCV.length > 0) {
         onLicensePlatesDetected(platesFromOpenCV);
         return;
       }
 
-      // Sends the image to the API
       const fallbackResponse = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/license-plate`,
         formData,
@@ -149,7 +149,6 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         setError("No license plate detected in either systems.");
       }
     } catch (err: any) {
-      // Handles errors during the API request
       setError(
         err.response?.data?.error ||
           err.message ||
