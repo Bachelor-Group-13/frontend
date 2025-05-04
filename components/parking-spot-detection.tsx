@@ -7,7 +7,7 @@ import { Car, AlertCircle, ArrowRight, Loader2, ImageIcon } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { Alert, AlertDescription } from "./ui/alert";
 import {
-    convertToParkingSpotBoundaries,
+  convertToParkingSpotBoundaries,
   detectParkingSpotsWithAI,
 } from "@/utils/parkingAI";
 
@@ -125,12 +125,8 @@ export function ParkingSpotDetection({
     }, 200);
 
     try {
-      const {
-        mappedSpots,
-        vehicles,
-        processedImage,
-        rawDetection
-      } = await detectParkingSpotsWithAI(selectedImage);
+      const { mappedSpots, vehicles, processedImage, rawDetection } =
+        await detectParkingSpotsWithAI(selectedImage);
 
       clearInterval(progressInterval);
       setProgress(100);
@@ -138,8 +134,8 @@ export function ParkingSpotDetection({
 
       const boundaries = convertToParkingSpotBoundaries({
         mappedSpots,
-        rawDetection
-      })
+        rawDetection,
+      });
       onSpotsDetected?.(boundaries, vehicles);
     } catch (error) {
       clearInterval(progressInterval);
