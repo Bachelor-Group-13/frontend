@@ -16,6 +16,7 @@ import { Car, ChevronDown, LogOut, User } from "lucide-react";
 import { logout } from "@/utils/auth";
 import { useAuth } from "./auth-context";
 import { cn } from "@/lib/utils";
+import { subscribeToPush } from "@/utils/push";
 
 /*
  * Navbar component:
@@ -29,7 +30,23 @@ export function Navbar() {
   const { user, setUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
   const router = useRouter();
+
+  const handleSubscribeClick = async () => {
+    if (!user?.id) {
+      alert("You need to be logged in to enable notifications");
+      return;
+    }
+    try {
+      await subscribeToPush(user.id);
+      setSubscribed(true);
+      alert("You will now receive notifications");
+    } catch (error) {
+      console.error("Error subscribing to push notifications:", error);
+      alert("Failed to subscribe to notifications");
+    }
+  };
 
   useEffect(() => {
     setIsLoading(false);
@@ -107,6 +124,16 @@ export function Navbar() {
           </div>
           <span className="tracking-tight">Inneparkert</span>
         </Link>
+
+        <div className="flex items-center space-x-2">
+          {subscribed ? (
+            <span className="text-sm text-green-600">🔔 Enabled</span>
+          ) : (
+            <Button size="sm" onClick={handleSubscribeClick}>
+              Enable Notifications
+            </Button>
+          )}
+        </div>
 
         <div className="flex items-center gap-4">
           {isLoading ? (
