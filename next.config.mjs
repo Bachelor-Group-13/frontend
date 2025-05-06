@@ -9,5 +9,5 @@ export default withSerwist({
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
-  }
+  },
 });

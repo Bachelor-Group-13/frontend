@@ -27,6 +27,7 @@ import {
   Camera,
   Car,
   CircleParking,
+  Clock,
   LayoutDashboard,
   Loader2,
   Mail,
@@ -48,6 +49,9 @@ import { ParkingSpotDetection } from "./parking-spot-detection";
 import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
 import { subscribeToPush } from "@/utils/push";
 import { Switch } from "./ui/switch";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { format } from "date-fns";
+import { Calendar } from "./ui/calendar";
 
 /*
  * GarageLayout component:
@@ -65,6 +69,9 @@ export function GarageLayout() {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [isUpdating, setIsUpdating] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [estimatedDeparture, setEstimatedDeparture] = useState<Date | null>(
+    null
+  );
 
   const { parkingSpots, user, fetchUserAndReservations, setParkingSpots } =
     useGarageReservations();
@@ -126,6 +133,7 @@ export function GarageLayout() {
           userId: user.id,
           licensePlate: selectedLicensePlate,
           reservationDate: new Date().toISOString().split("T")[0],
+          estimatedDeparture: estimatedDeparture?.toISOString() || null,
         });
       } else if (actionType === "unreserve") {
         console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
@@ -694,6 +702,41 @@ export function GarageLayout() {
                       )}
                     </SelectContent>
                   </Select>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Estimated Departure Time (Optional)
+                    </label>
+                    <div className="relative flex items-center">
+                      <input
+                        type="time"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm
+                          ring-offset-background placeholder:text-muted-foreground
+                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={
+                          estimatedDeparture
+                            ? format(estimatedDeparture, "HH:mm")
+                            : ""
+                        }
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            const [hours, minutes] = e.target.value.split(":");
+                            const date = new Date();
+                            date.setHours(parseInt(hours), parseInt(minutes));
+                            setEstimatedDeparture(date);
+                          } else {
+                            setEstimatedDeparture(null);
+                          }
+                        }}
+                        placeholder="Select time"
+                      />
+                    </div>
+                    {estimatedDeparture && (
+                      <p className="text-xs text-muted-foreground">
+                        Estimated departure at{" "}
+                        {format(estimatedDeparture, "HH:mm")}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </AlertDialogHeader>
