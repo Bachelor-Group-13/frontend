@@ -16,6 +16,7 @@ import { Car, ChevronDown, LogOut, User } from "lucide-react";
 import { logout } from "@/utils/auth";
 import { useAuth } from "./auth-context";
 import { cn } from "@/lib/utils";
+import { subscribeToPush } from "@/utils/push";
 
 /*
  * Navbar component:

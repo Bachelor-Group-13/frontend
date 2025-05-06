@@ -46,6 +46,8 @@ import { ParkingSpot } from "@/utils/types";
 import { Badge } from "./ui/badge";
 import { ParkingSpotDetection } from "./parking-spot-detection";
 import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
+import { subscribeToPush } from "@/utils/push";
+import { Switch } from "./ui/switch";
 
 /*
  * GarageLayout component:
@@ -62,6 +64,7 @@ export function GarageLayout() {
   >(null);
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
 
   const { parkingSpots, user, fetchUserAndReservations, setParkingSpots } =
     useGarageReservations();
@@ -165,7 +168,6 @@ export function GarageLayout() {
     async (boundaries: ParkingSpotBoundary[], _vehicles: Vehicle[]) => {
       setIsUpdating(true);
 
-      // 1) Merge AI boundaries into your ParkingSpot[] state
       setParkingSpots((currentSpots) =>
         currentSpots.map((dbSpot) => {
           const match = boundaries.find(
@@ -174,11 +176,8 @@ export function GarageLayout() {
 
           return {
             ...dbSpot,
-            // always boolean
             isOccupied: match?.isOccupied ?? false,
-            // always Vehicle|null
             vehicle: match?.vehicle ?? null,
-            // occupiedBy: only if there’s a plate, else null
             occupiedBy:
               match?.vehicle?.licensePlate != null
                 ? {
@@ -190,7 +189,6 @@ export function GarageLayout() {
                     user_id: null,
                   }
                 : null,
-            // detectedVehicle is optional, so undefined or full object
             detectedVehicle: match?.vehicle
               ? {
                   confidence: match.vehicle.confidence,
@@ -204,7 +202,6 @@ export function GarageLayout() {
         })
       );
 
-      // 2) Now create reservations for any plates that match real users…
       try {
         const today = new Date().toISOString().split("T")[0];
         const reservationPromises: Promise<any>[] = [];
@@ -263,10 +260,66 @@ export function GarageLayout() {
     return bSpot ? bSpot.isOccupied : false;
   };
 
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (!user?.id) return;
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        const subscription = await registration?.pushManager.getSubscription();
+        setSubscribed(!!subscription);
+      } catch (error) {
+        console.error("Error checking subscription:", error);
+      }
+    };
+    checkSubscription();
+  }, [user?.id]);
+
+  const handleSubscribeClick = async () => {
+    if (!user?.id) {
+      alert("You need to be logged in to enable notifications");
+      return;
+    }
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      const existingSubscription =
+        await registration?.pushManager.getSubscription();
+
+      if (existingSubscription) {
+        await existingSubscription.unsubscribe();
+        setSubscribed(false);
+      } else {
+        await subscribeToPush(user.id);
+        setSubscribed(true);
+      }
+    } catch (error) {
+      console.error("Error managing push notifications:", error);
+      alert("Failed to manage notification settings");
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="mt-2 text-xs text-gray-500">
-        User role: {user?.role || "Not loaded"}
+      <div className="mb-4 flex items-center justify-between pb-4">
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-500">
+            <span className="font-medium">Role:</span>{" "}
+            {user?.role || "Not loaded"}
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">Push Notifications</span>
+            <Switch
+              onCheckedChange={handleSubscribeClick}
+              checked={subscribed}
+              aria-label="Toggle notifications"
+            />
+            <span className="text-xs text-gray-500">
+              {subscribed ? "On" : "Off"}
+            </span>
+          </div>
+        </div>
       </div>
       {/* Header */}
       <div className="mb-6 flex flex-col items-center space-y-4">

@@ -127,7 +127,8 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
       console.log("Plates from OpenCV:", platesFromOpenCV);
 
       if (platesFromOpenCV.length > 0) {
-        onLicensePlatesDetected(platesFromOpenCV);
+        const texts = platesFromOpenCV.map((plate) => plate.text);
+        onLicensePlatesDetected(texts);
         return;
       }
 
