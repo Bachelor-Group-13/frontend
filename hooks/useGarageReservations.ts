@@ -17,6 +17,15 @@ export function useGarageReservations() {
       const reservationsRes = await api.get(`/api/reservations/date/${today}`);
       const reservations = reservationsRes.data;
 
+      console.log(
+        "Raw reservations from API:",
+        JSON.stringify(reservations, null, 2)
+      );
+      console.log(
+        "Sample reservation with estimatedDeparture:",
+        reservations.find((r: any) => r.estimatedDeparture) || "None found"
+      );
+
       const userReservation = reservations.find(
         (res: any) => res.userId === userDetails.id
       );
@@ -57,10 +66,11 @@ export function useGarageReservations() {
                 ? {
                     license_plate: reservation.licensePlate,
                     second_license_plate: null,
-                    name: reservation.user?.name || null,
-                    email: reservation.user?.email,
-                    phone_number: reservation.user?.phoneNumber,
+                    name: reservation.userName || null,
+                    email: reservation.userEmail,
+                    phone_number: reservation.userPhoneNumber,
                     user_id: reservation.userId,
+                    estimatedDeparture: reservation.estimatedDeparture || null,
                   }
                 : null,
               vehicle: null,
@@ -73,6 +83,11 @@ export function useGarageReservations() {
             (res: any) => res.spotNumber === spot.spotNumber
           );
 
+          console.log(`Processing spot ${spot.spotNumber}:`, {
+            hasReservation: !!reservation,
+            reservationData: reservation,
+            estimatedDeparture: reservation?.estimatedDeparture,
+          });
           if (reservation) {
             return {
               ...spot,
@@ -80,14 +95,23 @@ export function useGarageReservations() {
               occupiedBy: {
                 license_plate: reservation.licensePlate,
                 second_license_plate: null,
-                name: reservation.user?.name || null,
-                email: reservation.user?.email,
-                phone_number: reservation.user?.phoneNumber,
+                name: reservation.userName || null,
+                email: reservation.userEmail,
+                phone_number: reservation.userPhoneNumber,
                 user_id: reservation.userId,
+                estimatedDeparture: reservation.estimatedDeparture || null,
               },
               vehicle: null,
             };
           }
+          console.log(
+            "FULL API RESPONSE:",
+            JSON.stringify(reservations, null, 2)
+          );
+          console.log(
+            "SAMPLE RESERVATION WITH TIME:",
+            reservations.find((r: any) => r.estimatedDeparture) || "None found"
+          );
 
           if (spot.isOccupied && spot.vehicle) {
             return {
@@ -100,6 +124,7 @@ export function useGarageReservations() {
                 email: null,
                 phone_number: null,
                 user_id: null,
+                estimatedDeparture: null,
               },
               vehicle: null,
             };

@@ -49,9 +49,7 @@ import { ParkingSpotDetection } from "./parking-spot-detection";
 import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
 import { subscribeToPush } from "@/utils/push";
 import { Switch } from "./ui/switch";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { format } from "date-fns";
-import { Calendar } from "./ui/calendar";
 
 /*
  * GarageLayout component:
@@ -121,20 +119,21 @@ export function GarageLayout() {
           return;
         }
 
-        console.log("Creating reservation with:", {
-          spotNumber: selectedSpot.spotNumber,
-          userId: user.id,
-          licensePlate: selectedLicensePlate,
-          reservationDate: new Date().toISOString().split("T")[0],
-        });
+        console.log("Current estimatedDeparture state:", estimatedDeparture);
 
-        await api.post("/api/reservations", {
+        const reservationData = {
           spotNumber: selectedSpot.spotNumber,
           userId: user.id,
           licensePlate: selectedLicensePlate,
           reservationDate: new Date().toISOString().split("T")[0],
-          estimatedDeparture: estimatedDeparture?.toISOString() || null,
-        });
+          estimatedDeparture: estimatedDeparture
+            ? estimatedDeparture.toISOString()
+            : null,
+        };
+
+        console.log("Creating reservation with:", reservationData);
+
+        await api.post("/api/reservations", reservationData);
       } else if (actionType === "unreserve") {
         console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
 
@@ -144,6 +143,15 @@ export function GarageLayout() {
           `/api/reservations/date/${today}`
         );
         const reservations = reservationsResponse.data;
+
+        console.log(
+          "Raw reservations from API:",
+          JSON.stringify(reservations, null, 2)
+        );
+        console.log(
+          "Sample reservation with estimatedDeparture:",
+          reservations.find((r: any) => r.estimatedDeparture) || "None found"
+        );
 
         const reservation = reservations.find(
           (res: { spotNumber: string; userId: number }) =>
@@ -195,6 +203,7 @@ export function GarageLayout() {
                     email: null,
                     phone_number: null,
                     user_id: null,
+                    estimatedDeparture: null,
                   }
                 : null,
             detectedVehicle: match?.vehicle
@@ -706,12 +715,14 @@ export function GarageLayout() {
                     <label className="text-sm font-medium text-gray-700">
                       Estimated Departure Time (Optional)
                     </label>
-                    <div className="relative flex items-center">
+                    <div className="relative">
                       <input
                         type="time"
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm
-                          ring-offset-background placeholder:text-muted-foreground
-                          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          ring-offset-background file:border-0 file:bg-transparent file:text-sm
+                          file:font-medium placeholder:text-muted-foreground focus-visible:outline-none
+                          focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+                          disabled:cursor-not-allowed disabled:opacity-50"
                         value={
                           estimatedDeparture
                             ? format(estimatedDeparture, "HH:mm")
@@ -721,20 +732,35 @@ export function GarageLayout() {
                           if (e.target.value) {
                             const [hours, minutes] = e.target.value.split(":");
                             const date = new Date();
-                            date.setHours(parseInt(hours), parseInt(minutes));
+                            const reservationDate = new Date()
+                              .toISOString()
+                              .split("T")[0];
+                            date.setFullYear(
+                              parseInt(reservationDate.split("-")[0]),
+                              parseInt(reservationDate.split("-")[1]) - 1,
+                              parseInt(reservationDate.split("-")[2])
+                            );
+                            date.setHours(
+                              parseInt(hours),
+                              parseInt(minutes),
+                              0,
+                              0
+                            );
                             setEstimatedDeparture(date);
                           } else {
                             setEstimatedDeparture(null);
                           }
                         }}
-                        placeholder="Select time"
                       />
                     </div>
                     {estimatedDeparture && (
-                      <p className="text-xs text-muted-foreground">
-                        Estimated departure at{" "}
-                        {format(estimatedDeparture, "HH:mm")}
-                      </p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                          Estimated departure at{" "}
+                          {format(estimatedDeparture, "HH:mm")}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
