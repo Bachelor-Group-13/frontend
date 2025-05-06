@@ -5,7 +5,6 @@ import { ParkingSpot } from "@/utils/types";
 export function useGarageReservations() {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [user, setUser] = useState<any>(null);
-
   const fetchUserAndReservations = useCallback(async () => {
     try {
       const userRes = await api.get("/api/auth/me");
@@ -21,14 +20,12 @@ export function useGarageReservations() {
         "Raw reservations from API:",
         JSON.stringify(reservations, null, 2)
       );
-      console.log(
-        "Sample reservation with estimatedDeparture:",
-        reservations.find((r: any) => r.estimatedDeparture) || "None found"
-      );
 
       const userReservation = reservations.find(
         (res: any) => res.userId === userDetails.id
       );
+
+      console.log("User reservation found:", userReservation);
 
       setUser({
         id: userDetails.id,
@@ -70,7 +67,7 @@ export function useGarageReservations() {
                     email: reservation.userEmail,
                     phone_number: reservation.userPhoneNumber,
                     user_id: reservation.userId,
-                    estimatedDeparture: reservation.estimatedDeparture || null,
+                    estimatedDeparture: reservation.estimatedDeparture,
                   }
                 : null,
               vehicle: null,
@@ -83,11 +80,19 @@ export function useGarageReservations() {
             (res: any) => res.spotNumber === spot.spotNumber
           );
 
-          console.log(`Processing spot ${spot.spotNumber}:`, {
+          console.log(`Mapping spot ${spot.spotNumber}:`, {
             hasReservation: !!reservation,
-            reservationData: reservation,
-            estimatedDeparture: reservation?.estimatedDeparture,
+            reservationDetails: reservation
+              ? {
+                  licensePlate: reservation.licensePlate,
+                  userName: reservation.userName,
+                  userEmail: reservation.userEmail,
+                  userPhoneNumber: reservation.userPhoneNumber,
+                  estimatedDeparture: reservation.estimatedDeparture,
+                }
+              : null,
           });
+
           if (reservation) {
             return {
               ...spot,
@@ -99,32 +104,7 @@ export function useGarageReservations() {
                 email: reservation.userEmail,
                 phone_number: reservation.userPhoneNumber,
                 user_id: reservation.userId,
-                estimatedDeparture: reservation.estimatedDeparture || null,
-              },
-              vehicle: null,
-            };
-          }
-          console.log(
-            "FULL API RESPONSE:",
-            JSON.stringify(reservations, null, 2)
-          );
-          console.log(
-            "SAMPLE RESERVATION WITH TIME:",
-            reservations.find((r: any) => r.estimatedDeparture) || "None found"
-          );
-
-          if (spot.isOccupied && spot.vehicle) {
-            return {
-              ...spot,
-              isOccupied: true,
-              occupiedBy: {
-                license_plate: spot.vehicle.licensePlate || null,
-                second_license_plate: null,
-                name: null,
-                email: null,
-                phone_number: null,
-                user_id: null,
-                estimatedDeparture: null,
+                estimatedDeparture: reservation.estimatedDeparture,
               },
               vehicle: null,
             };
@@ -139,7 +119,7 @@ export function useGarageReservations() {
         });
       });
     } catch (err) {
-      console.error("Error fetching reservations", err);
+      console.error("Error fetching reservations:", err);
     }
   }, []);
   return {
