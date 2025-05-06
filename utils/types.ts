@@ -45,6 +45,7 @@ export type ParkingSpot = {
     email: string | null;
     phone_number: string | null;
     user_id: string | null;
+    estimatedDeparture: string | null;
   } | null;
   vehicle?: Vehicle | null;
   detectedVehicle?: {

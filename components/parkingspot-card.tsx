@@ -1,7 +1,9 @@
 import { ParkingSpot } from "@/utils/types";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { Mail, MessageCircle, Phone } from "lucide-react";
+import { Clock, Mail, MessageCircle, Phone } from "lucide-react";
 import CarspotVisuals from "./carspot-visuals";
+import { format } from "date-fns";
+import { useEffect } from "react";
 
 export function ParkingSpotCard({
   spot,
@@ -12,6 +14,16 @@ export function ParkingSpotCard({
   onClick: () => void;
   currentUserId: string | null;
 }) {
+  useEffect(() => {
+    console.log(`ParkingSpotCard ${spot.spotNumber}:`, {
+      isOccupied: spot.isOccupied,
+      occupiedBy: spot.occupiedBy,
+      estimatedDeparture: spot.occupiedBy?.estimatedDeparture,
+      parsedDate: spot.occupiedBy?.estimatedDeparture
+        ? new Date(spot.occupiedBy.estimatedDeparture)
+        : null,
+    });
+  }, [spot]);
   const isOwnSpot =
     spot.isOccupied && spot.occupiedBy?.user_id === currentUserId;
 
@@ -72,6 +84,25 @@ export function ParkingSpotCard({
                 </a>
               </div>
             </div>
+            {spot.occupiedBy && spot.occupiedBy.estimatedDeparture && (
+              <div className="flex items-center gap-2 pt-2 text-sm">
+                <Clock className="h-4 w-4 text-xs text-gray-500" />
+                <span className="text-xs text-gray-500">
+                  Leaving at{" "}
+                  {(() => {
+                    try {
+                      return format(
+                        new Date(spot.occupiedBy?.estimatedDeparture),
+                        "HH:mm"
+                      );
+                    } catch (error) {
+                      console.error("Date format error:", error);
+                      return "unknown time";
+                    }
+                  })()}
+                </span>
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-sm text-gray-500">This spot is available.</p>
