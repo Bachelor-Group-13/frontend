@@ -507,6 +507,20 @@ export function GarageLayout() {
                                 </div>
                               </div>
                               <div className="flex gap-2">
+                                {spot.occupiedBy?.estimatedDeparture && (
+                                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <Clock className="h-4 w-4" />
+                                    <span>
+                                      Leaving at{" "}
+                                      {format(
+                                        new Date(
+                                          spot.occupiedBy.estimatedDeparture
+                                        ),
+                                        "HH:mm"
+                                      )}
+                                    </span>
+                                  </div>
+                                )}
                                 {spot.occupiedBy?.phone_number && (
                                   <a
                                     href={`tel:${spot.occupiedBy.phone_number}`}
