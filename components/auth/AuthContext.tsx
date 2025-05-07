@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { api } from "@/utils/auth";
+import { api } from "@/lib/api/auth";
 import { useRouter, usePathname } from "next/navigation";
-import { AuthContextType, UserContext } from "@/utils/types";
+import { AuthContextType, UserContext } from "@/lib/utils/types";
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,

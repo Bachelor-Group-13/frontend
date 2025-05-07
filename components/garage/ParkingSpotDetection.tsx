@@ -1,15 +1,15 @@
 import { useRef, useState } from "react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { ParkingSpotBoundary, Vehicle } from "@/utils/types";
-import { cn } from "@/lib/utils";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { ParkingSpotBoundary, Vehicle } from "@/lib/utils/types";
+import { cn } from "@/lib/utils/utils";
 import { Car, AlertCircle, ArrowRight, Loader2, ImageIcon } from "lucide-react";
-import { Progress } from "./ui/progress";
-import { Alert, AlertDescription } from "./ui/alert";
+import { Progress } from "../ui/progress";
+import { Alert, AlertDescription } from "../ui/alert";
 import {
   convertToParkingSpotBoundaries,
   detectParkingSpotsWithAI,
-} from "@/utils/parkingAI";
+} from "@/lib/utils/parking";
 
 interface ParkingDetectionProps {
   onSpotsDetected?: (spots: ParkingSpotBoundary[], vehicles: Vehicle[]) => void;

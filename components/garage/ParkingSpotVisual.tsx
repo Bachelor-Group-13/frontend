@@ -12,7 +12,7 @@ const CarspotVisuals = ({ isAvailable, ...props }: CarspotVisualsProps) => {
         <div className="h-full w-full bg-transparent" {...props}></div>
       ) : (
         <Image
-          src="/car-parkingspot.svg"
+          src="/svg/car-parkingspot.svg"
           alt="Unavailable Parking Spot"
           layout="fill"
           objectFit="contain"

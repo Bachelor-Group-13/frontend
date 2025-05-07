@@ -1,6 +1,6 @@
 "use client";
 
-import LicensePlateUpload from "@/components/license-plate-upload";
+import LicensePlateUpload from "@/components/licenseplate/LicensePlateUpload";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,8 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TabsContent, TabsTrigger, Tabs, TabsList } from "@/components/ui/tabs";
-import { useLicensePlateDetection } from "@/hooks/useLicensePlateDetection";
-import { useWebcamCapture } from "@/hooks/useWebcamCapture";
+import { useLicensePlateDetection } from "@/lib/hooks/useLicensePlateDetection";
+import { useWebcamCapture } from "@/lib/hooks/useWebcamCapture";
 import {
   AlertCircle,
   ArrowLeft,
@@ -29,7 +29,7 @@ import Webcam from "react-webcam";
 import Link from "next/link";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/components/auth-context";
+import { useAuth } from "@/components/auth/AuthContext";
 
 export default function PlateRecognitionPage() {
   const [activeTab, setActiveTab] = useState<string>("manual");

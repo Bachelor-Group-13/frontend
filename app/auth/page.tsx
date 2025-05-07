@@ -25,8 +25,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { handleLicensePlateChange } from "@/utils/helpers";
-import { login, register } from "@/utils/auth";
+import { handleLicensePlateChange } from "@/lib/utils/helpers";
+import { login, register } from "@/lib/api/auth";
 
 /**
  * Auth Page:

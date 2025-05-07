@@ -3,10 +3,10 @@
 import { useRef, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { detectLicensePlates } from "@/utils/vision";
-import { cn } from "@/lib/utils";
+import { detectLicensePlates } from "@/lib/api/vision";
+import { cn } from "@/lib/utils/utils";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { Alert, AlertDescription } from "./ui/alert";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface LicensePlateUploadProps {
   onLicensePlatesDetected: (licensePlate: string[]) => void;

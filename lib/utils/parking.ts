@@ -1,8 +1,14 @@
-import { PlateDto, Vehicle, DetectedSpot, ParkingSpotBoundary } from "./types";
+import {
+  PlateDto,
+  Vehicle,
+  DetectedSpot,
+  ParkingSpotBoundary,
+  ParkingSpot,
+} from "./types";
 import {
   detectLicensePlates,
   detectParkingSpots as visionDetectParkingSpots,
-} from "./vision";
+} from "../api/vision";
 
 export function matchLicensePlates(
   plates: PlateDto[],
@@ -101,3 +107,30 @@ export function convertToParkingSpotBoundaries(detectionResults: {
     vehicle: spot.vehicle ?? null,
   }));
 }
+
+export const isParkedIn = (
+  spotNumber: string,
+  spots: ParkingSpot[]
+): boolean => {
+  const spotLetter = spotNumber.slice(-1);
+
+  if (spotLetter !== "A") {
+    return false;
+  }
+
+  const rowNumber = spotNumber.slice(0, -1);
+  const correspondingBSpot = `${rowNumber}B`;
+
+  const bSpot = spots.find((spot) => spot.spotNumber === correspondingBSpot);
+
+  return bSpot ? bSpot.isOccupied : false;
+};
+
+export const isBlockingCar = (
+  mySpotNumber: string,
+  otherSpotNumber: string
+) => {
+  if (!mySpotNumber.endsWith("A")) return false;
+  const row = mySpotNumber.slice(0, -1);
+  return otherSpotNumber === `${row}B`;
+};

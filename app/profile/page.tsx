@@ -26,9 +26,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { handleLicensePlateChange } from "@/utils/helpers";
-import { api } from "@/utils/auth";
-import { useAuth } from "@/components/auth-context";
+import { handleLicensePlateChange } from "@/lib/utils/helpers";
+import { api } from "@/lib/api/auth";
+import { useAuth } from "@/components/auth/AuthContext";
 import {
   Card,
   CardContent,

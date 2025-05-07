@@ -1,6 +1,6 @@
 import { useRef, useCallback } from "react";
 import Webcam from "react-webcam";
-import { api } from "@/utils/auth";
+import { api } from "@/lib/api/auth";
 
 export function useWebcamCapture(onDetected: (plates: string[]) => void) {
   const webcamRef = useRef<Webcam>(null);

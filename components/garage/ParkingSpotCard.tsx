@@ -1,10 +1,14 @@
-import { ParkingSpot } from "@/utils/types";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { ParkingSpot } from "@/lib/utils/types";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Clock, Mail, MessageCircle, Phone } from "lucide-react";
-import CarspotVisuals from "./carspot-visuals";
 import { format } from "date-fns";
 import { useEffect } from "react";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+import CarspotVisuals from "./ParkingSpotVisual";
 
 export function ParkingSpotCard({
   spot,

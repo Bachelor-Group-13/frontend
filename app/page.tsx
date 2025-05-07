@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Car } from "lucide-react";
-import { useAuth } from "@/components/auth-context";
+import { useAuth } from "@/components/auth/AuthContext";
 
 export default function LandingPage() {
   const { user, isLoading } = useAuth();

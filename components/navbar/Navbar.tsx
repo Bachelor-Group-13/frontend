@@ -13,10 +13,10 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Car, ChevronDown, LogOut, User } from "lucide-react";
-import { logout } from "@/utils/auth";
-import { useAuth } from "./auth-context";
-import { cn } from "@/lib/utils";
-import { subscribeToPush } from "@/utils/push";
+import { logout } from "@/lib/api/auth";
+import { useAuth } from "../auth/AuthContext";
+import { cn } from "@/lib/utils/utils";
+import { subscribeToPush } from "@/lib/utils/push";
 
 /*
  * Navbar component:

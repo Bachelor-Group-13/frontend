@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
-import { api } from "@/utils/auth";
-import { ParkingSpot } from "@/utils/types";
+import { useState, useCallback, useEffect } from "react";
+import { api } from "@/lib/api/auth";
+import { ParkingSpot } from "@/lib/utils/types";
 
 export function useGarageReservations() {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
@@ -133,6 +133,11 @@ export function useGarageReservations() {
       console.error("Error fetching reservations:", err);
     }
   }, []);
+
+  useEffect(() => {
+    fetchUserAndReservations();
+  }, [fetchUserAndReservations]);
+
   return {
     parkingSpots,
     setParkingSpots,

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { api } from "@/utils/auth";
-import { PlateUserInfo } from "@/utils/types";
+import { api } from "@/lib/api/auth";
+import { PlateUserInfo } from "@/lib/utils/types";
 
 export function useLicensePlateDetection() {
   const [platesInfo, setPlatesInfo] = useState<PlateUserInfo[]>([]);

@@ -1,4 +1,4 @@
-import { GarageLayout } from "@/components/garage-layout";
+import { GarageLayout } from "@/components/garage/GarageLayout";
 
 /**
  * Garage Page:
