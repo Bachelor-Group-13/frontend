@@ -38,7 +38,10 @@ export type ParkingSpot = {
   id: number;
   spotNumber: string;
   isOccupied: boolean;
+  anonymous?: boolean;
+  blockedSpot?: boolean;
   occupiedBy: {
+    anonymous?: boolean;
     license_plate: string | null;
     second_license_plate: string | null;
     name: string | null;
@@ -94,6 +97,7 @@ export interface Vehicle {
   area: number;
   position: "front" | "back";
   licensePlate?: string | null;
+  spotNumber?: string | null;
 }
 
 export interface DetectedSpot {

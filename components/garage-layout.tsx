@@ -190,15 +190,30 @@ export function GarageLayout() {
     async (boundaries: ParkingSpotBoundary[], _vehicles: Vehicle[]) => {
       setIsUpdating(true);
 
+      // First update the UI with detected spots
       setParkingSpots((currentSpots) =>
         currentSpots.map((dbSpot) => {
           const match = boundaries.find(
             (b) => b.spotNumber === dbSpot.spotNumber
           );
 
+          // Check if this is a blocked A spot
+          const isBlockedSpot =
+            dbSpot.spotNumber.endsWith("A") &&
+            boundaries.some(
+              (b) =>
+                b.spotNumber === `${dbSpot.spotNumber.slice(0, -1)}B` &&
+                b.isOccupied
+            );
+
           return {
             ...dbSpot,
             isOccupied: match?.isOccupied ?? false,
+            anonymous:
+              isBlockedSpot &&
+              match?.isOccupied &&
+              !match?.vehicle?.licensePlate,
+            blockedSpot: isBlockedSpot,
             vehicle: match?.vehicle ?? null,
             occupiedBy:
               match?.vehicle?.licensePlate != null
@@ -211,7 +226,18 @@ export function GarageLayout() {
                     user_id: null,
                     estimatedDeparture: null,
                   }
-                : null,
+                : isBlockedSpot && match?.isOccupied
+                  ? {
+                      license_plate: null,
+                      second_license_plate: null,
+                      name: null,
+                      email: null,
+                      phone_number: null,
+                      user_id: null,
+                      estimatedDeparture: null,
+                      anonymous: true,
+                    }
+                  : null,
             detectedVehicle: match?.vehicle
               ? {
                   confidence: match.vehicle.confidence,
@@ -230,26 +256,63 @@ export function GarageLayout() {
         const reservationPromises: Promise<any>[] = [];
 
         for (const b of boundaries) {
-          if (!b.isOccupied || !b.vehicle?.licensePlate) continue;
-
-          const userRes = await api.get(
-            `/api/auth/license-plate/${b.vehicle.licensePlate}`
-          );
-          const u = userRes.data;
-          if (u?.id) {
-            const existing = await api.get(`/api/reservations/user/${u.id}`);
-            const hasToday = existing.data.some(
-              (r: any) => r.reservationDate === today
+          // Handle regular reservations with license plates
+          if (b.isOccupied && b.vehicle?.licensePlate) {
+            const userRes = await api.get(
+              `/api/auth/license-plate/${b.vehicle.licensePlate}`
             );
-            if (!hasToday) {
-              reservationPromises.push(
-                api.post("/api/reservations", {
-                  userId: u.id,
-                  licensePlate: b.vehicle.licensePlate,
-                  spotNumber: b.spotNumber,
-                  reservationDate: today,
-                })
+            const u = userRes.data;
+            if (u?.id) {
+              const existing = await api.get(`/api/reservations/user/${u.id}`);
+              const hasToday = existing.data.some(
+                (r: any) => r.reservationDate === today
               );
+              if (!hasToday) {
+                reservationPromises.push(
+                  api.post("/api/reservations", {
+                    userId: u.id,
+                    licensePlate: b.vehicle.licensePlate,
+                    spotNumber: b.spotNumber,
+                    reservationDate: today,
+                  })
+                );
+              }
+            }
+          }
+
+          // Handle anonymous reservations for blocked A spots
+          if (b.spotNumber.endsWith("B") && b.isOccupied) {
+            const rowNumber = b.spotNumber.slice(0, -1);
+            const backSpot = boundaries.find(
+              (spot) =>
+                spot.spotNumber === `${rowNumber}A` &&
+                spot.isOccupied &&
+                !spot.vehicle?.licensePlate
+            );
+
+            if (backSpot) {
+              try {
+                const response = await api.post("/api/reservations", {
+                  spotNumber: `${rowNumber}A`,
+                  reservationDate: today,
+                  anonymous: true,
+                  blockedSpot: true,
+                  userId: null,
+                  licensePlate: null,
+                  estimatedDeparture: null,
+                });
+
+                if (response.data && response.data.id) {
+                  console.log("Anonymous reservation created:", response.data);
+                } else {
+                  console.error(
+                    "Failed to create anonymous reservation:",
+                    response.data
+                  );
+                }
+              } catch (error) {
+                console.error("Error creating anonymous reservation:", error);
+              }
             }
           }
         }
