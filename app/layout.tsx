@@ -27,8 +27,6 @@ export const metadata: Metadata = {
   },
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",
-  viewport: { width: "device-width", initialScale: 1 },
-  themeColor: "#1976d2",
   appleWebApp: {
     capable: true,
     title: APP_DEFAULT_TITLE,
@@ -50,6 +48,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#1976d2",
 };
 
 export default function RootLayout({
@@ -60,15 +59,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <head>
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{
-            __html: `
+        {process.env.NODE_ENV === "production" && (
+          <script
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html: `
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(console.error);
         }`,
-          }}
-        />
+            }}
+          />
+        )}
       </head>
       <body>
         <AuthProvider>
