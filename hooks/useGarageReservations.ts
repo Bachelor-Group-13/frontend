@@ -89,6 +89,8 @@ export function useGarageReservations() {
                   userEmail: reservation.userEmail,
                   userPhoneNumber: reservation.userPhoneNumber,
                   estimatedDeparture: reservation.estimatedDeparture,
+                  anonymous: reservation.anonymous,
+                  blockedSpot: reservation.blockedSpot,
                 }
               : null,
           });
@@ -97,14 +99,21 @@ export function useGarageReservations() {
             return {
               ...spot,
               isOccupied: true,
+              anonymous: reservation.anonymous ?? false,
+              blockedSpot: reservation.blockedSpot ?? false,
               occupiedBy: {
                 license_plate: reservation.licensePlate,
                 second_license_plate: null,
-                name: reservation.userName || null,
-                email: reservation.userEmail,
-                phone_number: reservation.userPhoneNumber,
-                user_id: reservation.userId,
+                name: reservation.anonymous
+                  ? null
+                  : reservation.userName || null,
+                email: reservation.anonymous ? null : reservation.userEmail,
+                phone_number: reservation.anonymous
+                  ? null
+                  : reservation.userPhoneNumber,
+                user_id: reservation.anonymous ? null : reservation.userId,
                 estimatedDeparture: reservation.estimatedDeparture,
+                anonymous: reservation.anonymous ?? false,
               },
               vehicle: null,
             };
@@ -113,6 +122,8 @@ export function useGarageReservations() {
           return {
             ...spot,
             isOccupied: false,
+            anonymous: false,
+            blockedSpot: false,
             occupiedBy: null,
             vehicle: null,
           };

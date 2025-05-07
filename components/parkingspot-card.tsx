@@ -4,6 +4,7 @@ import { Clock, Mail, MessageCircle, Phone } from "lucide-react";
 import CarspotVisuals from "./carspot-visuals";
 import { format } from "date-fns";
 import { useEffect } from "react";
+import { Button } from "./ui/button";
 
 export function ParkingSpotCard({
   spot,
@@ -30,6 +31,7 @@ export function ParkingSpotCard({
   const getSpotColor = () => {
     if (!spot.isOccupied) return "bg-green-600";
     if (isOwnSpot) return "bg-orange-500";
+    if (spot.occupiedBy?.anonymous) return "bg-gray-500";
     return "bg-red-600";
   };
 
@@ -52,38 +54,61 @@ export function ParkingSpotCard({
       <HoverCardContent className="w-72">
         {spot.isOccupied && spot.occupiedBy ? (
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold">
-              Name: {spot.occupiedBy.name}
-            </h4>
-            <div className="flex items-center justify-between text-sm text-gray-600">
-              <p>License plate: {spot.occupiedBy.license_plate}</p>
-            </div>
-            <div className="flex items-center justify-between text-sm text-gray-600">
-              <p>Email: {spot.occupiedBy.email}</p>
-              <a
-                href={`mailto:${spot.occupiedBy.email}`}
-                className="text-neutral-900 hover:text-blue-700"
-              >
-                <Mail className="h-5 w-5" />
-              </a>
-            </div>
-            <div className="flex items-center justify-between text-sm text-gray-600">
-              <p>Phone: {spot.occupiedBy.phone_number}</p>
-              <div className="flex space-x-2">
-                <a
-                  href={`tel:${spot.occupiedBy.phone_number}`}
-                  className="text-neutral-900 hover:text-blue-700"
+            {spot.occupiedBy.anonymous ? (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-600">
+                  Unknown Vehicle
+                </h4>
+                <p className="text-sm text-gray-500">
+                  This spot is occupied by an unidentified vehicle
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick();
+                  }}
                 >
-                  <Phone className="h-5 w-5" />
-                </a>
-                <a
-                  href={`sms:${spot.occupiedBy.phone_number}`}
-                  className="text-neutral-900 hover:text-green-700"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                </a>
+                  Claim this spot
+                </Button>
               </div>
-            </div>
+            ) : (
+              <>
+                <h4 className="text-sm font-semibold">
+                  Name: {spot.occupiedBy.name}
+                </h4>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <p>License plate: {spot.occupiedBy.license_plate}</p>
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <p>Email: {spot.occupiedBy.email}</p>
+                  <a
+                    href={`mailto:${spot.occupiedBy.email}`}
+                    className="text-neutral-900 hover:text-blue-700"
+                  >
+                    <Mail className="h-5 w-5" />
+                  </a>
+                </div>
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <p>Phone: {spot.occupiedBy.phone_number}</p>
+                  <div className="flex space-x-2">
+                    <a
+                      href={`tel:${spot.occupiedBy.phone_number}`}
+                      className="text-neutral-900 hover:text-blue-700"
+                    >
+                      <Phone className="h-5 w-5" />
+                    </a>
+                    <a
+                      href={`sms:${spot.occupiedBy.phone_number}`}
+                      className="text-neutral-900 hover:text-green-700"
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
             {spot.occupiedBy && spot.occupiedBy.estimatedDeparture && (
               <div className="flex items-center gap-2 pt-2 text-sm">
                 <Clock className="h-4 w-4 text-xs text-gray-500" />

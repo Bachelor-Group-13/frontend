@@ -190,15 +190,30 @@ export function GarageLayout() {
     async (boundaries: ParkingSpotBoundary[], _vehicles: Vehicle[]) => {
       setIsUpdating(true);
 
+      // First update the UI with detected spots
       setParkingSpots((currentSpots) =>
         currentSpots.map((dbSpot) => {
           const match = boundaries.find(
             (b) => b.spotNumber === dbSpot.spotNumber
           );
 
+          // Check if this is a blocked A spot
+          const isBlockedSpot =
+            dbSpot.spotNumber.endsWith("A") &&
+            boundaries.some(
+              (b) =>
+                b.spotNumber === `${dbSpot.spotNumber.slice(0, -1)}B` &&
+                b.isOccupied
+            );
+
           return {
             ...dbSpot,
             isOccupied: match?.isOccupied ?? false,
+            anonymous:
+              isBlockedSpot &&
+              match?.isOccupied &&
+              !match?.vehicle?.licensePlate,
+            blockedSpot: isBlockedSpot,
             vehicle: match?.vehicle ?? null,
             occupiedBy:
               match?.vehicle?.licensePlate != null
@@ -211,7 +226,18 @@ export function GarageLayout() {
                     user_id: null,
                     estimatedDeparture: null,
                   }
-                : null,
+                : isBlockedSpot && match?.isOccupied
+                  ? {
+                      license_plate: null,
+                      second_license_plate: null,
+                      name: null,
+                      email: null,
+                      phone_number: null,
+                      user_id: null,
+                      estimatedDeparture: null,
+                      anonymous: true,
+                    }
+                  : null,
             detectedVehicle: match?.vehicle
               ? {
                   confidence: match.vehicle.confidence,
@@ -230,26 +256,63 @@ export function GarageLayout() {
         const reservationPromises: Promise<any>[] = [];
 
         for (const b of boundaries) {
-          if (!b.isOccupied || !b.vehicle?.licensePlate) continue;
-
-          const userRes = await api.get(
-            `/api/auth/license-plate/${b.vehicle.licensePlate}`
-          );
-          const u = userRes.data;
-          if (u?.id) {
-            const existing = await api.get(`/api/reservations/user/${u.id}`);
-            const hasToday = existing.data.some(
-              (r: any) => r.reservationDate === today
+          // Handle regular reservations with license plates
+          if (b.isOccupied && b.vehicle?.licensePlate) {
+            const userRes = await api.get(
+              `/api/auth/license-plate/${b.vehicle.licensePlate}`
             );
-            if (!hasToday) {
-              reservationPromises.push(
-                api.post("/api/reservations", {
-                  userId: u.id,
-                  licensePlate: b.vehicle.licensePlate,
-                  spotNumber: b.spotNumber,
-                  reservationDate: today,
-                })
+            const u = userRes.data;
+            if (u?.id) {
+              const existing = await api.get(`/api/reservations/user/${u.id}`);
+              const hasToday = existing.data.some(
+                (r: any) => r.reservationDate === today
               );
+              if (!hasToday) {
+                reservationPromises.push(
+                  api.post("/api/reservations", {
+                    userId: u.id,
+                    licensePlate: b.vehicle.licensePlate,
+                    spotNumber: b.spotNumber,
+                    reservationDate: today,
+                  })
+                );
+              }
+            }
+          }
+
+          // Handle anonymous reservations for blocked A spots
+          if (b.spotNumber.endsWith("B") && b.isOccupied) {
+            const rowNumber = b.spotNumber.slice(0, -1);
+            const backSpot = boundaries.find(
+              (spot) =>
+                spot.spotNumber === `${rowNumber}A` &&
+                spot.isOccupied &&
+                !spot.vehicle?.licensePlate
+            );
+
+            if (backSpot) {
+              try {
+                const response = await api.post("/api/reservations", {
+                  spotNumber: `${rowNumber}A`,
+                  reservationDate: today,
+                  anonymous: true,
+                  blockedSpot: true,
+                  userId: null,
+                  licensePlate: null,
+                  estimatedDeparture: null,
+                });
+
+                if (response.data && response.data.id) {
+                  console.log("Anonymous reservation created:", response.data);
+                } else {
+                  console.error(
+                    "Failed to create anonymous reservation:",
+                    response.data
+                  );
+                }
+              } catch (error) {
+                console.error("Error creating anonymous reservation:", error);
+              }
             }
           }
         }
@@ -323,6 +386,49 @@ export function GarageLayout() {
     } catch (error) {
       console.error("Error managing push notifications:", error);
       alert("Failed to manage notification settings");
+    }
+  };
+
+  const handleClaimSpot = async () => {
+    if (!selectedSpot || !user || !selectedLicensePlate) return;
+
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const reservationsResponse = await api.get(
+        `/api/reservations/date/${today}`
+      );
+      const reservations = reservationsResponse.data;
+
+      const anonymousReservation = reservations.find(
+        (res: any) =>
+          res.spotNumber === selectedSpot.spotNumber && res.anonymous === true
+      );
+
+      if (anonymousReservation) {
+        await api.delete(`/api/reservations/${anonymousReservation.id}`);
+      }
+
+      const reservationData = {
+        spotNumber: selectedSpot.spotNumber,
+        userId: user.id,
+        licensePlate: selectedLicensePlate,
+        reservationDate: today,
+        estimatedDeparture: estimatedDeparture
+          ? estimatedDeparture.toISOString()
+          : null,
+      };
+
+      await api.post("/api/reservations", reservationData);
+      await fetchUserAndReservations();
+      setSelectedSpot(null);
+      setActiveTab("dashboard");
+    } catch (error) {
+      console.error("Failed to claim spot:", error);
+      if (error instanceof Error) {
+        alert(`Failed to claim spot: ${error.message}`);
+      } else {
+        alert("Failed to claim spot: An unknown error occurred.");
+      }
     }
   };
 
@@ -521,14 +627,18 @@ export function GarageLayout() {
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
                                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white">
-                                          {spot.occupiedBy?.name
-                                            ?.split(" ")
-                                            .map((n) => n[0])
-                                            .join("")}
+                                          {spot.occupiedBy?.anonymous
+                                            ? "?"
+                                            : spot.occupiedBy?.name
+                                                ?.split(" ")
+                                                .map((n) => n[0])
+                                                .join("")}
                                         </div>
                                         <div>
                                           <p className="font-medium">
-                                            {spot.occupiedBy?.name}
+                                            {spot.occupiedBy?.anonymous
+                                              ? "Unknown Vehicle"
+                                              : spot.occupiedBy?.name}
                                           </p>
                                           <p className="text-xs text-gray-500">
                                             Spot {spot.spotNumber}
@@ -653,6 +763,10 @@ export function GarageLayout() {
                   <div className="mr-2 h-4 w-4 rounded-full bg-red-500"></div>
                   <span>Occupied</span>
                 </div>
+                <div className="flex items-center">
+                  <div className="mr-2 h-4 w-4 rounded-full bg-gray-500"></div>
+                  <span>Unknown Vehicle</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -723,121 +837,138 @@ export function GarageLayout() {
           <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
               <AlertDialogTitle>
-                {selectedSpot.isOccupied &&
-                selectedSpot.occupiedBy?.user_id === user?.id
-                  ? `Unreserve Spot ${selectedSpot.spotNumber}?`
-                  : selectedSpot.isOccupied
-                    ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
-                    : `Reserve Spot ${selectedSpot.spotNumber}?`}
+                {selectedSpot.isOccupied && selectedSpot.occupiedBy?.anonymous
+                  ? `Claim Spot ${selectedSpot.spotNumber}?`
+                  : selectedSpot.isOccupied &&
+                      selectedSpot.occupiedBy?.user_id === user?.id
+                    ? `Unreserve Spot ${selectedSpot.spotNumber}?`
+                    : selectedSpot.isOccupied
+                      ? `Spot ${selectedSpot.spotNumber} is Already Reserved`
+                      : `Reserve Spot ${selectedSpot.spotNumber}?`}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                {selectedSpot.isOccupied &&
-                selectedSpot.occupiedBy?.user_id === user?.id
-                  ? "Do you want to make this spot available again?"
-                  : selectedSpot.isOccupied
-                    ? "This spot is currently reserved by someone else."
-                    : "Do you want to reserve this spot for the rest of the day?"}
+                {selectedSpot.isOccupied && selectedSpot.occupiedBy?.anonymous
+                  ? "Do you want to claim this spot as yours?"
+                  : selectedSpot.isOccupied &&
+                      selectedSpot.occupiedBy?.user_id === user?.id
+                    ? "Do you want to make this spot available again?"
+                    : selectedSpot.isOccupied
+                      ? "This spot is currently reserved by someone else."
+                      : "Do you want to reserve this spot for the rest of the day?"}
               </AlertDialogDescription>
-              {!selectedSpot.isOccupied && user && (
-                <div className="mt-4">
-                  <label
-                    htmlFor="license-plate-select"
-                    className="mt-2 block text-sm font-medium text-gray-700"
-                  >
-                    Select License Plate
-                  </label>
-                  <Select
-                    value={selectedLicensePlate || ""}
-                    onValueChange={setSelectedLicensePlate}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a license plate" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={user.license_plate}>
-                        {user.license_plate}
-                      </SelectItem>
-                      {user.second_license_plate && (
-                        <SelectItem value={user.second_license_plate}>
-                          {user.second_license_plate}
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
-                      Estimated Departure Time (Optional)
+              {(!selectedSpot.isOccupied ||
+                selectedSpot.occupiedBy?.anonymous) &&
+                user && (
+                  <div className="mt-4">
+                    <label
+                      htmlFor="license-plate-select"
+                      className="mt-2 block text-sm font-medium text-gray-700"
+                    >
+                      Select License Plate
                     </label>
-                    <div className="relative">
-                      <input
-                        type="time"
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm
-                          ring-offset-background file:border-0 file:bg-transparent file:text-sm
-                          file:font-medium placeholder:text-muted-foreground focus-visible:outline-none
-                          focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-                          disabled:cursor-not-allowed disabled:opacity-50"
-                        value={
-                          estimatedDeparture
-                            ? format(estimatedDeparture, "HH:mm")
-                            : ""
-                        }
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            const [hours, minutes] = e.target.value.split(":");
-                            const date = new Date();
-                            const reservationDate = new Date()
-                              .toISOString()
-                              .split("T")[0];
-                            date.setFullYear(
-                              parseInt(reservationDate.split("-")[0]),
-                              parseInt(reservationDate.split("-")[1]) - 1,
-                              parseInt(reservationDate.split("-")[2])
-                            );
-                            date.setHours(
-                              parseInt(hours),
-                              parseInt(minutes),
-                              0,
-                              0
-                            );
-                            setEstimatedDeparture(date);
-                          } else {
-                            setEstimatedDeparture(null);
+                    <Select
+                      value={selectedLicensePlate || ""}
+                      onValueChange={setSelectedLicensePlate}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a license plate" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={user.license_plate}>
+                          {user.license_plate}
+                        </SelectItem>
+                        {user.second_license_plate && (
+                          <SelectItem value={user.second_license_plate}>
+                            {user.second_license_plate}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Estimated Departure Time (Optional)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="time"
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm
+                            ring-offset-background file:border-0 file:bg-transparent file:text-sm
+                            file:font-medium placeholder:text-muted-foreground focus-visible:outline-none
+                            focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+                            disabled:cursor-not-allowed disabled:opacity-50"
+                          value={
+                            estimatedDeparture
+                              ? format(estimatedDeparture, "HH:mm")
+                              : ""
                           }
-                        }}
-                      />
-                    </div>
-                    {estimatedDeparture && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span>
-                          Estimated departure at{" "}
-                          {format(estimatedDeparture, "HH:mm")}
-                        </span>
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              const [hours, minutes] =
+                                e.target.value.split(":");
+                              const date = new Date();
+                              const reservationDate = new Date()
+                                .toISOString()
+                                .split("T")[0];
+                              date.setFullYear(
+                                parseInt(reservationDate.split("-")[0]),
+                                parseInt(reservationDate.split("-")[1]) - 1,
+                                parseInt(reservationDate.split("-")[2])
+                              );
+                              date.setHours(
+                                parseInt(hours),
+                                parseInt(minutes),
+                                0,
+                                0
+                              );
+                              setEstimatedDeparture(date);
+                            } else {
+                              setEstimatedDeparture(null);
+                            }
+                          }}
+                        />
                       </div>
-                    )}
+                      {estimatedDeparture && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>
+                            Estimated departure at{" "}
+                            {format(estimatedDeparture, "HH:mm")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-4 flex-col space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0">
               <AlertDialogCancel onClick={() => setSelectedSpot(null)}>
                 Cancel
               </AlertDialogCancel>
               {(!selectedSpot.isOccupied ||
-                selectedSpot.occupiedBy?.user_id === user?.id) && (
+                selectedSpot.occupiedBy?.user_id === user?.id ||
+                selectedSpot.occupiedBy?.anonymous) && (
                 <AlertDialogAction
-                  onClick={() =>
-                    handleReservation(
-                      selectedSpot.isOccupied ? "unreserve" : "reserve"
-                    )
-                  }
+                  onClick={() => {
+                    if (selectedSpot.occupiedBy?.anonymous) {
+                      handleClaimSpot();
+                    } else {
+                      handleReservation(
+                        selectedSpot.isOccupied ? "unreserve" : "reserve"
+                      );
+                    }
+                  }}
                   className={
-                    selectedSpot.isOccupied
+                    selectedSpot.isOccupied &&
+                    !selectedSpot.occupiedBy?.anonymous
                       ? "bg-red-600 hover:bg-red-700"
                       : "bg-green-600 hover:bg-green-700"
                   }
                 >
-                  {selectedSpot.isOccupied ? "Unreserve" : "Reserve"}
+                  {selectedSpot.occupiedBy?.anonymous
+                    ? "Claim Spot"
+                    : selectedSpot.isOccupied
+                      ? "Unreserve"
+                      : "Reserve"}
                 </AlertDialogAction>
               )}
             </AlertDialogFooter>
