@@ -208,11 +208,9 @@ export default function ProfilePage() {
       await api.put(`/api/auth/${user.id}`, updateData);
 
       setShowSuccessAlert(true);
-      // Clear password fields on successful update
       setPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      // --- Error Handling ---
       console.error("Error updating user profile:", error);
       setErrorMessage(
         error.response?.data?.message ||
@@ -224,7 +222,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Render loading state
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
