@@ -16,7 +16,6 @@ import { useReservationActions } from "@/lib/hooks/useReservationActions";
 export function GarageLayout() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
 
   const { parkingSpots, user, fetchUserAndReservations, setParkingSpots } =
     useGarageReservations();
@@ -36,20 +35,14 @@ export function GarageLayout() {
     setParkingSpots,
     fetchUserAndReservations,
     setSelectedSpot,
-    setActiveTab,
     setShowUnauthorizedAlert,
+    setActiveTab: () => {},
   });
 
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-4 flex items-center justify-between pb-4">
-        <div className="flex items-center space-x-4">
-          <div className="text-sm text-gray-500">
-            <span className="font-medium">Role:</span>{" "}
-            {user?.role || "Not loaded"}
-          </div>
-        </div>
-
+        <div className="flex items-center space-x-4" />
         <NotificationToggle user={user} />
       </div>
 
@@ -60,11 +53,7 @@ export function GarageLayout() {
       </div>
 
       {/* Tabs */}
-      <Tabs
-        defaultValue="dashboard"
-        className="w-full"
-        onValueChange={setActiveTab}
-      >
+      <Tabs defaultValue="dashboard" className="w-full">
         <TabsList
           className={`grid w-full ${
             user && user.role === "ROLE_DEVELOPER"
@@ -98,7 +87,7 @@ export function GarageLayout() {
           <GarageMap
             parkingSpots={parkingSpots}
             onSpotSelect={setSelectedSpot}
-            currentUserId={user?.id || null}
+            currentUserId={user?.id?.toString() || null}
           />
         </TabsContent>
 

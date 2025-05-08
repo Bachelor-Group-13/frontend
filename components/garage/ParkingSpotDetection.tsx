@@ -31,13 +31,11 @@ export function ParkingSpotDetection({
    * Process selected file
    */
   const processSelectedFile = (file: File) => {
-    // Checks if the file is an image
     if (!file.type.startsWith("image/")) {
       setError("Please select an image file (JPEG, PNG, etc.)");
       return;
     }
 
-    // Checks file size (limit 10MB)
     if (file.size > 10 * 1024 * 1024) {
       setError("File size exceeds 10MB");
       return;
