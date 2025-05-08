@@ -8,7 +8,7 @@ import { Progress } from "../ui/progress";
 import { Alert, AlertDescription } from "../ui/alert";
 import {
   convertToParkingSpotBoundaries,
-  detectParkingSpotsWithAI,
+  detectParkingSpots,
 } from "@/lib/utils/parking";
 
 interface ParkingDetectionProps {
@@ -126,7 +126,7 @@ export function ParkingSpotDetection({
 
     try {
       const { mappedSpots, vehicles, processedImage, rawDetection } =
-        await detectParkingSpotsWithAI(selectedImage);
+        await detectParkingSpots(selectedImage);
 
       clearInterval(progressInterval);
       setProgress(100);

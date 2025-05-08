@@ -10,13 +10,14 @@ import {
   detectParkingSpots as visionDetectParkingSpots,
 } from "../api/vision";
 
+const PARKING_ROWS = 5;
+
 export function matchLicensePlates(
   plates: PlateDto[],
   vehicles: Vehicle[]
 ): Vehicle[] {
   const out: Vehicle[] = vehicles.map((v) => ({ ...v, licensePlate: null }));
   plates.forEach(({ text, bbox }) => {
-    // pick [x1,y1,x2,y2]
     const [x1, y1, x2, y2] =
       bbox.length === 4
         ? (bbox as [number, number, number, number])
@@ -41,41 +42,54 @@ export function matchLicensePlates(
   return out;
 }
 
+function createParkingSpot(
+  spotNumber: string,
+  vehicle: Vehicle | null
+): DetectedSpot {
+  return {
+    spotNumber,
+    isOccupied: !!vehicle,
+    vehicle,
+  };
+}
+
+function calculateParkingSummary(mappedSpots: DetectedSpot[]) {
+  const occupied = mappedSpots.filter((spot) => spot.isOccupied).length;
+  const withPlates = mappedSpots.filter(
+    (spot) => !!spot.vehicle?.licensePlate
+  ).length;
+
+  return {
+    totalSpots: PARKING_ROWS * 2,
+    occupiedSpots: occupied,
+    availableSpots: PARKING_ROWS * 2 - occupied,
+    spotsWithPlates: withPlates,
+  };
+}
+
 export function analyzeParkingData({ vehicles }: { vehicles: Vehicle[] }) {
   const sorted = [...vehicles].sort((a, b) => b.center[0] - a.center[0]);
   const fronts = sorted.filter((v) => v.position === "front");
   const backs = sorted.filter((v) => v.position === "back");
-  const mappedSpots: DetectedSpot[] = [];
-  for (let i = 0; i < 5; i++) {
-    mappedSpots.push({
-      spotNumber: `${i + 1}A`,
-      isOccupied: !!backs[i],
-      vehicle: backs[i] || null,
-    });
-    mappedSpots.push({
-      spotNumber: `${i + 1}B`,
-      isOccupied: !!fronts[i],
-      vehicle: fronts[i] || null,
-    });
-  }
-  const occupied = mappedSpots.filter((s) => s.isOccupied).length;
-  const withPlates = mappedSpots.filter(
-    (s) => !!s.vehicle?.licensePlate
-  ).length;
 
-  console.log("Occupied spots:", occupied);
+  const mappedSpots: DetectedSpot[] = [];
+  for (let i = 0; i < PARKING_ROWS; i++) {
+    mappedSpots.push(createParkingSpot(`${i + 1}A`, backs[i]));
+    mappedSpots.push(createParkingSpot(`${i + 1}B`, fronts[i]));
+  }
+
+  console.log(
+    "Occupied spots:",
+    mappedSpots.filter((s) => s.isOccupied).length
+  );
+
   return {
     mappedSpots,
-    summary: {
-      totalSpots: 10,
-      occupiedSpots: occupied,
-      availableSpots: 10 - occupied,
-      spotsWithPlates: withPlates,
-    },
+    summary: calculateParkingSummary(mappedSpots),
   };
 }
 
-export async function detectParkingSpotsWithAI(imageFile: File) {
+export async function detectParkingSpots(imageFile: File) {
   const detection = await visionDetectParkingSpots(imageFile);
   const plates = await detectLicensePlates(imageFile);
   const vehicles1 = matchLicensePlates(plates, detection.vehicles);

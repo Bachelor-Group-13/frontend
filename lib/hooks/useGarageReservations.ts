@@ -1,21 +1,38 @@
 import { useState, useCallback, useEffect } from "react";
-import { api } from "@/lib/api/auth";
 import { ParkingSpot } from "@/lib/utils/types";
+import {
+  fetchUserDetails,
+  fetchReservations,
+  createInitialParkingSpots,
+  updateParkingSpotsWithReservations,
+} from "../services/garageService";
+
+interface User {
+  id: number;
+  license_plate: string | null;
+  second_license_plate: string | null;
+  email: string;
+  phone_number: string;
+  name: string;
+  role: string;
+  current_reservation: {
+    spotNumber: string;
+    licensePlate: string;
+  } | null;
+  vehicle: any;
+}
 
 export function useGarageReservations() {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+
   const fetchUserAndReservations = useCallback(async () => {
     try {
-      const userRes = await api.get("/api/auth/me");
-      const userDetails = userRes.data;
-
+      const userDetails = await fetchUserDetails();
       console.log("User details from API:", userDetails);
 
       const today = new Date().toISOString().split("T")[0];
-      const reservationsRes = await api.get(`/api/reservations/date/${today}`);
-      const reservations = reservationsRes.data;
-
+      const reservations = await fetchReservations(today);
       console.log(
         "Raw reservations from API:",
         JSON.stringify(reservations, null, 2)
@@ -24,7 +41,6 @@ export function useGarageReservations() {
       const userReservation = reservations.find(
         (res: any) => res.userId === userDetails.id
       );
-
       console.log("User reservation found:", userReservation);
 
       setUser({
@@ -46,88 +62,9 @@ export function useGarageReservations() {
 
       setParkingSpots((currentSpots) => {
         if (currentSpots.length === 0) {
-          return Array.from({ length: 10 }, (_, i) => {
-            const row = Math.floor(i / 2) + 1;
-            const col = i % 2 === 0 ? "A" : "B";
-            const spotNumber = `${row}${col}`;
-
-            const reservation = reservations.find(
-              (res: any) => res.spotNumber === spotNumber
-            );
-
-            return {
-              id: i + 1,
-              spotNumber,
-              isOccupied: !!reservation,
-              occupiedBy: reservation
-                ? {
-                    license_plate: reservation.licensePlate,
-                    second_license_plate: null,
-                    name: reservation.userName || null,
-                    email: reservation.userEmail,
-                    phone_number: reservation.userPhoneNumber,
-                    user_id: reservation.userId,
-                    estimatedDeparture: reservation.estimatedDeparture,
-                  }
-                : null,
-              vehicle: null,
-            };
-          });
+          return createInitialParkingSpots(reservations);
         }
-
-        return currentSpots.map((spot) => {
-          const reservation = reservations.find(
-            (res: any) => res.spotNumber === spot.spotNumber
-          );
-
-          console.log(`Mapping spot ${spot.spotNumber}:`, {
-            hasReservation: !!reservation,
-            reservationDetails: reservation
-              ? {
-                  licensePlate: reservation.licensePlate,
-                  userName: reservation.userName,
-                  userEmail: reservation.userEmail,
-                  userPhoneNumber: reservation.userPhoneNumber,
-                  estimatedDeparture: reservation.estimatedDeparture,
-                  anonymous: reservation.anonymous,
-                  blockedSpot: reservation.blockedSpot,
-                }
-              : null,
-          });
-
-          if (reservation) {
-            return {
-              ...spot,
-              isOccupied: true,
-              anonymous: reservation.anonymous ?? false,
-              blockedSpot: reservation.blockedSpot ?? false,
-              occupiedBy: {
-                license_plate: reservation.licensePlate,
-                second_license_plate: null,
-                name: reservation.anonymous
-                  ? null
-                  : reservation.userName || null,
-                email: reservation.anonymous ? null : reservation.userEmail,
-                phone_number: reservation.anonymous
-                  ? null
-                  : reservation.userPhoneNumber,
-                user_id: reservation.anonymous ? null : reservation.userId,
-                estimatedDeparture: reservation.estimatedDeparture,
-                anonymous: reservation.anonymous ?? false,
-              },
-              vehicle: null,
-            };
-          }
-
-          return {
-            ...spot,
-            isOccupied: false,
-            anonymous: false,
-            blockedSpot: false,
-            occupiedBy: null,
-            vehicle: null,
-          };
-        });
+        return updateParkingSpotsWithReservations(currentSpots, reservations);
       });
     } catch (err) {
       console.error("Error fetching reservations:", err);
