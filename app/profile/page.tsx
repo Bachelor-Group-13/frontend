@@ -1,21 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import {
-  AlertCircle,
-  ArrowLeft,
-  Car,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  Lock,
-  Phone,
-  Plus,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   AlertDialog,
@@ -26,22 +13,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { handleLicensePlateChange } from "@/lib/utils/helpers";
 import { api } from "@/lib/api/auth";
 import { useAuth } from "@/components/auth/AuthContext";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import ProfileCard from "@/components/profile/ProfileCard";
+import VehicleSettings from "@/components/profile/VehicleSettings";
+import ContactSettings from "@/components/profile/ContactSettings";
+import SecuritySettings from "@/components/profile/SecuritySettings";
+import { handleLicensePlateChange } from "@/lib/utils/helpers";
 
 /*
- * SettingsPage:
+ * ProfilePage:
  *
  * User interface for users to update their profile
  * including license plate, phone number, and password.
@@ -49,14 +30,12 @@ import { Badge } from "@/components/ui/badge";
  * to update it
  */
 export default function ProfilePage() {
-  // State variables using useState hook
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [licensePlate, setLicensePlate] = useState("");
   const [secondLicensePlate, setSecondLicensePlate] = useState("");
   const [name, setName] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
@@ -67,17 +46,58 @@ export default function ProfilePage() {
     null
   );
   const [showSecondLicensePlate, setShowSecondLicensePlate] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
 
-  // useEffect hook to fetch user data
+  const handlePrimaryLicensePlateChange = useCallback(
+    (value: string) => {
+      setLicensePlate(value);
+      handleLicensePlateChange(
+        { target: { value } } as React.ChangeEvent<HTMLInputElement>,
+        () => {},
+        setLicensePlateError
+      );
+    },
+    [setLicensePlate, setLicensePlateError]
+  );
+
+  const handleSecondLicensePlateChange = useCallback(
+    (value: string) => {
+      setSecondLicensePlate(value);
+    },
+    [setSecondLicensePlate]
+  );
+
+  const handlePhoneNumberChange = useCallback(
+    (value: string) => {
+      setPhoneNumber(value);
+    },
+    [setPhoneNumber]
+  );
+
+  const handlePasswordChange = useCallback(
+    (value: string) => {
+      setPassword(value);
+    },
+    [setPassword]
+  );
+
+  const handleConfirmPasswordChange = useCallback(
+    (value: string) => {
+      setConfirmPassword(value);
+    },
+    [setConfirmPassword]
+  );
+
+  const handleShowSecondLicensePlate = useCallback(() => {
+    setShowSecondLicensePlate(true);
+  }, [setShowSecondLicensePlate]);
+
   useEffect(() => {
     const fetchUser = async () => {
-      setIsLoading(true);
-
       if (!isAuthenticated || !user) {
         router.push("/auth");
         return;
@@ -97,6 +117,7 @@ export default function ProfilePage() {
           setShowSecondLicensePlate(true);
         }
       } catch (error: any) {
+        console.error("Error fetching user data:", error);
         setErrorMessage(
           error.response?.data?.message || "Failed to fetch user data"
         );
@@ -109,28 +130,6 @@ export default function ProfilePage() {
     fetchUser();
   }, [user, isAuthenticated, router]);
 
-  /**
-   * handleLicensePlateChange function:
-   *
-   * Updates the license plate state with the value from the input field.
-   */
-  const handleLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
-  };
-
-  /**
-   * handleSecondLicensePlateChange function:
-   *
-   * Updates the second license plate state with the value from the input field.
-   */
-  const handleSecondLicensePlateInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setSecondLicensePlate(e.target.value);
-  };
-
   /*
    * handleUpdate function:
    *
@@ -140,6 +139,8 @@ export default function ProfilePage() {
    */
   const handleUpdate = async () => {
     setIsSubmitting(true);
+    setErrorMessage("");
+
     try {
       if (password && password !== confirmPassword) {
         setShowPasswordMismatchAlert(true);
@@ -151,19 +152,54 @@ export default function ProfilePage() {
         throw new Error("User ID not found");
       }
 
+      if (!licensePlate) {
+        setLicensePlateError("Primary license plate is required.");
+        setIsSubmitting(false);
+        return;
+      }
+      handleLicensePlateChange(
+        {
+          target: { value: licensePlate },
+        } as React.ChangeEvent<HTMLInputElement>,
+        () => {},
+        setLicensePlateError
+      );
+
+      if (licensePlateError !== null) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (
+        phoneNumber &&
+        (phoneNumber.length !== 8 || !/^\d+$/.test(phoneNumber))
+      ) {
+        setErrorMessage("Invalid phone number format. It should be 8 digits.");
+        setShowErrorAlert(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (password && password.length < 6) {
+        setErrorMessage("New password must be at least 6 characters long.");
+        setShowErrorAlert(true);
+        setIsSubmitting(false);
+        return;
+      }
+
       const updateData: any = {};
 
-      if (licensePlate) {
-        updateData.licensePlate = licensePlate.toUpperCase();
+      updateData.licensePlate = licensePlate.toUpperCase();
+
+      if (secondLicensePlate !== "" || showSecondLicensePlate) {
+        updateData.secondLicensePlate = secondLicensePlate
+          ? secondLicensePlate.toUpperCase()
+          : null;
+      } else {
+        updateData.secondLicensePlate = null;
       }
 
-      updateData.secondLicensePlate = secondLicensePlate
-        ? secondLicensePlate.toUpperCase()
-        : null;
-
-      if (phoneNumber) {
-        updateData.phoneNumber = phoneNumber;
-      }
+      updateData.phoneNumber = phoneNumber || null;
 
       if (password) {
         updateData.password = password;
@@ -172,12 +208,15 @@ export default function ProfilePage() {
       await api.put(`/api/auth/${user.id}`, updateData);
 
       setShowSuccessAlert(true);
+      // Clear password fields on successful update
       setPassword("");
       setConfirmPassword("");
     } catch (error: any) {
+      // --- Error Handling ---
       console.error("Error updating user profile:", error);
       setErrorMessage(
-        error.response?.data?.message || "An unknown error occurred"
+        error.response?.data?.message ||
+          "An unknown error occurred during update."
       );
       setShowErrorAlert(true);
     } finally {
@@ -185,6 +224,7 @@ export default function ProfilePage() {
     }
   };
 
+  // Render loading state
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -198,6 +238,33 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  if (showErrorAlert && errorMessage.includes("Failed to fetch user data")) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <AlertDialog open={showErrorAlert} onOpenChange={setShowErrorAlert}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-red-500" />
+                Error Loading Profile
+              </AlertDialogTitle>
+              <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction
+                onClick={() => router.push("/garage")}
+                className="bg-neutral-900 hover:bg-neutral-800"
+              >
+                Go to Garage
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-12 pt-8">
       <div className="container mx-auto px-4">
@@ -213,210 +280,33 @@ export default function ProfilePage() {
         </div>
 
         <div className="mx-auto max-w-2xl">
-          <Card className="mb-6 overflow-hidden shadow-md">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 pb-6">
-              <div className="flex items-center gap-4">
-                <div
-                  className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-900 text-xl
-                    font-bold text-white"
-                >
-                  {name
-                    ?.split(" ")
-                    .map((n) => n[0])
-                    .join("") || "U"}
-                </div>
-                <div>
-                  <CardTitle className="text-xl">{name}</CardTitle>
-                  <CardDescription className="text-sm text-gray-500">
-                    {userEmail}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
-                    <Car className="h-5 w-5 text-gray-500" />
-                    Vehicle Information
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="license-plate" className="text-sm">
-                        Primary License Plate
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="license-plate"
-                          type="text"
-                          value={licensePlate}
-                          onChange={handleLicensePlateInputChange}
-                          placeholder="AB12345"
-                          className={licensePlateError ? "border-red-500" : ""}
-                          minLength={7}
-                          maxLength={7}
-                        />
-                      </div>
-                      {licensePlateError && (
-                        <p className="text-xs text-red-500">
-                          {licensePlateError}
-                        </p>
-                      )}
-                    </div>
-
-                    {!secondLicensePlate && !showSecondLicensePlate ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowSecondLicensePlate(true)}
-                        className="flex items-center gap-1 text-xs"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Add Second License Plate
-                      </Button>
-                    ) : (
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="second-license-plate"
-                          className="text-sm"
-                        >
-                          Secondary License Plate
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="second-license-plate"
-                            type="text"
-                            value={secondLicensePlate}
-                            onChange={handleSecondLicensePlateInputChange}
-                            placeholder="Second license plate"
-                            minLength={7}
-                            maxLength={7}
-                          />
-                          {secondLicensePlate && (
-                            <Badge className="absolute right-2 top-2 bg-gray-500">
-                              Secondary
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
-                    <Phone className="h-5 w-5 text-gray-500" />
-                    Contact Information
-                  </h3>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone-number" className="text-sm">
-                      Phone Number
-                    </Label>
-                    <Input
-                      id="phone-number"
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="Your phone number"
-                      maxLength={8}
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
-                    <Lock className="h-5 w-5 text-gray-500" />
-                    Security
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password" className="text-sm">
-                        New Password
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="new-password"
-                          type={showPassword ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Enter new password"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="text-sm">
-                        Confirm New Password
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="confirm-password"
-                          type={showPassword ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Confirm new password"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        Leave blank if you don't want to change your password
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex justify-end border-t bg-gray-50 p-6">
-              <Button
-                onClick={handleUpdate}
-                className="bg-neutral-900 hover:bg-neutral-800"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <span
-                      className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white
-                        border-t-transparent"
-                    ></span>
-                    Updating...
-                  </>
-                ) : (
-                  "Update Profile"
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
+          <ProfileCard
+            name={name}
+            email={userEmail}
+            onUpdate={handleUpdate}
+            isSubmitting={isSubmitting}
+            licensePlateError={licensePlateError}
+          >
+            <VehicleSettings
+              primaryLicensePlate={licensePlate}
+              onPrimaryLicensePlateChange={handlePrimaryLicensePlateChange}
+              secondLicensePlate={secondLicensePlate}
+              onSecondLicensePlateChange={handleSecondLicensePlateChange}
+              licensePlateError={licensePlateError}
+              showSecondLicensePlate={showSecondLicensePlate}
+              onShowSecondLicensePlate={handleShowSecondLicensePlate}
+            />
+            <ContactSettings
+              phoneNumber={phoneNumber}
+              onPhoneNumberChange={handlePhoneNumberChange}
+            />
+            <SecuritySettings
+              password={password}
+              onPasswordChange={handlePasswordChange}
+              confirmPassword={confirmPassword}
+              onConfirmPasswordChange={handleConfirmPasswordChange}
+            />
+          </ProfileCard>
         </div>
       </div>
 
@@ -425,7 +315,7 @@ export default function ProfilePage() {
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5" />
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
               Profile Updated
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -446,12 +336,17 @@ export default function ProfilePage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Error Alert Dialog */}
-      <AlertDialog open={showErrorAlert} onOpenChange={setShowErrorAlert}>
+      {/* Error Alert Dialog (excluding fetch errors) */}
+      <AlertDialog
+        open={
+          showErrorAlert && !errorMessage.includes("Failed to fetch user data")
+        }
+        onOpenChange={setShowErrorAlert}
+      >
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" />
+              <AlertCircle className="h-5 w-5 text-red-500" />
               Error
             </AlertDialogTitle>
             <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
@@ -475,7 +370,7 @@ export default function ProfilePage() {
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" />
+              <AlertCircle className="h-5 w-5 text-red-500" />
               Password Mismatch
             </AlertDialogTitle>
             <AlertDialogDescription>
