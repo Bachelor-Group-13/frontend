@@ -60,26 +60,6 @@ export type ParkingSpot = {
   } | null;
 };
 
-// Defines the type for the reservation response
-export type ReservationResponse = {
-  spot_number: string;
-  user_id: string;
-  license_plate: string;
-  reserved_by: {
-    name: string | null;
-    email: string | null;
-    phone_number: string | null;
-  };
-};
-
-// Defines the type for storing plate + user info
-export type PlateUserInfo = {
-  name: string;
-  plate: string;
-  email?: string;
-  phone_number?: string;
-};
-
 // Interface for parking spot boundary
 export interface ParkingSpotBoundary {
   id: number;
