@@ -12,6 +12,8 @@ import { ReservationDialog } from "./dialogs/ReservationDialog";
 import { UnauthorizedDialog } from "./dialogs/UnauthorizedDialog";
 import { NotificationToggle } from "./NotificationToggle";
 import { useReservationActions } from "@/lib/hooks/useReservationActions";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 export function GarageLayout() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
@@ -50,6 +52,15 @@ export function GarageLayout() {
       <div className="mb-6 flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
         <p className="text-gray-500">Reserve your parking spot</p>
+      </div>
+
+      <div className="mb-6 flex justify-center">
+        <Link href="/plate-recognition">
+          <Button variant="default" className="rounded-md px-6 py-6">
+            <Camera className="mr-2 h-5 w-5" />
+            Scan License Plate
+          </Button>
+        </Link>
       </div>
 
       {/* Tabs */}

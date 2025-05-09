@@ -15,11 +15,24 @@ interface NearbyVehiclesProps {
 }
 
 export function NearbyVehicles({ user, parkingSpots }: NearbyVehiclesProps) {
-  const nearbyVehicles = parkingSpots.filter(
-    (spot) =>
-      spot.isOccupied && spot.occupiedBy && spot.occupiedBy.user_id !== user?.id
-  );
+  const nearbyVehicles = parkingSpots.filter((spot) => {
+    if (
+      !spot.isOccupied ||
+      !spot.occupiedBy ||
+      spot.occupiedBy.user_id === user?.id
+    ) {
+      return false;
+    }
 
+    if (user?.current_reservation) {
+      const rowNumber = user.current_reservation.spotNumber.slice(0, -1);
+      if (spot.spotNumber === `${rowNumber}B`) {
+        return false;
+      }
+    }
+
+    return true;
+  });
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
       <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">

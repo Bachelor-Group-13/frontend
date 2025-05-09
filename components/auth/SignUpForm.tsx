@@ -1,6 +1,6 @@
 "use client";
 
-import { register } from "@/lib/api/auth";
+import { login, register } from "@/lib/api/auth";
 import { handleLicensePlateChange } from "@/lib/utils/helpers";
 import { useState } from "react";
 import { Label } from "../ui/label";
@@ -15,9 +15,14 @@ interface SignUpFormProps {
     title: string,
     description: string
   ) => void;
+  setIsSignUp: (value: boolean) => void;
 }
 
-export default function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
+export default function SignUpForm({
+  onSuccess,
+  onError,
+  setIsSignUp,
+}: SignUpFormProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -76,18 +81,28 @@ export default function SignUpForm({ onSuccess, onError }: SignUpFormProps) {
         return;
       }
 
-      onSuccess();
+      // After successful registration, try to sign in
+      const loginResult = await login(email, password);
+      if (loginResult.error) {
+        onError(
+          "destructive",
+          "Sign Up Successful",
+          "Account created but automatic sign in failed. Please sign in manually."
+        );
+        setIsSignUp(false);
+      } else {
+        onSuccess();
+      }
     } catch (error: any) {
       onError(
         "destructive",
         "Error",
-        error.message || "An uknown error occured."
+        error.message || "An unknown error occurred."
       );
     } finally {
       setIsSubmitting(false);
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
