@@ -10,7 +10,6 @@ import { GarageMap } from "./GarageMap";
 import { GarageDetection } from "./GarageDetection";
 import { ReservationDialog } from "./dialogs/ReservationDialog";
 import { UnauthorizedDialog } from "./dialogs/UnauthorizedDialog";
-import { NotificationToggle } from "./NotificationToggle";
 import { useReservationActions } from "@/lib/hooks/useReservationActions";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -21,11 +20,9 @@ import {
   AlertDialogAction,
   AlertDialogContent,
   AlertDialogFooter,
-  AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import { DetectedPlates } from "../licenseplate/DetectedPlates";
 import { PlateInfoCard } from "../licenseplate/PlateInfoCard";
 
 export function GarageLayout() {
@@ -67,11 +64,6 @@ export function GarageLayout() {
 
   return (
     <div className="container mx-auto py-4">
-      <div className="mb-4 flex items-center justify-between pb-4">
-        <div className="flex items-center space-x-4" />
-        <NotificationToggle user={user} />
-      </div>
-
       {/* Header */}
       <div
         className="mb-6 flex flex-col space-y-4 px-6 md:flex-row md:items-center md:justify-between

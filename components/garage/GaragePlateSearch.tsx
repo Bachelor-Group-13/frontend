@@ -2,7 +2,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { useLicensePlateDetection } from "@/lib/hooks/useLicensePlateDetection";
 
 export interface GaragePlateSearchProps {
   onSearch: (plate: string) => void;
@@ -14,7 +13,7 @@ export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
   return (
     <div className="max-w-xs">
       <div
-        className="flex h-12 overflow-hidden rounded-md border transition
+        className="flex h-12 overflow-hidden rounded-md border-2 transition
           focus-within:border-transparent focus-within:ring-2 focus-within:ring-blue-500"
         tabIndex={-1}
       >
