@@ -7,14 +7,14 @@ import { Label } from "../ui/label";
 
 interface ManualSearchTabProps {
   manualPlate: string;
-  onManualPlateChange: (value: string) => void;
-  onSearch: () => void;
+  onManualPlateChangeAction: (value: string) => void;
+  onSearchAction: () => void;
 }
 
 export function ManualSearchTab({
   manualPlate,
-  onManualPlateChange,
-  onSearch,
+  onManualPlateChangeAction,
+  onSearchAction,
 }: ManualSearchTabProps) {
   return (
     <div className="space-y-4">
@@ -26,12 +26,14 @@ export function ManualSearchTab({
           <Input
             id="license-plate"
             value={manualPlate}
-            onChange={(e) => onManualPlateChange(e.target.value.toUpperCase())}
-            placeholder="Enter License Plate (e.g., AB12345)"
+            onChange={(e) =>
+              onManualPlateChangeAction(e.target.value.toUpperCase())
+            }
+            placeholder="Enter Plate Number"
             className="flex-1"
           />
           <Button
-            onClick={onSearch}
+            onClick={onSearchAction}
             disabled={!manualPlate.trim()}
             className="bg-neutral-900 hover:bg-neutral-800"
           >

@@ -12,7 +12,7 @@ interface GarageDashboardProps {
 
 export function GarageDashboard({ user, parkingSpots }: GarageDashboardProps) {
   return (
-    <Card className="border-0 bg-gray-50 shadow-none">
+    <Card className="w-full border-0 bg-gray-50 shadow-none">
       <CardContent>
         <div className="grid gap-6 md:grid-cols-2">
           {/* Parking Status */}

@@ -14,10 +14,24 @@ import { NotificationToggle } from "./NotificationToggle";
 import { useReservationActions } from "@/lib/hooks/useReservationActions";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { GaragePlateSearch } from "./GaragePlateSearch";
+import { useLicensePlateDetection } from "@/lib/hooks/useLicensePlateDetection";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { DetectedPlates } from "../licenseplate/DetectedPlates";
+import { PlateInfoCard } from "../licenseplate/PlateInfoCard";
 
 export function GarageLayout() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
+  const [plateDialogOpen, setPlateDialogOpen] = useState(false);
 
   const { parkingSpots, user, fetchUserAndReservations, setParkingSpots } =
     useGarageReservations();
@@ -41,22 +55,46 @@ export function GarageLayout() {
     setActiveTab: () => {},
   });
 
+  const { platesInfo, handleLicensePlatesDetected } =
+    useLicensePlateDetection();
+
+  const onManualSearch = (plate: string) => {
+    setSelectedLicensePlate(plate);
+    fetchUserAndReservations();
+    handleLicensePlatesDetected([plate]);
+    setPlateDialogOpen(true);
+  };
+
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto py-4">
       <div className="mb-4 flex items-center justify-between pb-4">
         <div className="flex items-center space-x-4" />
         <NotificationToggle user={user} />
       </div>
 
       {/* Header */}
-      <div className="mb-6 flex flex-col items-center space-y-4">
-        <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
-        <p className="text-gray-500">Reserve your parking spot</p>
+      <div
+        className="mb-6 flex flex-col space-y-4 px-6 md:flex-row md:items-center md:justify-between
+          md:space-y-0"
+      >
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Garage</h1>
+          <p className="text-gray-500">Reserve your parking spot</p>
+        </div>
+
+        {/* PC: Manual search box */}
+        <div className="hidden md:block">
+          <GaragePlateSearch onSearch={onManualSearch} />
+        </div>
       </div>
 
-      <div className="mb-6 flex justify-center">
+      {/* Mobile: Scan License Plate button */}
+      <div className="mb-6 block md:hidden">
         <Link href="/plate-recognition">
-          <Button variant="default" className="rounded-md px-6 py-6">
+          <Button
+            variant="outline"
+            className="mx-auto flex w-full max-w-xs items-center justify-center"
+          >
             <Camera className="mr-2 h-5 w-5" />
             Scan License Plate
           </Button>
@@ -65,28 +103,30 @@ export function GarageLayout() {
 
       {/* Tabs */}
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList
-          className={`grid w-full ${
-            user && user.role === "ROLE_DEVELOPER"
-              ? "grid-cols-3"
-              : "grid-cols-2"
-            }`}
-        >
-          <TabsTrigger value="dashboard" className="flex items-center">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="garage" className="flex items-center">
-            <CircleParking className="mr-2 h-4 w-4" />
-            Garage Layout
-          </TabsTrigger>
-          {user && user.role === "ROLE_DEVELOPER" && (
-            <TabsTrigger value="detection" className="flex items-center">
-              <Camera className="mr-2 h-4 w-4" />
-              Detect Spots
+        <div className="px-6">
+          <TabsList
+            className={`grid w-full ${
+              user && user.role === "ROLE_DEVELOPER"
+                ? "grid-cols-3"
+                : "grid-cols-2"
+              }`}
+          >
+            <TabsTrigger value="dashboard" className="flex items-center">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
             </TabsTrigger>
-          )}
-        </TabsList>
+            <TabsTrigger value="garage" className="flex items-center">
+              <CircleParking className="mr-2 h-4 w-4" />
+              Garage Layout
+            </TabsTrigger>
+            {user && user.role === "ROLE_DEVELOPER" && (
+              <TabsTrigger value="detection" className="flex items-center">
+                <Camera className="mr-2 h-4 w-4" />
+                Detect Spots
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         {/* Dashboard Tab */}
         <TabsContent value="dashboard" className="mt-6">
@@ -138,6 +178,25 @@ export function GarageLayout() {
         open={showUnauthorizedAlert}
         onOpenChange={setShowUnauthorizedAlert}
       />
+
+      {/* Plate search dialog */}
+      <AlertDialog open={plateDialogOpen} onOpenChange={setPlateDialogOpen}>
+        <AlertDialogTrigger className="hidden" />
+        <AlertDialogContent className="">
+          <AlertDialogTitle className="mt-5 text-2xl">
+            Vehicle Info:
+          </AlertDialogTitle>
+          {platesInfo.length > 0 && <PlateInfoCard info={platesInfo[0]} />}
+          <AlertDialogFooter>
+            <AlertDialogAction
+              className="mx-auto mt-2"
+              onClick={() => setPlateDialogOpen(false)}
+            >
+              Close
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

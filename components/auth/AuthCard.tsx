@@ -30,7 +30,7 @@ export default function AuthCard({
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div className="gap flex items-center">
-            <CardTitle className="text-2xl font-bold">Inneparkert</CardTitle>
+            <CardTitle className="text-2xl font-bold">{title}</CardTitle>
           </div>
           <div className="w-5" />
         </div>
