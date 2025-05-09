@@ -1,7 +1,7 @@
 "use client";
 
 import { login, register } from "@/lib/api/auth";
-import { handleLicensePlateChange } from "@/lib/utils/helpers";
+import { handleLicensePlateChange } from "@/lib/utils/plate-helpers";
 import { useState } from "react";
 import { Label } from "../ui/label";
 import { Car, Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";

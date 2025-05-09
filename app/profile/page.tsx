@@ -19,7 +19,7 @@ import ProfileCard from "@/components/profile/ProfileCard";
 import VehicleSettings from "@/components/profile/VehicleSettings";
 import ContactSettings from "@/components/profile/ContactSettings";
 import SecuritySettings from "@/components/profile/SecuritySettings";
-import { handleLicensePlateChange } from "@/lib/utils/helpers";
+import { handleLicensePlateChange } from "@/lib/utils/plate-helpers";
 
 /*
  * ProfilePage:
