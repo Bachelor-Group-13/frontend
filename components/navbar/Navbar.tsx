@@ -148,7 +148,10 @@ export function Navbar() {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem asChild>
-                    <NotificationToggle user={user} />
+                    <NotificationToggle
+                      user={user}
+                      className="flex w-full cursor-pointer justify-start"
+                    />
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
