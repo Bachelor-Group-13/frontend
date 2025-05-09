@@ -19,13 +19,21 @@ export const login = async (email: string, password: string) => {
     });
     console.log("Login response", response.data);
 
-    const userResponse = await api.get(`${API_URL}me`);
+    try {
+      const userResponse = await api.get(`${API_URL}me`);
+      window.dispatchEvent(
+        new CustomEvent("userAuthChange", { detail: userResponse.data })
+      );
+    } catch (meError: any) {
+      console.error("Error fetching user details:", meError);
+      window.dispatchEvent(
+        new CustomEvent("userAuthChange", { detail: response.data })
+      );
+    }
 
-    window.dispatchEvent(
-      new CustomEvent("userAuthChange", { detail: userResponse.data })
-    );
     return { data: response.data, error: null };
   } catch (error: any) {
+    console.error("Login error:", error.response?.data || error);
     return {
       data: null,
       error: error.response?.data?.message || "Login failed",

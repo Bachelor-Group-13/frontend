@@ -3,6 +3,7 @@ import { ParkingSpot } from "@/lib/utils/types";
 import { ParkingStatus } from "./dashboard/ParkingStatus";
 import { GarageStats } from "./dashboard/GarageStats";
 import { NearbyVehicles } from "./dashboard/NearbyVehicles";
+import { ParkedInBy } from "./dashboard/ParkedInBy";
 
 interface GarageDashboardProps {
   user: any;
@@ -11,7 +12,7 @@ interface GarageDashboardProps {
 
 export function GarageDashboard({ user, parkingSpots }: GarageDashboardProps) {
   return (
-    <Card className="border-0 bg-gray-50 shadow-sm">
+    <Card className="border-0 bg-gray-50 shadow-none">
       <CardContent>
         <div className="grid gap-6 md:grid-cols-2">
           {/* Parking Status */}
@@ -24,6 +25,7 @@ export function GarageDashboard({ user, parkingSpots }: GarageDashboardProps) {
           {/* Nearby Vehicles */}
           <div className="space-y-4">
             <h2 className="text-xl font-bold">Nearby Vehicles</h2>
+            <ParkedInBy user={user} parkingSpots={parkingSpots} />
             <NearbyVehicles user={user} parkingSpots={parkingSpots} />
           </div>
         </div>
