@@ -32,7 +32,7 @@ interface ErrorDialogProps {
  * A reusable error dialog component that displays error messages with an action button.
  *
  * @param {ErrorDialogProps} props - The component props
- * @returns {JSX.Element} A styled alert dialog with error information
+ * @returns A styled alert dialog with error information
  */
 export function ErrorDialog({
   open,

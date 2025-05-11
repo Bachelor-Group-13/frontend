@@ -11,7 +11,7 @@ import { useState } from "react";
  * Authentication page component.
  * Provides a tabbed interface for user sign-in and sign-up functionality.
  *
- * @returns {JSX.Element} The rendered authentication page
+ * @returns The rendered authentication page
  */
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);

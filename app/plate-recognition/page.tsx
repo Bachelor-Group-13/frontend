@@ -27,7 +27,7 @@ import Webcam from "react-webcam";
  * - Camera capture
  * - Image upload (developer only)
  *
- * @returns {JSX.Element} The rendered plate recognition page
+ * @returns The rendered plate recognition page
  */
 export default function PlateRecognitionPage() {
   const [activeTab, setActiveTab] = useState<string>("manual");

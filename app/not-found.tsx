@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
  * Displays a user-friendly error message when a user navigates to a non-existent page.
  * Includes a link to return to the home page.
  *
- * @returns {JSX.Element} The rendered not found page
+ * @returns The rendered not found page
  */
 export default function NotFound() {
   return (

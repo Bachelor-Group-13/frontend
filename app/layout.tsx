@@ -62,7 +62,7 @@ export const viewport: Viewport = {
  *
  * @param {Object} props - Component props
  * @param {React.ReactNode} props.children - Child components to render
- * @returns {JSX.Element} The rendered root layout
+ * @returns The rendered root layout
  */
 export default function RootLayout({
   children,

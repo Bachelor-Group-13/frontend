@@ -28,7 +28,7 @@ interface PasswordMismatchDialogProps {
  * Used when the password and confirm password fields don't match.
  *
  * @param {PasswordMismatchDialogProps} props - The component props
- * @returns {JSX.Element} A styled alert dialog with password mismatch information
+ * @returns A styled alert dialog with password mismatch information
  */
 export function PasswordMismatchDialog({
   open,

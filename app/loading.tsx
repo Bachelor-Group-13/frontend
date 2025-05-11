@@ -2,7 +2,7 @@
  * A loading spinner component.
  * Used as a fallback UI during page transitions and data fetching.
  *
- * @returns {JSX.Element} The rendered loading spinner
+ * @returns The rendered loading spinner
  */
 export default function Loading() {
   return (

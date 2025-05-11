@@ -15,7 +15,7 @@ import { PasswordMismatchDialog } from "@/components/profile/dialogs/PasswordMis
 /**
  * The profile page component that displays and manages user profile settings.
  *
- * @returns {JSX.Element} The profile page layout with all its components
+ * @returns The profile page layout with all its components
  */
 export default function ProfilePage() {
   const router = useRouter();

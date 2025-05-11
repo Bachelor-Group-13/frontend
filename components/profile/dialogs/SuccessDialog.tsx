@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +28,7 @@ interface SuccessDialogProps {
  * Shows a confirmation message and provides a button to return to the garage.
  *
  * @param {SuccessDialogProps} props - The component props
- * @returns {JSX.Element} A styled alert dialog with success information
+ * @returns A styled alert dialog with success information
  */
 export function SuccessDialog({
   open,

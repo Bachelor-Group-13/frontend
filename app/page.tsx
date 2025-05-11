@@ -8,7 +8,7 @@ import { LandingPageFooter } from "@/components/landingpage/Footer";
  * The main landing page component.
  * Displays the application's hero section, how-to-use guide, and footer.
  *
- * @returns {JSX.Element} The rendered landing page
+ * @returns The rendered landing page
  */
 export default function LandingPage() {
   const { isLoading } = useAuth();
