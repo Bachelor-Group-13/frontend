@@ -12,6 +12,13 @@ import {
 
 const PARKING_ROWS = 5;
 
+/**
+ * Matches detected license plates to vehicles based on their positions.
+ *
+ * @param {PlateDto[]} plates - Array of detected license plates
+ * @param {Vehicle[]} vehicles - Array of detected vehicles
+ * @returns {Vehicle[]} Vehicles with matched license plates
+ */
 export function matchLicensePlates(
   plates: PlateDto[],
   vehicles: Vehicle[]
@@ -42,6 +49,13 @@ export function matchLicensePlates(
   return out;
 }
 
+/**
+ * Creates a parking spot object with vehicle information.
+ *
+ * @param {string} spotNumber - The parking spot number
+ * @param {Vehicle|null} vehicle - The vehicle in the spot
+ * @returns {DetectedSpot} The created parking spot
+ */
 function createParkingSpot(
   spotNumber: string,
   vehicle: Vehicle | null
@@ -53,6 +67,12 @@ function createParkingSpot(
   };
 }
 
+/**
+ * Calculates a summary of parking spot occupancy.
+ *
+ * @param {DetectedSpot[]} mappedSpots - Array of detected parking spots
+ * @returns {Object} Summary of parking spot statistics
+ */
 function calculateParkingSummary(mappedSpots: DetectedSpot[]) {
   const occupied = mappedSpots.filter((spot) => spot.isOccupied).length;
   const withPlates = mappedSpots.filter(
@@ -67,6 +87,12 @@ function calculateParkingSummary(mappedSpots: DetectedSpot[]) {
   };
 }
 
+/**
+ * Analyzes parking data and maps vehicles to parking spots.
+ *
+ * @param {{vehicles: Vehicle[]}} data - Object containing detected vehicles
+ * @returns {Object} Mapped parking spots and summary
+ */
 export function analyzeParkingData({ vehicles }: { vehicles: Vehicle[] }) {
   const sorted = [...vehicles].sort((a, b) => b.center[0] - a.center[0]);
   const fronts = sorted.filter((v) => v.position === "front");
@@ -89,6 +115,12 @@ export function analyzeParkingData({ vehicles }: { vehicles: Vehicle[] }) {
   };
 }
 
+/**
+ * Detects parking spots and license plates in an image.
+ *
+ * @param {File} imageFile - The image file to analyze
+ * @returns {Promise<Object>} Detection results including mapped spots and summary
+ */
 export async function detectParkingSpots(imageFile: File) {
   const detection = await visionDetectParkingSpots(imageFile);
   const plates = await detectLicensePlates(imageFile);
@@ -109,6 +141,12 @@ export async function detectParkingSpots(imageFile: File) {
   };
 }
 
+/**
+ * Converts detection results to parking spot boundaries.
+ *
+ * @param {Object} detectionResults - The detection results to convert
+ * @returns {ParkingSpotBoundary[]} Array of parking spot boundaries
+ */
 export function convertToParkingSpotBoundaries(detectionResults: {
   mappedSpots: DetectedSpot[];
   rawDetection?: { vehicles: Vehicle[]; prcessedImage?: string };
@@ -122,6 +160,13 @@ export function convertToParkingSpotBoundaries(detectionResults: {
   }));
 }
 
+/**
+ * Checks if a parking spot is blocked by a vehicle in the corresponding B spot.
+ *
+ * @param {string} spotNumber - The parking spot number to check
+ * @param {ParkingSpot[]} spots - Array of parking spots
+ * @returns {boolean} True if the spot is blocked
+ */
 export const isParkedIn = (
   spotNumber: string,
   spots: ParkingSpot[]
@@ -140,6 +185,13 @@ export const isParkedIn = (
   return bSpot ? bSpot.isOccupied : false;
 };
 
+/**
+ * Checks if one parking spot is blocking another.
+ *
+ * @param {string} mySpotNumber - The first parking spot number
+ * @param {string} otherSpotNumber - The second parking spot number
+ * @returns {boolean} True if the spots are blocking each other
+ */
 export const isBlockingCar = (
   mySpotNumber: string,
   otherSpotNumber: string

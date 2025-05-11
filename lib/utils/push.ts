@@ -1,5 +1,12 @@
 import { api } from "../api/auth";
 
+/**
+ * Converts a base64 URL string to a Uint8Array.
+ * Used for converting the VAPID public key to the format required by the Push API.
+ *
+ * @param {string} base64String - The base64 URL string to convert
+ * @returns {Uint8Array} The converted array
+ */
 export function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const b64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
@@ -7,6 +14,14 @@ export function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
+/**
+ * Subscribes a user to push notifications.
+ * Handles the entire subscription process
+ *
+ * @param {string} userId - The ID of the user to subscribe
+ * @returns {Promise<PushSubscription>} The created push subscription
+ * @throws {Error} If push messaging is not supported or permission is denied
+ */
 export async function subscribeToPush(userId: string) {
   try {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
