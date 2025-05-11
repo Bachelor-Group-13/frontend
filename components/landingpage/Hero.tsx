@@ -4,6 +4,9 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "../auth/AuthContext";
 
+/**
+ * A hero section component for the landing page.
+ */
 export function HeroSection() {
   const { user } = useAuth();
   const buttonText = user ? "Go to Garage" : "Get Started";
@@ -11,6 +14,7 @@ export function HeroSection() {
 
   return (
     <section className="relative overflow-hidden bg-neutral-900 py-20 text-white">
+      {/* Background image with opacity */}
       <div className="absolute inset-0 z-0 opacity-20">
         <Image
           src="/parking-lot3.jpg"
@@ -20,11 +24,13 @@ export function HeroSection() {
           priority
         />
       </div>
+      {/* Gradient overlay */}
       <div
         className="absolute inset-0 z-10 bg-gradient-to-r from-neutral-900 via-neutral-900/95
           to-neutral-900/80"
       ></div>
 
+      {/* Main content */}
       <div className="container relative z-20 mx-auto px-4">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="mb-6 text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl">

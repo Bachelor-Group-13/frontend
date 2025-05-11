@@ -8,6 +8,12 @@ import { Car, Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
+/**
+ * Props for the SignUpForm component.
+ * @param onSuccessAction - Function to call when sign up is successful
+ * @param onErrorAction - Function to call when an error occurs, takes type, title, and description
+ * @param setIsSignUpAction - Function to toggle between sign up and sign in views
+ */
 interface SignUpFormProps {
   onSuccessAction: () => void;
   onErrorAction: (
@@ -18,6 +24,13 @@ interface SignUpFormProps {
   setIsSignUpAction: (value: boolean) => void;
 }
 
+/**
+ * A form component for user registration.
+ *
+ * Handles user sign up with email, name, password, license plate, and phone number.
+ * Includes validation for all fields and automatic sign in after successful registration.
+ * @param {SignUpFormProps} props - The props for the SignUpForm component
+ */
 export default function SignUpForm({
   onSuccessAction,
   onErrorAction,
@@ -34,16 +47,19 @@ export default function SignUpForm({
     null
   );
 
+  // Handle license plate input with validation
   const handleLicensePlateInputChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleLicensePlateChange(e, setLicensePlate, setLicensePlateError);
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validate required fields
     if (!email || !name || !password || !licensePlate || !phoneNumber) {
       onErrorAction(
         "destructive",
@@ -54,6 +70,7 @@ export default function SignUpForm({
       return;
     }
 
+    // Validate password length
     if (password.length < 6) {
       onErrorAction(
         "destructive",
@@ -64,6 +81,7 @@ export default function SignUpForm({
       return;
     }
 
+    // Validate license plate
     if (licensePlateError) {
       onErrorAction("destructive", "Invalid license plate", licensePlateError);
       setIsSubmitting(false);
@@ -71,6 +89,7 @@ export default function SignUpForm({
     }
 
     try {
+      // Attempt registration
       const { data, error } = await register(
         name,
         email,
@@ -85,7 +104,7 @@ export default function SignUpForm({
         return;
       }
 
-      // After successful registration, try to sign in
+      // Try to sign in after successful registration
       const loginResult = await login(email, password);
       if (loginResult.error) {
         onErrorAction(
@@ -107,8 +126,10 @@ export default function SignUpForm({
       setIsSubmitting(false);
     }
   };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Email input field */}
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-sm font-medium">
           Email Address
@@ -125,6 +146,8 @@ export default function SignUpForm({
           />
         </div>
       </div>
+
+      {/* Name input field */}
       <div className="space-y-2">
         <Label htmlFor="name" className="text-sm font-medium">
           Full Name
@@ -143,6 +166,7 @@ export default function SignUpForm({
         </div>
       </div>
 
+      {/* Password input field */}
       <div className="space-y-2">
         <Label htmlFor="signup-password" className="text-sm font-medium">
           Password
@@ -173,6 +197,7 @@ export default function SignUpForm({
         </div>
       </div>
 
+      {/* License plate input field */}
       <div className="space-y-2">
         <Label htmlFor="license-plate" className="text-sm font-medium">
           License Plate
@@ -197,6 +222,7 @@ export default function SignUpForm({
         )}
       </div>
 
+      {/* Phone number input field */}
       <div className="space-y-2">
         <Label htmlFor="phone" className="text-sm font-medium">
           Phone Number
@@ -217,6 +243,7 @@ export default function SignUpForm({
         </div>
       </div>
 
+      {/* Submit button */}
       <Button
         type="submit"
         className="mt-8 w-full bg-neutral-900 py-5 hover:bg-neutral-800"

@@ -1,5 +1,8 @@
 import { Car } from "lucide-react";
 
+/**
+ * A footer component for the landing page.
+ */
 export function LandingPageFooter() {
   return (
     <footer className="mt-auto bg-white py-12">

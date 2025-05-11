@@ -11,10 +11,20 @@ import {
   detectParkingSpots,
 } from "@/lib/utils/parking";
 
+/**
+ * Props for the ParkingSpotDetection component.
+ * @param onSpotsDetected - Optional callback when spots and vehicles are detected
+ */
 interface ParkingDetectionProps {
   onSpotsDetected?: (spots: ParkingSpotBoundary[], vehicles: Vehicle[]) => void;
 }
 
+/**
+ * A developer tool for detecting parking spots and vehicles in images.
+ *
+ * Allows uploading images of parking areas and uses AI to detect spots and vehicles.
+ * @param {ParkingDetectionProps} props - The props for the ParkingSpotDetection component
+ */
 export function ParkingSpotDetection({
   onSpotsDetected,
 }: ParkingDetectionProps) {
@@ -27,9 +37,7 @@ export function ParkingSpotDetection({
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  /**
-   * Process selected file
-   */
+  // Process selected file and validate it
   const processSelectedFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
       setError("Please select an image file (JPEG, PNG, etc.)");
@@ -47,18 +55,14 @@ export function ParkingSpotDetection({
     setError(null);
   };
 
-  /**
-   * Handle file input change event
-   */
+  // Handle file input change
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       processSelectedFile(e.target.files[0]);
     }
   };
 
-  /**
-   * Handles drag events
-   */
+  // Handle drag events for file upload
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -70,9 +74,7 @@ export function ParkingSpotDetection({
     }
   };
 
-  /**
-   * Handles drop events
-   */
+  // Handle file drop
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -83,16 +85,12 @@ export function ParkingSpotDetection({
     }
   };
 
-  /**
-   * Triggers file input click
-   */
+  // Trigger file input click
   const handleButtonClick = () => {
     inputRef.current?.click();
   };
 
-  /**
-   * Clears the selected image
-   */
+  // Clear selected image and reset state
   const clearImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
@@ -102,9 +100,7 @@ export function ParkingSpotDetection({
     }
   };
 
-  /**
-   * Detects vehicles in the selected image
-   */
+  // Detect vehicles and parking spots in the image
   const detectVehicles = async () => {
     if (!selectedImage) {
       setError("Please select an image");
@@ -149,6 +145,7 @@ export function ParkingSpotDetection({
 
   return (
     <div className="space-y-6">
+      {/* File upload area */}
       <div
         className={cn(
           `relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center
@@ -174,6 +171,7 @@ export function ParkingSpotDetection({
           className="hidden"
         />
 
+        {/* Image preview or upload prompt */}
         {imagePreview && !processedImage ? (
           <div className="relative w-full">
             <Button
@@ -211,6 +209,7 @@ export function ParkingSpotDetection({
         )}
       </div>
 
+      {/* Error message */}
       {error && (
         <Alert variant="destructive" className="text-sm">
           <AlertCircle className="h-4 w-4" />
@@ -218,6 +217,7 @@ export function ParkingSpotDetection({
         </Alert>
       )}
 
+      {/* Loading progress */}
       {loading && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -229,6 +229,8 @@ export function ParkingSpotDetection({
           <Progress value={progress} className="h-2 w-full" />
         </div>
       )}
+
+      {/* Detection button */}
       <div className="flex justify-end">
         <Button
           onClick={detectVehicles}
@@ -249,6 +251,7 @@ export function ParkingSpotDetection({
         </Button>
       </div>
 
+      {/* Detection results */}
       {processedImage && (
         <div className="mt-8 space-y-4 rounded-lg border bg-gray-50 p-4">
           <h3 className="flex items-center gap-2 text-lg font-medium text-gray-900">

@@ -7,6 +7,18 @@ import {
   updateParkingSpotsWithReservations,
 } from "../services/garageService";
 
+/**
+ * Represents a user with their personal and vehicle information.
+ * @property {number} id - The unique identifier for the user
+ * @property {string|null} license_plate - The user's primary license plate
+ * @property {string|null} second_license_plate - The user's secondary license plate
+ * @property {string} email - The user's email address
+ * @property {string} phone_number - The user's phone number
+ * @property {string} name - The user's full name
+ * @property {string} role - The user's role in the system
+ * @property {Object|null} current_reservation - The user's active parking reservation
+ * @property {any} vehicle - Additional vehicle information
+ */
 interface User {
   id: number;
   license_plate: string | null;
@@ -22,10 +34,24 @@ interface User {
   vehicle: any;
 }
 
+/**
+ * A hook that manages user and parking spot state for the garage.
+ *
+ * It fetches user details and reservations, then maps them to the UI
+ * parking spot state.
+ *
+ * @returns {Object} An object containing:
+ *   - parkingSpots: Array of parking spots with their current status
+ *   - setParkingSpots: Function to update parking spots state
+ *   - user: Current user information
+ *   - setUser: Function to update user state
+ *   - fetchUserAndReservations: Function to refresh user and reservation data
+ */
 export function useGarageReservations() {
   const [parkingSpots, setParkingSpots] = useState<ParkingSpot[]>([]);
   const [user, setUser] = useState<User | null>(null);
 
+  // Fetches user details and reservation data for today, and updates state.
   const fetchUserAndReservations = useCallback(async () => {
     try {
       const userDetails = await fetchUserDetails();

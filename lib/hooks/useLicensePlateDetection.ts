@@ -1,10 +1,32 @@
 import { useState } from "react";
 import { api } from "@/lib/api/auth";
-import { PlateUserInfo } from "@/lib/utils/types";
 
+/**
+ * Represents information about a license plate and its associated user.
+ * @property {string} plate - The license plate number
+ * @property {string} email - The user's email address
+ * @property {string} name - The user's full name
+ * @property {string} phone_number - The user's phone number
+ */
+type PlateUserInfo = {
+  plate: string;
+  email?: string;
+  name: string;
+  phone_number?: string;
+};
+
+/**
+ * A hook that manages license plate detection and user information lookup.
+ *
+ * @returns {Object} An object containing:
+ *   - platesInfo: Array of detected plates with user information
+ *   - setPlatesInfo: Function to update plates information
+ *   - handleLicensePlatesDetected: Function to process detected plates
+ */
 export function useLicensePlateDetection() {
   const [platesInfo, setPlatesInfo] = useState<PlateUserInfo[]>([]);
 
+  // Processes detected license plates and fetches associated user information
   const handleLicensePlatesDetected = async (plates: string[]) => {
     const cleanedPlates = plates.map((p) => p.replace(/\s/g, ""));
     const results = await Promise.all(
@@ -24,6 +46,7 @@ export function useLicensePlateDetection() {
     setPlatesInfo(results);
   };
 
+  // Fetches user information for a given license plate
   const fetchLicensePlateInfo = async (plate: string) => {
     try {
       const res = await api.get(`/api/auth/license-plate/${plate}`);

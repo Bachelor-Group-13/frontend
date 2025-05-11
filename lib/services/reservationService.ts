@@ -1,5 +1,14 @@
 import { api } from "@/lib/api/auth";
 
+/**
+ * Creates a new parking spot reservation.
+ *
+ * @param {string} spotNumber - The parking spot number
+ * @param {number} userId - The ID of the user making the reservation
+ * @param {string} licensePlate - The license plate of the vehicle
+ * @param {Date|null} estimatedDeparture - The estimated departure time
+ * @returns {Promise<any>} The created reservation
+ */
 export async function createReservation(
   spotNumber: string,
   userId: number,
@@ -17,6 +26,14 @@ export async function createReservation(
   return api.post("/api/reservations", reservationData);
 }
 
+/**
+ * Deletes an existing parking spot reservation.
+ *
+ * @param {string} spotNumber - The parking spot number
+ * @param {number} userId - The ID of the user who made the reservation
+ * @returns {Promise<any>} The deleted reservation
+ * @throws {Error} If the reservation is not found
+ */
 export async function deleteReservation(spotNumber: string, userId: number) {
   const today = new Date().toISOString().split("T")[0];
   const reservationsResponse = await api.get(`/api/reservations/date/${today}`);

@@ -11,6 +11,12 @@ import { api } from "@/lib/api/auth";
 import { ParkingSpotDetection } from "./ParkingSpotDetection";
 import { ParkingSpotBoundary, Vehicle } from "@/lib/utils/types";
 
+/**
+ * Props for the GarageDetection component.
+ * @param onSpotsDetected - Function to handle detected parking spots and vehicles
+ * @param isUpdating - Whether the detection is currently updating
+ * @param fetchUserAndReservations - Function to refresh user and reservation data
+ */
 interface GarageDetectionProps {
   onSpotsDetected: (
     boundaries: ParkingSpotBoundary[],
@@ -20,6 +26,15 @@ interface GarageDetectionProps {
   fetchUserAndReservations: () => Promise<void>;
 }
 
+/**
+ * A developer-only component for detecting parking spots and vehicles in the garage.
+ *
+ * This tool is only accessible to developers and includes features for:
+ * - Testing parking spot detection
+ * - Clearing all reservations
+ *
+ * @param {GarageDetectionProps} props - The props for the GarageDetection component
+ */
 export function GarageDetection({
   onSpotsDetected,
   isUpdating,
@@ -51,6 +66,7 @@ export function GarageDetection({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Loading state when updating spots */}
         {isUpdating && (
           <div className="mb-4 rounded-md bg-blue-50 p-4 text-blue-800">
             <div className="flex items-center">
@@ -60,6 +76,7 @@ export function GarageDetection({
           </div>
         )}
 
+        {/* Clear reservations section */}
         <div className="flex items-center justify-between border-b pb-4">
           <div>
             <p className="text-sm text-gray-500">
@@ -70,6 +87,8 @@ export function GarageDetection({
             Clear All Reservations
           </Button>
         </div>
+
+        {/* Parking spot detection component */}
         <ParkingSpotDetection onSpotsDetected={onSpotsDetected} />
       </CardContent>
     </Card>

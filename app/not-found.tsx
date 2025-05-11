@@ -2,12 +2,12 @@ import Link from "next/link";
 import { Car } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/*
- * NotFound Page:
+/**
+ * The 404 Not Found page component.
+ * Displays a user-friendly error message when a user navigates to a non-existent page.
+ * Includes a link to return to the home page.
  *
- * This page is displayed when a user navigates to a page
- * that does not exist. It displays a user friendly message and
- * link back to home page
+ * @returns {JSX.Element} The rendered not found page
  */
 export default function NotFound() {
   return (

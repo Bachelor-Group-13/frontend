@@ -8,6 +8,11 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
+/**
+ * Props for the SignInForm component.
+ * @param onSuccessAction - Function to call when sign in is successful, receives user data
+ * @param onErrorAction - Function to call when an error occurs, takes type, title, and description
+ */
 interface SignInFormProps {
   onSuccessAction: (userData?: any) => void;
   onErrorAction: (
@@ -17,6 +22,13 @@ interface SignInFormProps {
   ) => void;
 }
 
+/**
+ * A form component for user authentication.
+ *
+ * Handles user sign in with email and password.
+ * Redirects to the garage page on successful authentication.
+ * @param {SignInFormProps} props - The props for the SignInForm component
+ */
 export default function SignInForm({
   onSuccessAction,
   onErrorAction,
@@ -27,10 +39,12 @@ export default function SignInForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validate required fields
     if (!email || !password) {
       onErrorAction(
         "destructive",
@@ -42,6 +56,7 @@ export default function SignInForm({
     }
 
     try {
+      // Attempt login
       const { data, error } = await login(email, password);
 
       if (error) {
@@ -50,6 +65,7 @@ export default function SignInForm({
         return;
       }
 
+      // Handle successful login
       console.log("Login successful:", data);
       onSuccessAction(data);
       router.push("/garage");
@@ -66,6 +82,7 @@ export default function SignInForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Email input field */}
       <div className="space-y-2">
         <Label htmlFor="email" className="text-sm font-medium">
           Email Address
@@ -84,6 +101,7 @@ export default function SignInForm({
         </div>
       </div>
 
+      {/* Password input field */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="password" className="text-sm font-medium">
@@ -115,6 +133,7 @@ export default function SignInForm({
         </div>
       </div>
 
+      {/* Submit button */}
       <Button
         type="submit"
         disabled={isSubmitting}

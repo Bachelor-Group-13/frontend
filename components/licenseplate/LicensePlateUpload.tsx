@@ -8,21 +8,27 @@ import { cn } from "@/lib/utils/utils";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 
+/**
+ * Props for the LicensePlateUpload component.
+ * @param onLicensePlatesDetected - Callback function that receives an array of detected license plate numbers
+ */
 interface LicensePlateUploadProps {
   onLicensePlatesDetected: (licensePlate: string[]) => void;
 }
 
-/*
- * LicensePlateUpload component:
+/**
+ * A component that provides an interface for uploading and processing license plate images.
  *
- * Provides a user interface for uploading an image
- * containing a license plate. It sends the image to the recognition API, and
- * calls the onLicensePlateDetected callback with the detected license plate number.
+ * Features:
+ * - Drag and drop or click to upload images
+ * - Image preview with the ability to remove selected images
+ * - File type and size validation
+ * - License plate detection
+ * - Loading states and error handling
  */
 const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   onLicensePlatesDetected,
 }) => {
-  // State variabels using the useState hook
   const [image, setImage] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,9 +36,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  /**
-   * Handles changes to the image input field
-   */
+  // Handles changes to the image input field
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -40,11 +44,9 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     }
   };
 
-  /**
-   * Processes the selected file and sets the image state.
-   */
+  // Processes the selected file and sets the image state
   const processSelectedFile = (file: File) => {
-    // Checks if the file is an image
+    // Check if the file is an image
     if (!file.type.match("image.*")) {
       setError("Please select a valid image file.");
       return;
@@ -61,9 +63,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     setError(null);
   };
 
-  /**
-   * Handles drag events for the image input field.
-   */
+  // Handles drag events for the image input field
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -75,9 +75,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     }
   };
 
-  /**
-   * Handles the drop event for the image input field.
-   */
+  // Handles the drop event for the image input field
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -88,16 +86,12 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     }
   };
 
-  /**
-   * File input click handler
-   */
+  // File input click handler
   const handleButtonClick = () => {
     inputRef.current?.click();
   };
 
-  /**
-   * Clears selected image
-   */
+  // Clears selected image
   const clearImage = () => {
     setImage(null);
     setPreviewURL(null);
@@ -107,9 +101,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
     }
   };
 
-  /**
-   * Handles the submission of the uploaded image to the API.
-   */
+  // Handles the submission of the uploaded image to the API
   const handleSubmit = async () => {
     if (!image) {
       setError("Please select an image.");
@@ -161,6 +153,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   };
   return (
     <div className="space-y-4">
+      {/* Upload area */}
       <div
         className={cn(
           `relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center
@@ -187,6 +180,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         />
         {previewURL ? (
           <div className="relative w-full">
+            {/* Remove image button */}
             <Button
               variant="outline"
               size="icon"
@@ -199,6 +193,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
             >
               <X className="h-4 w-4" />
             </Button>
+            {/* Image preview */}
             <img
               src={previewURL || "/placeholder.svg"}
               alt="License plate preview"
@@ -207,9 +202,11 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4 text-center">
+            {/* Upload icon */}
             <div className="rounded-full bg-gray-100 p-3">
               <Upload className="h-6 w-6 text-gray-500" />
             </div>
+            {/* Upload instructions */}
             <div className="space-y-1">
               <p className="text-sm font-medium text-gray-700">
                 Drag and drop an image, or click to browse
@@ -221,6 +218,8 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
           </div>
         )}
       </div>
+
+      {/* Error message */}
       {error && (
         <Alert variant="destructive" className="text-sm">
           <AlertDescription className="flex items-center gap-2">
@@ -229,6 +228,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         </Alert>
       )}
 
+      {/* Action buttons */}
       <div className="flex justify-end">
         <Button
           onClick={handleSubmit}

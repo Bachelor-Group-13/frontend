@@ -8,6 +8,15 @@ import {
   CardTitle,
 } from "../ui/card";
 
+/**
+ * Props for the ProfileCard component.
+ * @param name - The user's full name
+ * @param email - The user's email address
+ * @param children - The content to be displayed in the card
+ * @param onUpdate - Function to handle profile updates
+ * @param isSubmitting - Whether the form is currently submitting
+ * @param licensePlateError - Error message for license plate validation, if any
+ */
 interface ProfileCardProps {
   name: string;
   email: string;
@@ -17,6 +26,11 @@ interface ProfileCardProps {
   licensePlateError: string | null;
 }
 
+/**
+ * A card component that displays and manages user profile information.
+ *
+ * Shows user details and provides a form for updating profile information
+ */
 export default function ProfileCard({
   name,
   email,
@@ -27,6 +41,7 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   return (
     <Card className="mb-6 overflow-hidden shadow-md">
+      {/* Profile header */}
       <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 pb-6">
         <div className="flex items-center gap-4">
           <div
@@ -47,10 +62,12 @@ export default function ProfileCard({
         </div>
       </CardHeader>
 
+      {/* Profile form content */}
       <CardContent className="p-6">
         <div className="space-y-6">{children}</div>
       </CardContent>
 
+      {/* Update button */}
       <CardFooter className="flex justify-end border-t bg-gray-50 p-6">
         <Button
           onClick={onUpdate}

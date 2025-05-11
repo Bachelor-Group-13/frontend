@@ -20,6 +20,15 @@ import { CameraTab } from "@/components/licenseplate/CameraTab";
 import { DetectedPlates } from "@/components/licenseplate/DetectedPlates";
 import Webcam from "react-webcam";
 
+/**
+ * License plate recognition page component.
+ * Provides multiple methods for license plate detection:
+ * - Manual search
+ * - Camera capture
+ * - Image upload (developer only)
+ *
+ * @returns {JSX.Element} The rendered plate recognition page
+ */
 export default function PlateRecognitionPage() {
   const [activeTab, setActiveTab] = useState<string>("manual");
   const { platesInfo, handleLicensePlatesDetected } =
@@ -29,12 +38,14 @@ export default function PlateRecognitionPage() {
   const [manualPlate, setManualPlate] = useState("");
   const { user } = useAuth();
 
+  // Handles the camera capture process
   const handleCapture = async () => {
     setProcessing(true);
     await capture();
     setProcessing(false);
   };
 
+  // Handles manual license plate search
   const handleManualSearch = () => {
     if (manualPlate.trim()) {
       handleLicensePlatesDetected([manualPlate.trim().toUpperCase()]);
@@ -44,6 +55,7 @@ export default function PlateRecognitionPage() {
   return (
     <PlateRecognitionLayout>
       <div className="mx-auto max-w-3xl">
+        {/* Card container for the recognition interface */}
         <Card className="overflow-hidden shadow-lg">
           <CardHeader className="pb-8">
             <CardTitle className="flex items-center gap-2 text-2xl">
@@ -55,17 +67,20 @@ export default function PlateRecognitionPage() {
             </CardDescription>
           </CardHeader>
 
+          {/* Tabs for the different methods */}
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
             className="w-full"
           >
+            {/* Tab navigation */}
             <PlateRecognitionTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
             />
 
             <CardContent className="p-6">
+              {/* Manual search tab */}
               <TabsContent className="mt-0" value="manual">
                 <ManualSearchTab
                   manualPlate={manualPlate}
@@ -74,6 +89,7 @@ export default function PlateRecognitionPage() {
                 />
               </TabsContent>
 
+              {/* Camera capture tab */}
               <TabsContent value="camera" className="mt-0">
                 <CameraTab
                   webcamRef={webcamRef as React.RefObject<Webcam>}
@@ -82,6 +98,7 @@ export default function PlateRecognitionPage() {
                 />
               </TabsContent>
 
+              {/* Image upload tab (developer only) */}
               {user && user?.role === "ROLE_DEVELOPER" && (
                 <TabsContent value="upload" className="mt-0">
                   <LicensePlateUpload
@@ -90,6 +107,7 @@ export default function PlateRecognitionPage() {
                 </TabsContent>
               )}
 
+              {/* Results display */}
               <DetectedPlates platesInfo={platesInfo} />
             </CardContent>
           </Tabs>

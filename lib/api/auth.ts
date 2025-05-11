@@ -2,6 +2,10 @@ import axios from "axios";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/`;
 
+/**
+ * Axios instance configured for API requests.
+ * Includes base URL, credentials, and default headers.
+ */
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
@@ -10,6 +14,12 @@ export const api = axios.create({
   },
 });
 
+/**
+ * Authenticates a user with email and password.
+ * @param email - User's email address
+ * @param password - User's password
+ * @returns Promise with user data or error
+ */
 export const login = async (email: string, password: string) => {
   try {
     console.log("Attempting to login with", { email, password });
@@ -43,6 +53,15 @@ export const login = async (email: string, password: string) => {
   }
 };
 
+/**
+ * Registers a new user account.
+ * @param name - User's full name
+ * @param email - User's email address
+ * @param password - User's password
+ * @param licensePlate - Optional primary license plate
+ * @param phoneNumber - Optional phone number
+ * @returns Promise with registration data or error
+ */
 export const register = async (
   name: string,
   email: string,
@@ -67,6 +86,7 @@ export const register = async (
   }
 };
 
+// Logs out the current user and redirects to home page.
 export const logout = async () => {
   try {
     await api.post(`${API_URL}logout`, {}, { withCredentials: true });
@@ -79,6 +99,7 @@ export const logout = async () => {
   }
 };
 
+// Automatically logs out the user if their token has expired.
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

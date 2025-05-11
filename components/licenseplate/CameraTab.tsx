@@ -4,12 +4,24 @@ import { Button } from "@/components/ui/button";
 import { Camera } from "lucide-react";
 import Webcam from "react-webcam";
 
+/**
+ * Props for the CameraTab component.
+ * @param webcamRef - Reference to the webcam component
+ * @param processing - Whether the camera is currently processing an image
+ * @param onCapture - Function to call when the capture button is clicked
+ */
 interface CameraTabProps {
   webcamRef: React.RefObject<Webcam>;
   processing: boolean;
   onCapture: () => void;
 }
 
+/**
+ * A component that provides a camera interface for capturing license plates.
+ *
+ * Displays a camera feed with a capture button.
+ * Uses the device's back camera by default for better license plate capture.
+ */
 export function CameraTab({
   webcamRef,
   processing,
@@ -17,6 +29,7 @@ export function CameraTab({
 }: CameraTabProps) {
   return (
     <div className="space-y-4">
+      {/* Camera feed container */}
       <div className="relative overflow-hidden rounded-lg border bg-gray-50">
         <Webcam
           audio={false}
@@ -29,6 +42,7 @@ export function CameraTab({
           }}
           className="mx-auto w-full"
         />
+        {/* Capture button overlay */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-4">
           <Button
             onClick={onCapture}
@@ -53,6 +67,7 @@ export function CameraTab({
           </Button>
         </div>
       </div>
+      {/* Instructions text */}
       <p className="text-center text-sm text-gray-500">
         Position the license plate clearly in the frame and click the capture
         button.

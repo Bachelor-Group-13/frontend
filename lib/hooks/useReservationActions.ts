@@ -2,6 +2,16 @@ import { useState, useCallback } from "react";
 import { api } from "@/lib/api/auth";
 import { ParkingSpot, ParkingSpotBoundary, Vehicle } from "@/lib/utils/types";
 
+/**
+ * Props for the useReservationActions hook.
+ * @property {any} user - The current user
+ * @property {ParkingSpot[]} parkingSpots - Array of parking spots
+ * @property {Function} setParkingSpots - Function to update parking spots
+ * @property {Function} fetchUserAndReservations - Function to refresh user and reservation data
+ * @property {Function} setSelectedSpot - Function to update selected spot
+ * @property {Function} setActiveTab - Function to update active tab
+ * @property {Function} setShowUnauthorizedAlert - Function to show unauthorized alert
+ */
 interface UseReservationActionsProps {
   user: any;
   parkingSpots: ParkingSpot[];
@@ -12,6 +22,19 @@ interface UseReservationActionsProps {
   setShowUnauthorizedAlert: (show: boolean) => void;
 }
 
+/**
+ * A hook that manages parking spot reservation actions.
+ *
+ * @returns {Object} An object containing:
+ *   - selectedLicensePlate: The currently selected license plate
+ *   - setSelectedLicensePlate: Function to update selected license plate
+ *   - estimatedDeparture: The estimated departure time
+ *   - setEstimatedDeparture: Function to update estimated departure time
+ *   - handleReservation: Function to handle spot reservation/unreservation
+ *   - handleClaimSpot: Function to claim an anonymous spot
+ *   - handleSpotsDetected: Function to process detected parking spots
+ *   - isUpdating: Boolean indicating if an update is in progress
+ */
 export function useReservationActions({
   user,
   parkingSpots,
@@ -29,6 +52,7 @@ export function useReservationActions({
     null
   );
 
+  // Handles reservation or unreservation of a parking spot
   const handleReservation = async (
     selectedSpot: ParkingSpot,
     actionType: "reserve" | "unreserve"
@@ -112,6 +136,7 @@ export function useReservationActions({
     }
   };
 
+  // Claims an anonymous parking spot for the current user
   const handleClaimSpot = async (selectedSpot: ParkingSpot) => {
     if (!selectedSpot || !user || !selectedLicensePlate) return;
 
@@ -155,6 +180,7 @@ export function useReservationActions({
     }
   };
 
+  // Processes detected parking spots and updates their status
   const handleSpotsDetected = useCallback(
     async (boundaries: ParkingSpotBoundary[], _vehicles: Vehicle[]) => {
       setIsUpdating(true);

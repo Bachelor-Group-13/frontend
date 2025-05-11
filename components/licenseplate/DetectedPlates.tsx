@@ -3,10 +3,19 @@
 import { CheckCircle2 } from "lucide-react";
 import { PlateInfo, PlateInfoCard } from "./PlateInfoCard";
 
+/**
+ * Props for the DetectedPlates component.
+ * @param platesInfo - Array of detected license plate information
+ */
 interface DetectedPlatesProps {
   platesInfo: PlateInfo[];
 }
 
+/**
+ * A component that displays a list of detected license plates.
+ *
+ * Shows each plate's information in a card format.
+ */
 export function DetectedPlates({ platesInfo }: DetectedPlatesProps) {
   if (platesInfo.length === 0) return null;
 

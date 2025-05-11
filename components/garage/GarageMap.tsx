@@ -2,12 +2,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ParkingSpot } from "@/lib/utils/types";
 import { ParkingSpotCard } from "./ParkingSpotCard";
 
+/**
+ * Props for the GarageMap component.
+ * @param parkingSpots - The list of parking spots to display on the map
+ * @param onSpotSelect - The function to call when a spot is selected
+ * @param currentUserId - The ID of the current user
+ */
 interface GarageMapProps {
   parkingSpots: ParkingSpot[];
   onSpotSelect: (spot: ParkingSpot) => void;
   currentUserId: string | null;
 }
 
+/**
+ * A component that displays a map of the garage with parking spots.
+ *
+ * Includes clickable spot cards and visual indicators for spot status.
+ * @param {GarageMapProps} props - The props for the GarageMap component
+ */
 export function GarageMap({
   parkingSpots,
   onSpotSelect,

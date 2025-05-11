@@ -19,6 +19,10 @@ const APP_DEFAULT_TITLE = "Inneparkert";
 const APP_TITLE_TEMPLATE = "%s - Inneparkert";
 const APP_DESCRIPTION = "Parking Garage Management Application";
 
+/**
+ * Application metadata configuration.
+ * Defines SEO, social media, and PWA settings.
+ */
 export const metadata: Metadata = {
   applicationName: APP_NAME,
   title: {
@@ -51,6 +55,15 @@ export const viewport: Viewport = {
   themeColor: "#1976d2",
 };
 
+/**
+ * Root layout component that wraps the entire application.
+ * Provides authentication context, navigation, and font configuration.
+ * Handles service worker registration in production.
+ *
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render
+ * @returns {JSX.Element} The rendered root layout
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
