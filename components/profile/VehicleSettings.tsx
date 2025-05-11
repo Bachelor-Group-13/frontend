@@ -1,6 +1,5 @@
 "use client";
 
-import { handleLicensePlateChange } from "@/lib/utils/helpers";
 import { Car, Plus } from "lucide-react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -8,6 +7,16 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
 
+/**
+ * Props for the VehicleSettings component.
+ * @param primaryLicensePlate - The primary license plate value
+ * @param onPrimaryLicensePlateChange - Function to handle primary license plate changes
+ * @param secondLicensePlate - The secondary license plate value
+ * @param onSecondLicensePlateChange - Function to handle secondary license plate changes
+ * @param licensePlateError - Error message for license plate validation
+ * @param showSecondLicensePlate - Whether to show the secondary license plate input
+ * @param onShowSecondLicensePlate - Function to toggle secondary license plate input
+ */
 interface VehicleSettingsProps {
   primaryLicensePlate: string;
   onPrimaryLicensePlateChange: (value: string) => void;
@@ -18,6 +27,12 @@ interface VehicleSettingsProps {
   onShowSecondLicensePlate: () => void;
 }
 
+/**
+ * A component that provides a form for managing vehicle license plates.
+ *
+ * Handles primary and optional secondary license plate inputs
+ * with validation and formatting.
+ */
 export default function VehicleSettings({
   primaryLicensePlate,
   onPrimaryLicensePlateChange,
@@ -29,12 +44,15 @@ export default function VehicleSettings({
 }: VehicleSettingsProps) {
   return (
     <div>
+      {/* Header */}
       <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
         <Car className="h-5 w-5 text-gray-500" />
         Vehicle Information
       </h3>
 
+      {/* License plate form */}
       <div className="space-y-4">
+        {/* Primary license plate input */}
         <div className="space-y-2">
           <Label htmlFor="license-plate" className="text-sm">
             Primary License Plate
@@ -57,6 +75,7 @@ export default function VehicleSettings({
           )}
         </div>
 
+        {/* Secondary license plate section */}
         {!secondLicensePlate && !showSecondLicensePlate ? (
           <Button
             type="button"

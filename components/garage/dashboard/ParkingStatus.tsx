@@ -3,12 +3,24 @@ import { Car } from "lucide-react";
 import { ParkingSpot } from "@/lib/utils/types";
 import { isParkedIn } from "@/lib/utils/parking";
 
+/**
+ * Props for the ParkingStatus component.
+ * @param user - The current user data
+ * @param parkingSpots - List of all parking spots in the garage
+ */
 interface ParkingStatusProps {
   user: any;
   parkingSpots: ParkingSpot[];
 }
 
+/**
+ * A component that displays the current parking status of the user.
+ *
+ * Shows whether the user is parked, their spot number, and vehicle details.
+ * @param {ParkingStatusProps} props - The props for the ParkingStatus component
+ */
 export function ParkingStatus({ user, parkingSpots }: ParkingStatusProps) {
+  // Check if the user has any active parking reservations
   if (!user || !user.current_reservation) {
     return (
       <div className="rounded-lg border-2 border-green-500 bg-white p-4">
@@ -23,11 +35,13 @@ export function ParkingStatus({ user, parkingSpots }: ParkingStatusProps) {
     );
   }
 
+  // Check if the user is parked in a spot
   const isParkedInSpot = isParkedIn(
     user.current_reservation.spotNumber,
     parkingSpots
   );
 
+  // If user is parked in a spot, display the status
   return (
     <div className="rounded-lg border-2 border-red-500 bg-white p-4">
       <div className="flex items-center justify-between">

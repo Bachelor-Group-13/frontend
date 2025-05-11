@@ -8,12 +8,25 @@ import {
 } from "../ui/card";
 import { ArrowLeft } from "lucide-react";
 
+/**
+ * Props for the AuthCard component.
+ * @param title - The title to display at the top of the card
+ * @param description - A description for the card
+ * @param children - The content inside the card
+ */
 interface AuthCardProps {
   title: string;
   description: string;
   children: React.ReactNode;
 }
 
+/**
+ * A card component used for authentication content.
+ *
+ * Provides a consistent layout for sign in and sign up forms,
+ * with a back button, title, description, and content area.
+ * @param {AuthCardProps} props - The props for the AuthCard component
+ */
 export default function AuthCard({
   title,
   description,

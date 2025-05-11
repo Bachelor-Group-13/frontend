@@ -18,13 +18,11 @@ import { useAuth } from "../auth/AuthContext";
 import { cn } from "@/lib/utils/utils";
 import { NotificationToggle } from "../garage/NotificationToggle";
 
-/*
- * Navbar component:
+/**
+ * A navigation bar component that provides user authentication and navigation.
  *
- * Navigation bar with user authentication features,
- * including sign out button and link to the profile page.
- * It fetches users information from supabase and displays
- * it in an avatar.
+ * Handles user authentication state, displays user profile information,
+ * and provides access to user settings and sign out functionality.
  */
 export function Navbar() {
   const { user, setUser } = useAuth();
@@ -45,24 +43,14 @@ export function Navbar() {
     };
   }, []);
 
-  /*
-   * handleSignOut function:
-   *
-   * Signs the user out of the application and redirects them to the
-   * landing page
-   *
-   */
+  // Signs the user out and redirects to the landing page
   const handleSignOut = () => {
     logout();
     setUser(null);
     router.push("/");
   };
 
-  /*
-   * getInitials function:
-   *
-   * Extracts the initials from the users email address.
-   */
+  // Extracts initials from user's name or email for avatar fallback
   const getInitials = () => {
     if (user?.name) {
       const nameParts = user.name.split(" ");
@@ -94,6 +82,7 @@ export function Navbar() {
       )}
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        {/* Logo and app name */}
         <Link
           href="/"
           className="flex items-center gap-2 font-mono text-xl font-bold transition-colors
@@ -109,15 +98,18 @@ export function Navbar() {
           <span className="tracking-tight">Inneparkert</span>
         </Link>
 
+        {/* User authentication section */}
         <div className="flex items-center gap-4">
           {isLoading ? (
+            /* Loading state */
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
               <span className="animate-pulse">...</span>
             </div>
           ) : user ? (
-            // Logged-in state
+            /* Logged-in state */
             <div className="flex items-center gap-3">
               <DropdownMenu>
+                {/* User avatar and name */}
                 <DropdownMenuTrigger asChild>
                   <div
                     className="flex cursor-pointer items-center gap-2 rounded-full px-2 py-1 transition-colors
@@ -138,7 +130,9 @@ export function Navbar() {
                     <ChevronDown className="h-4 w-4 opacity-70" />
                   </div>
                 </DropdownMenuTrigger>
+                {/* Dropdown menu content */}
                 <DropdownMenuContent align="end" className="w-56">
+                  {/* User info */}
                   <div className="px-2 py-1.5">
                     <p className="text-sm font-medium">
                       {user.name || user.email}
@@ -147,6 +141,7 @@ export function Navbar() {
                   </div>
                   <DropdownMenuSeparator />
 
+                  {/* Notification toggle */}
                   <DropdownMenuItem asChild>
                     <NotificationToggle
                       user={user}
@@ -156,6 +151,7 @@ export function Navbar() {
 
                   <DropdownMenuSeparator />
 
+                  {/* Profile link */}
                   <DropdownMenuItem asChild>
                     <Link
                       href="/profile"
@@ -166,6 +162,7 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  {/* Sign out button */}
                   <DropdownMenuItem
                     onClick={handleSignOut}
                     className="flex cursor-pointer items-center gap-2 text-red-600 focus:bg-red-50
@@ -178,7 +175,7 @@ export function Navbar() {
               </DropdownMenu>
             </div>
           ) : (
-            // Logged-out state
+            /* Logged-out state */
             <Link href="/auth">
               <Button
                 className={cn(

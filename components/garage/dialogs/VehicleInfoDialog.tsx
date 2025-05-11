@@ -17,12 +17,24 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
+/**
+ * Props for the VehicleInfoDialog component.
+ * @param open - Whether the dialog is open
+ * @param onOpenChange - Function to handle dialog open state changes
+ * @param plateInfo - Information about the vehicle's license plate
+ */
 interface VehicleInfoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   plateInfo: PlateInfo | null;
 }
 
+/**
+ * A dialog component that displays detailed information about a vehicle.
+ *
+ * Shows license plate information in a styled card with animation effects.
+ * @param {VehicleInfoDialogProps} props - The props for the VehicleInfoDialog component
+ */
 export function VehicleInfoDialog({
   open,
   onOpenChange,
@@ -30,6 +42,7 @@ export function VehicleInfoDialog({
 }: VehicleInfoDialogProps) {
   const [animateContent, setAnimateContent] = useState(false);
 
+  // Handle animation when dialog opens/closes
   useEffect(() => {
     if (open) {
       const timer = setTimeout(() => setAnimateContent(true), 100);
@@ -43,6 +56,7 @@ export function VehicleInfoDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger className="hidden" />
       <AlertDialogContent className="max-w-md border-0 p-0 shadow-lg sm:rounded-2xl">
+        {/* Dialog header with gradient background */}
         <div
           className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-blue-600
             to-blue-700 p-6 text-white"
@@ -52,6 +66,7 @@ export function VehicleInfoDialog({
               <AlertDialogTitle className="text-2xl font-bold tracking-tight text-white">
                 Vehicle Information
               </AlertDialogTitle>
+              {/* Close button */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -66,6 +81,7 @@ export function VehicleInfoDialog({
           </AlertDialogHeader>
         </div>
 
+        {/* Vehicle information content */}
         <div className="p-6">
           {plateInfo && <PlateInfoCard info={plateInfo} />}
         </div>

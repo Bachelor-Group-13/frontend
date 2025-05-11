@@ -4,6 +4,9 @@ import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
 
+/**
+ * A section component that explains how to use the application.
+ */
 export function HowToUseSection() {
   const { user } = useAuth();
   const buttonText = user ? "Go to Garage" : "Get Started";

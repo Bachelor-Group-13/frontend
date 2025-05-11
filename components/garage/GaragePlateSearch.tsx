@@ -3,15 +3,26 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
+/**
+ * Props for the GaragePlateSearch component.
+ * @param onSearch - Function to handle the search when a valid plate is entered
+ */
 export interface GaragePlateSearchProps {
   onSearch: (plate: string) => void;
 }
 
+/**
+ * A component for searching license plates.
+ *
+ * Includes a styled input with validation for plate format.
+ * @param {GaragePlateSearchProps} props - The props for the GaragePlateSearch component
+ */
 export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
   const [plate, setPlate] = useState("");
 
   return (
     <div className="max-w-xs">
+      {/* License plate input field */}
       <div
         className="flex h-12 overflow-hidden rounded-md border-2 transition
           focus-within:border-transparent focus-within:ring-2 focus-within:ring-blue-500"
@@ -31,6 +42,7 @@ export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
           </span>
         </div>
 
+        {/* License plate input field */}
         <Input
           type="text"
           value={plate}
@@ -45,6 +57,7 @@ export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
             focus-visible:border-transparent focus-visible:ring-0"
         />
 
+        {/* Search button */}
         <Button
           onClick={() => {
             const trimmed = plate.trim().toUpperCase();

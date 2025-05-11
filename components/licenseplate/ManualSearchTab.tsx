@@ -5,12 +5,23 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
+/**
+ * Props for the ManualSearchTab component.
+ * @param manualPlate - The current value of the license plate input
+ * @param onManualPlateChangeAction - Function to handle changes to the license plate input
+ * @param onSearchAction - Function to handle the search button click
+ */
 interface ManualSearchTabProps {
   manualPlate: string;
   onManualPlateChangeAction: (value: string) => void;
   onSearchAction: () => void;
 }
 
+/**
+ * A component that provides a manual input field for searching license plates.
+ *
+ * Features a text input field for entering license plate numbers and a search button.
+ */
 export function ManualSearchTab({
   manualPlate,
   onManualPlateChangeAction,
@@ -18,10 +29,12 @@ export function ManualSearchTab({
 }: ManualSearchTabProps) {
   return (
     <div className="space-y-4">
+      {/* Input section */}
       <div className="space-y-2">
         <Label htmlFor="license-plate" className="text-sm font-medium">
           License Plate Number
         </Label>
+        {/* Input and search button */}
         <div className="flex gap-2">
           <Input
             id="license-plate"

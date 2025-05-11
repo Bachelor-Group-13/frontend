@@ -18,16 +18,17 @@ import { useLicensePlateDetection } from "@/lib/hooks/useLicensePlateDetection";
 import { VehicleInfoDialog } from "./dialogs/VehicleInfoDialog";
 
 /**
- * Garage Layout component for managing garage operations
- * including a dashboard, garage layout map, and developer tools for detecting parking spots.
+ * A layout component for managing garage operations.
  *
- * It integrates license plate scanning, reservation actions, and user role-based features.
+ * Provides a dashboard, garage layout map, and developer tools for detecting parking spots.
+ * Integrates license plate scanning, reservation actions, and user role-based features.
  */
 export function GarageLayout() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
   const [plateDialogOpen, setPlateDialogOpen] = useState(false);
 
+  // Hooks for garage functionality
   const { parkingSpots, user, fetchUserAndReservations, setParkingSpots } =
     useGarageReservations();
 
@@ -55,9 +56,8 @@ export function GarageLayout() {
 
   /**
    * Handles the manual search of a license plate.
-   * Updates selected plate, fetches user/reservation data, and opens a dialog.
-   *
-   * @param plate - The license plate to search for
+   * Updates selected plate, fetches user/reservation data and opens a dialog.
+   * @param {string} plate - The license plate to search for
    */
   const onManualSearch = (plate: string) => {
     setSelectedLicensePlate(plate);
@@ -68,7 +68,7 @@ export function GarageLayout() {
 
   return (
     <div className="container mx-auto py-4">
-      {/* Header */}
+      {/* Header section */}
       <div
         className="mb-6 flex flex-col space-y-4 px-6 md:flex-row md:items-center md:justify-between
           md:space-y-0"
@@ -78,7 +78,7 @@ export function GarageLayout() {
           <p className="text-gray-500">Reserve your parking spot</p>
         </div>
 
-        {/* PC: Manual search box */}
+        {/* Desktop: Manual search box */}
         <div className="hidden md:block">
           <GaragePlateSearch onSearch={onManualSearch} />
         </div>
@@ -97,7 +97,7 @@ export function GarageLayout() {
         </Link>
       </div>
 
-      {/* Tabs */}
+      {/* Main content tabs */}
       <Tabs defaultValue="dashboard" className="w-full">
         <div className="px-6">
           <TabsList
@@ -124,12 +124,12 @@ export function GarageLayout() {
           </TabsList>
         </div>
 
-        {/* Dashboard Tab */}
+        {/* Dashboard tab content */}
         <TabsContent value="dashboard" className="mt-6">
           <GarageDashboard user={user} parkingSpots={parkingSpots} />
         </TabsContent>
 
-        {/* Garage Layout Tab */}
+        {/* Garage layout tab content */}
         <TabsContent value="garage" className="mt-6">
           <GarageMap
             parkingSpots={parkingSpots}
@@ -138,7 +138,7 @@ export function GarageLayout() {
           />
         </TabsContent>
 
-        {/* Detection Tab - Developers only tab */}
+        {/* Detection tab content - Developer only */}
         {user && user.role === "ROLE_DEVELOPER" && (
           <TabsContent value="detection" className="mt-6">
             <GarageDetection
@@ -150,7 +150,7 @@ export function GarageLayout() {
         )}
       </Tabs>
 
-      {/* Dialogs */}
+      {/* Dialog components */}
       {selectedSpot && (
         <ReservationDialog
           selectedSpot={selectedSpot}
@@ -170,13 +170,13 @@ export function GarageLayout() {
         />
       )}
 
-      {/* Unauthorized Dialog */}
+      {/* Unauthorized alert dialog */}
       <UnauthorizedDialog
         open={showUnauthorizedAlert}
         onOpenChange={setShowUnauthorizedAlert}
       />
 
-      {/* Plate search dialog */}
+      {/* Vehicle info dialog */}
       <VehicleInfoDialog
         open={plateDialogOpen}
         onOpenChange={setPlateDialogOpen}

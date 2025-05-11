@@ -5,6 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
 
+/**
+ * Props for the SecuritySettings component.
+ * @param password - The new password value
+ * @param onPasswordChange - Function to handle password changes
+ * @param confirmPassword - The password confirmation value
+ * @param onConfirmPasswordChange - Function to handle confirm password changes
+ */
 interface SecuritySettingsProps {
   password: string;
   onPasswordChange: (value: string) => void;
@@ -12,6 +19,11 @@ interface SecuritySettingsProps {
   onConfirmPasswordChange: (value: string) => void;
 }
 
+/**
+ * A component that provides a form for updating user password.
+ *
+ * Includes password visibility toggle and confirmation field
+ */
 export default function SecuritySettings({
   password,
   onPasswordChange,
@@ -22,12 +34,15 @@ export default function SecuritySettings({
 
   return (
     <div>
+      {/* Header */}
       <h3 className="mb-4 flex items-center gap-2 text-lg font-medium">
         <Lock className="h-5 w-5 text-gray-500" />
         Security
       </h3>
 
+      {/* Password form */}
       <div className="space-y-4">
+        {/* New password input */}
         <div className="space-y-2">
           <Label htmlFor="new-password" className="text-sm">
             New Password
@@ -54,6 +69,7 @@ export default function SecuritySettings({
           </div>
         </div>
 
+        {/* Confirm password input */}
         <div className="space-y-2">
           <Label htmlFor="confirm-password" className="text-sm">
             Confirm New Password

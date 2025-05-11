@@ -10,15 +10,29 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import CarspotVisuals from "./ParkingSpotVisual";
 
+/**
+ * Props for the ParkingSpotCard component.
+ * @param spot - The parking spot data to display
+ * @param onClick - The function to call when the spot is clicked
+ * @param currentUserId - The ID of the current user
+ */
+interface ParkingSpotCardProps {
+  spot: ParkingSpot;
+  onClick: () => void;
+  currentUserId: string | null;
+}
+
+/**
+ * A component that displays a single parking spot card.
+ *
+ * Shows spot status with different colors and a hover card with spot details.
+ * @param {ParkingSpotCardProps} props - The props for the ParkingSpotCard component
+ */
 export function ParkingSpotCard({
   spot,
   onClick,
   currentUserId,
-}: {
-  spot: ParkingSpot;
-  onClick: () => void;
-  currentUserId: string | null;
-}) {
+}: ParkingSpotCardProps) {
   useEffect(() => {
     console.log(`ParkingSpotCard ${spot.spotNumber}:`, {
       isOccupied: spot.isOccupied,
@@ -41,6 +55,7 @@ export function ParkingSpotCard({
 
   return (
     <HoverCard key={spot.id}>
+      {/* Main spot card that shows the spot number and status */}
       <HoverCardTrigger asChild>
         <div
           className={`flex h-24 cursor-pointer items-center justify-center rounded font-bold
@@ -55,9 +70,12 @@ export function ParkingSpotCard({
           </div>
         </div>
       </HoverCardTrigger>
+
+      {/* Hover card content with spot details */}
       <HoverCardContent className="w-72">
         {spot.isOccupied && spot.occupiedBy ? (
           <div className="space-y-2">
+            {/* Show different content for anonymous vs known vehicles */}
             {spot.occupiedBy.anonymous ? (
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-600">
@@ -79,6 +97,7 @@ export function ParkingSpotCard({
               </div>
             ) : (
               <>
+                {/* Vehicle owner details */}
                 <h4 className="text-sm font-semibold">
                   Name: {spot.occupiedBy.name}
                 </h4>
@@ -113,6 +132,7 @@ export function ParkingSpotCard({
                 </div>
               </>
             )}
+            {/* Estimated departure time */}
             {spot.occupiedBy && spot.occupiedBy.estimatedDeparture && (
               <div className="flex items-center gap-2 pt-2 text-sm">
                 <Clock className="h-4 w-4 text-xs text-gray-500" />
