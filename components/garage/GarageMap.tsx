@@ -1,9 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ParkingSpot } from "@/lib/utils/types";
 import { ParkingSpotCard } from "./ParkingSpotCard";
-import { Button } from "@/components/ui/button";
-import { Camera } from "lucide-react";
-import Link from "next/link";
 
 interface GarageMapProps {
   parkingSpots: ParkingSpot[];

@@ -15,16 +15,14 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { GaragePlateSearch } from "./GaragePlateSearch";
 import { useLicensePlateDetection } from "@/lib/hooks/useLicensePlateDetection";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { PlateInfoCard } from "../licenseplate/PlateInfoCard";
+import { VehicleInfoDialog } from "./dialogs/VehicleInfoDialog";
 
+/**
+ * Garage Layout component for managing garage operations
+ * including a dashboard, garage layout map, and developer tools for detecting parking spots.
+ *
+ * It integrates license plate scanning, reservation actions, and user role-based features.
+ */
 export function GarageLayout() {
   const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
   const [showUnauthorizedAlert, setShowUnauthorizedAlert] = useState(false);
@@ -55,6 +53,12 @@ export function GarageLayout() {
   const { platesInfo, handleLicensePlatesDetected } =
     useLicensePlateDetection();
 
+  /**
+   * Handles the manual search of a license plate.
+   * Updates selected plate, fetches user/reservation data, and opens a dialog.
+   *
+   * @param plate - The license plate to search for
+   */
   const onManualSearch = (plate: string) => {
     setSelectedLicensePlate(plate);
     fetchUserAndReservations();
@@ -166,29 +170,18 @@ export function GarageLayout() {
         />
       )}
 
+      {/* Unauthorized Dialog */}
       <UnauthorizedDialog
         open={showUnauthorizedAlert}
         onOpenChange={setShowUnauthorizedAlert}
       />
 
       {/* Plate search dialog */}
-      <AlertDialog open={plateDialogOpen} onOpenChange={setPlateDialogOpen}>
-        <AlertDialogTrigger className="hidden" />
-        <AlertDialogContent className="">
-          <AlertDialogTitle className="mt-5 text-2xl">
-            Vehicle Info:
-          </AlertDialogTitle>
-          {platesInfo.length > 0 && <PlateInfoCard info={platesInfo[0]} />}
-          <AlertDialogFooter>
-            <AlertDialogAction
-              className="mx-auto mt-2"
-              onClick={() => setPlateDialogOpen(false)}
-            >
-              Close
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <VehicleInfoDialog
+        open={plateDialogOpen}
+        onOpenChange={setPlateDialogOpen}
+        plateInfo={platesInfo.length > 0 ? platesInfo[0] : null}
+      />
     </div>
   );
 }

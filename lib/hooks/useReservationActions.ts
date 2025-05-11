@@ -284,7 +284,6 @@ export function useReservationActions({
 
         await Promise.all(reservationPromises);
         await fetchUserAndReservations();
-        alert("Parking spots updated successfully with AI detection!");
         setActiveTab("dashboard");
       } catch (err) {
         console.error("Reservation flow failed:", err);

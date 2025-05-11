@@ -119,6 +119,7 @@ export default function SignUpForm({
             id="signup-email"
             type="email"
             value={email}
+            placeholder="email@email.com"
             onChange={(e) => setEmail(e.target.value)}
             className="pl-10"
           />

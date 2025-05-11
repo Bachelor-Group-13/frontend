@@ -9,7 +9,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 interface SignInFormProps {
-  onSuccessAction: () => void;
+  onSuccessAction: (userData?: any) => void;
   onErrorAction: (
     type: "default" | "destructive",
     title: string,
@@ -50,7 +50,8 @@ export default function SignInForm({
         return;
       }
 
-      onSuccessAction();
+      console.log("Login successful:", data);
+      onSuccessAction(data);
       router.push("/garage");
     } catch (error: any) {
       onErrorAction(
