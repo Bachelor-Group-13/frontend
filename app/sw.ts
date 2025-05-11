@@ -1,6 +1,10 @@
 import { defaultCache } from "@serwist/next/worker";
 import { PrecacheEntry, Serwist, SerwistGlobalConfig } from "serwist";
 
+/**
+ * Extends the global worker scope with Serwist configuration.
+ * Adds type definition for the service worker manifest.
+ */
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
     __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
@@ -9,6 +13,10 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
+/**
+ * Initializes the Serwist service worker with caching and navigation preload.
+ * Configures precaching, client claiming, and runtime caching strategies.
+ */
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
@@ -19,6 +27,12 @@ const serwist = new Serwist({
 
 serwist.addEventListeners();
 
+/**
+ * Handles incoming push notifications.
+ * Processes the notification payload and displays it to the user.
+ *
+ * @param {PushEvent} event - The push event containing notification data
+ */
 self.addEventListener("push", (event) => {
   console.log("Push event received", event);
 

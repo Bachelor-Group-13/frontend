@@ -1,10 +1,10 @@
 import { GarageLayout } from "@/components/garage/GarageLayout";
 
 /**
- * Garage Page:
+ * Garage page component.
+ * Renders the main garage interface with a responsive container.
  *
- * Main page for the garage section. It includes a navbar
- * and the garage layout.
+ * @returns {JSX.Element} The rendered garage page
  */
 export default function GaragePage() {
   return (

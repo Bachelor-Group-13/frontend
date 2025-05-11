@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 
 /**
- * Auth page:
- * This page allows users to either sign in or sign up.
- * It handles user authentication and session management.
+ * Authentication page component.
+ * Provides a tabbed interface for user sign-in and sign-up functionality.
+ *
+ * @returns {JSX.Element} The rendered authentication page
  */
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -20,6 +21,13 @@ export default function AuthPage() {
     description: string;
   } | null>(null);
 
+  /**
+   * Handles displaying alerts for success or error messages.
+   *
+   * @param {"default" | "destructive"} type - The type of alert to display
+   * @param {string} title - The alert title
+   * @param {string} description - The alert description
+   */
   const handleAlert = (
     type: "default" | "destructive",
     title: string,
@@ -28,6 +36,7 @@ export default function AuthPage() {
     setAlert({ type, title, description });
   };
 
+  // Handles successful sign-up by showing a success message and switching to sign-in.
   const handleSignUpSuccess = () => {
     handleAlert(
       "default",
