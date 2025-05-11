@@ -6,26 +6,23 @@ import {
 } from "@/components/licenseplate/PlateInfoCard";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
 
 /**
  * Props for the VehicleInfoDialog component.
  * @param open - Whether the dialog is open
- * @param onOpenChange - Function to handle dialog open state changes
+ * @param onOpenChangeAction - Function to handle dialog open state changes
  * @param plateInfo - Information about the vehicle's license plate
  */
 interface VehicleInfoDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChangeAction: (open: boolean) => void;
   plateInfo: PlateInfo | null;
 }
 
@@ -37,23 +34,13 @@ interface VehicleInfoDialogProps {
  */
 export function VehicleInfoDialog({
   open,
-  onOpenChange,
+  onOpenChangeAction,
   plateInfo,
 }: VehicleInfoDialogProps) {
-  const [animateContent, setAnimateContent] = useState(false);
 
-  // Handle animation when dialog opens/closes
-  useEffect(() => {
-    if (open) {
-      const timer = setTimeout(() => setAnimateContent(true), 100);
-      return () => clearTimeout(timer);
-    } else {
-      setAnimateContent(false);
-    }
-  }, [open]);
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={onOpenChangeAction}>
       <AlertDialogTrigger className="hidden" />
       <AlertDialogContent className="max-w-md border-0 p-0 shadow-lg sm:rounded-2xl">
         {/* Dialog header with gradient background */}
@@ -72,7 +59,7 @@ export function VehicleInfoDialog({
                 size="icon"
                 className="absolute right-4 top-4 h-8 w-8 rounded-full bg-white/10 text-white
                   hover:bg-white/20"
-                onClick={() => onOpenChange(false)}
+                onClick={() => onOpenChangeAction(false)}
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>

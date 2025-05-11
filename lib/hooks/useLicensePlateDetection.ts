@@ -18,7 +18,7 @@ type PlateUserInfo = {
 /**
  * A hook that manages license plate detection and user information lookup.
  *
- * @returns {Object} An object containing:
+ * @returns An object containing:
  *   - platesInfo: Array of detected plates with user information
  *   - setPlatesInfo: Function to update plates information
  *   - handleLicensePlatesDetected: Function to process detected plates

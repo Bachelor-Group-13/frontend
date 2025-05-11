@@ -10,21 +10,21 @@ import { Separator } from "../ui/separator";
 /**
  * Props for the VehicleSettings component.
  * @param primaryLicensePlate - The primary license plate value
- * @param onPrimaryLicensePlateChange - Function to handle primary license plate changes
+ * @param onPrimaryLicensePlateChangeAction - Function to handle primary license plate changes
  * @param secondLicensePlate - The secondary license plate value
- * @param onSecondLicensePlateChange - Function to handle secondary license plate changes
+ * @param onSecondLicensePlateChangeAction - Function to handle secondary license plate changes
  * @param licensePlateError - Error message for license plate validation
  * @param showSecondLicensePlate - Whether to show the secondary license plate input
- * @param onShowSecondLicensePlate - Function to toggle secondary license plate input
+ * @param onShowSecondLicensePlateAction - Function to toggle secondary license plate input
  */
 interface VehicleSettingsProps {
   primaryLicensePlate: string;
-  onPrimaryLicensePlateChange: (value: string) => void;
+  onPrimaryLicensePlateChangeAction: (value: string) => void;
   secondLicensePlate: string;
-  onSecondLicensePlateChange: (value: string) => void;
+  onSecondLicensePlateChangeAction: (value: string) => void;
   licensePlateError: string | null;
   showSecondLicensePlate: boolean;
-  onShowSecondLicensePlate: () => void;
+  onShowSecondLicensePlateAction: () => void;
 }
 
 /**
@@ -35,12 +35,12 @@ interface VehicleSettingsProps {
  */
 export default function VehicleSettings({
   primaryLicensePlate,
-  onPrimaryLicensePlateChange,
+   onPrimaryLicensePlateChangeAction,
   secondLicensePlate,
-  onSecondLicensePlateChange,
+  onSecondLicensePlateChangeAction,
   licensePlateError,
   showSecondLicensePlate,
-  onShowSecondLicensePlate,
+  onShowSecondLicensePlateAction,
 }: VehicleSettingsProps) {
   return (
     <div>
@@ -62,7 +62,7 @@ export default function VehicleSettings({
               id="license-plate"
               type="text"
               value={primaryLicensePlate}
-              onChange={(e) => onPrimaryLicensePlateChange(e.target.value)}
+              onChange={(e) => onPrimaryLicensePlateChangeAction(e.target.value)}
               placeholder="AB12345"
               className={licensePlateError ? "border-red-500" : ""}
               minLength={7}
@@ -81,7 +81,7 @@ export default function VehicleSettings({
             type="button"
             variant="outline"
             size="sm"
-            onClick={onShowSecondLicensePlate}
+            onClick={onShowSecondLicensePlateAction}
             className="flex items-center gap-1 text-xs"
           >
             <Plus className="h-3 w-3" />
@@ -97,7 +97,7 @@ export default function VehicleSettings({
                 id="second-license-plate"
                 type="text"
                 value={secondLicensePlate}
-                onChange={(e) => onSecondLicensePlateChange(e.target.value)}
+                onChange={(e) => onSecondLicensePlateChangeAction(e.target.value)}
                 placeholder="Second license plate"
                 minLength={7}
                 maxLength={7}

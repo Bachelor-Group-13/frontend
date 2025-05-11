@@ -40,7 +40,7 @@ interface User {
  * It fetches user details and reservations, then maps them to the UI
  * parking spot state.
  *
- * @returns {Object} An object containing:
+ * @returns An object containing:
  *   - parkingSpots: Array of parking spots with their current status
  *   - setParkingSpots: Function to update parking spots state
  *   - user: Current user information

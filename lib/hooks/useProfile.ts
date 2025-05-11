@@ -9,7 +9,7 @@ import { profileService } from "@/lib/services/profileService";
  *
  * Handles form data, UI state, and profile operations
  *
- * @returns {Object} An object containing:
+ * @returns An object containing:
  *   - formData: The current form state
  *   - uiState: The current UI state
  *   - setUiState: Function to update UI state

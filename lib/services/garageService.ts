@@ -4,7 +4,7 @@ import { ParkingSpot } from "@/lib/utils/types";
 /**
  * Fetches the current user's details from the API.
  *
- * @returns {Promise<any>} The user's details
+ * @returns The user's details
  */
 export async function fetchUserDetails() {
   const userRes = await api.get("/api/auth/me");
@@ -15,7 +15,7 @@ export async function fetchUserDetails() {
  * Fetches parking spot reservations for a specific date.
  *
  * @param {string} date - The date to fetch reservations for
- * @returns {Promise<any[]>} Array of reservations for the specified date
+ * @returns Array of reservations for the specified date
  */
 export async function fetchReservations(date: string) {
   const reservationsRes = await api.get(`/api/reservations/date/${date}`);
@@ -63,7 +63,7 @@ export function createInitialParkingSpots(reservations: any[]): ParkingSpot[] {
  *
  * @param {ParkingSpot[]} currentSpots - Current array of parking spots
  * @param {any[]} reservations - Array of new reservations
- * @returns {ParkingSpot[]} Updated array of parking spots
+ * @returns Updated array of parking spots
  */
 export function updateParkingSpotsWithReservations(
   currentSpots: ParkingSpot[],

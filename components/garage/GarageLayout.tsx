@@ -179,7 +179,7 @@ export function GarageLayout() {
       {/* Vehicle info dialog */}
       <VehicleInfoDialog
         open={plateDialogOpen}
-        onOpenChange={setPlateDialogOpen}
+        onOpenChangeAction={setPlateDialogOpen}
         plateInfo={platesInfo.length > 0 ? platesInfo[0] : null}
       />
     </div>

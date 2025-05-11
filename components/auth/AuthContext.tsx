@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
  * Custom hook to access the authentication context.
  *
  * Provides access to authentication state, user data, and loading state.
- * @returns {AuthContextType} The authentication context value
+ * @returns The authentication context value
  */
 export const useAuth = () => {
   return useContext(AuthContext);

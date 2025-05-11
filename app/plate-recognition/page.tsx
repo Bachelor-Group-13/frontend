@@ -76,7 +76,7 @@ export default function PlateRecognitionPage() {
             {/* Tab navigation */}
             <PlateRecognitionTabs
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChangeAction={setActiveTab}
             />
 
             <CardContent className="p-6">
@@ -94,7 +94,7 @@ export default function PlateRecognitionPage() {
                 <CameraTab
                   webcamRef={webcamRef as React.RefObject<Webcam>}
                   processing={processing}
-                  onCapture={handleCapture}
+                  onCaptureAction={handleCapture}
                 />
               </TabsContent>
 

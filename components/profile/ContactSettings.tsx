@@ -8,11 +8,11 @@ import { Phone } from "lucide-react";
 /**
  * Props for the ContactSettings component.
  * @param phoneNumber - The current phone number value
- * @param onPhoneNumberChange - Function to handle phone number changes
+ * @param onPhoneNumberChangeAction - Function to handle phone number changes
  */
 interface ContactSettingsProps {
   phoneNumber: string;
-  onPhoneNumberChange: (value: string) => void;
+  onPhoneNumberChangeAction: (value: string) => void;
 }
 
 /**
@@ -23,7 +23,7 @@ interface ContactSettingsProps {
  */
 export default function ContactSettings({
   phoneNumber,
-  onPhoneNumberChange,
+  onPhoneNumberChangeAction,
 }: ContactSettingsProps) {
   return (
     <div>
@@ -43,7 +43,7 @@ export default function ContactSettings({
           id="phone-number"
           type="tel"
           value={phoneNumber}
-          onChange={(e) => onPhoneNumberChange(e.target.value)}
+          onChange={(e) => onPhoneNumberChangeAction(e.target.value)}
           placeholder="Your phone number"
           maxLength={8}
         />

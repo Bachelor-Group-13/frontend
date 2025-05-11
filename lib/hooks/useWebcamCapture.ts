@@ -6,7 +6,7 @@ import { api } from "@/lib/api/auth";
  * A hook that manages webcam capture and license plate detection.
  *
  * @param {Function} onDetected - Callback function called when license plates are detected
- * @returns {Object} An object containing:
+ * @returns An object containing:
  *   - webcamRef: Reference to the webcam component
  *   - capture: Function to capture and process an image
  */

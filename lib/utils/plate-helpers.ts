@@ -6,7 +6,7 @@ import { ChangeEvent, Dispatch, SetStateAction } from "react";
  * Example: AB12345
  *
  * @param {string} licensePlate - The license plate to validate
- * @returns {boolean} True if the license plate is valid
+ * @returns rue if the license plate is valid
  */
 export const isValidLicensePlate = (licensePlate: string): boolean => {
   const regex = /^[A-Z]{2}[0-9]{5}$/;

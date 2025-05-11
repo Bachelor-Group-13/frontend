@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "../auth/AuthContext";
 import { Search } from "lucide-react";
 import { Camera } from "lucide-react";
@@ -9,11 +9,11 @@ import { Upload } from "lucide-react";
 /**
  * Props for the PlateRecognitionTabs component.
  * @param activeTab - The currently selected tab
- * @param onTabChange - Function to handle tab changes
+ * @param onTabChangeAction - Function to handle tab changes
  */
 interface PlateRecognitionTabsProps {
   activeTab: string;
-  onTabChange: (value: string) => void;
+  onTabChangeAction: (value: string) => void;
 }
 
 /**
@@ -25,14 +25,14 @@ interface PlateRecognitionTabsProps {
  */
 export function PlateRecognitionTabs({
   activeTab,
-  onTabChange,
+  onTabChangeAction,
 }: PlateRecognitionTabsProps) {
   const { user } = useAuth();
   return (
     <Tabs
       defaultValue="manual"
       value={activeTab}
-      onValueChange={onTabChange}
+      onValueChange={onTabChangeAction}
       className="w-full"
     >
       {/* Tabs container */}

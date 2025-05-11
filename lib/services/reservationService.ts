@@ -7,7 +7,7 @@ import { api } from "@/lib/api/auth";
  * @param {number} userId - The ID of the user making the reservation
  * @param {string} licensePlate - The license plate of the vehicle
  * @param {Date|null} estimatedDeparture - The estimated departure time
- * @returns {Promise<any>} The created reservation
+ * @returns The created reservation
  */
 export async function createReservation(
   spotNumber: string,
@@ -31,7 +31,7 @@ export async function createReservation(
  *
  * @param {string} spotNumber - The parking spot number
  * @param {number} userId - The ID of the user who made the reservation
- * @returns {Promise<any>} The deleted reservation
+ * @returns The deleted reservation
  * @throws {Error} If the reservation is not found
  */
 export async function deleteReservation(spotNumber: string, userId: number) {

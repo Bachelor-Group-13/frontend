@@ -69,14 +69,14 @@ export default function ProfilePage() {
             {/* Vehicle settings section */}
             <VehicleSettings
               primaryLicensePlate={formData.licensePlate}
-              onPrimaryLicensePlateChange={handlePrimaryLicensePlateChange}
+              onPrimaryLicensePlateChangeAction={handlePrimaryLicensePlateChange}
               secondLicensePlate={formData.secondLicensePlate}
-              onSecondLicensePlateChange={(value) =>
+              onSecondLicensePlateChangeAction={(value) =>
                 handleFieldChange("secondLicensePlate", value)
               }
               licensePlateError={uiState.licensePlateError}
               showSecondLicensePlate={uiState.showSecondLicensePlate}
-              onShowSecondLicensePlate={() =>
+              onShowSecondLicensePlateAction={() =>
                 setUiState((prev) => ({
                   ...prev,
                   showSecondLicensePlate: true,
@@ -86,16 +86,16 @@ export default function ProfilePage() {
             {/* Contact settings section */}
             <ContactSettings
               phoneNumber={formData.phoneNumber}
-              onPhoneNumberChange={(value) =>
+              onPhoneNumberChangeAction={(value) =>
                 handleFieldChange("phoneNumber", value)
               }
             />
             {/* Security settings section */}
             <SecuritySettings
               password={formData.password}
-              onPasswordChange={(value) => handleFieldChange("password", value)}
+              onPasswordChangeAction={(value) => handleFieldChange("password", value)}
               confirmPassword={formData.confirmPassword}
-              onConfirmPasswordChange={(value) =>
+              onConfirmPasswordChangeAction={(value) =>
                 handleFieldChange("confirmPassword", value)
               }
             />

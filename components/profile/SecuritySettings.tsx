@@ -8,15 +8,15 @@ import { useState } from "react";
 /**
  * Props for the SecuritySettings component.
  * @param password - The new password value
- * @param onPasswordChange - Function to handle password changes
+ * @param onPasswordChangeAction - Function to handle password changes
  * @param confirmPassword - The password confirmation value
- * @param onConfirmPasswordChange - Function to handle confirm password changes
+ * @param onConfirmPasswordChangeAction - Function to handle confirm password changes
  */
 interface SecuritySettingsProps {
   password: string;
-  onPasswordChange: (value: string) => void;
+  onPasswordChangeAction: (value: string) => void;
   confirmPassword: string;
-  onConfirmPasswordChange: (value: string) => void;
+  onConfirmPasswordChangeAction: (value: string) => void;
 }
 
 /**
@@ -26,9 +26,9 @@ interface SecuritySettingsProps {
  */
 export default function SecuritySettings({
   password,
-  onPasswordChange,
+  onPasswordChangeAction,
   confirmPassword,
-  onConfirmPasswordChange,
+  onConfirmPasswordChangeAction,
 }: SecuritySettingsProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -52,7 +52,7 @@ export default function SecuritySettings({
               id="new-password"
               type={showPassword ? "text" : "password"}
               value={password}
-              onChange={(e) => onPasswordChange(e.target.value)}
+              onChange={(e) => onPasswordChangeAction(e.target.value)}
               placeholder="Enter new password"
             />
             <button
@@ -79,7 +79,7 @@ export default function SecuritySettings({
               id="confirm-password"
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
-              onChange={(e) => onConfirmPasswordChange(e.target.value)}
+              onChange={(e) => onConfirmPasswordChangeAction(e.target.value)}
               placeholder="Confirm new password"
             />
             <button

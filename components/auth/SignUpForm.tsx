@@ -104,6 +104,8 @@ export default function SignUpForm({
         return;
       }
 
+      console.log("Registration successful:", data);
+
       // Try to sign in after successful registration
       const loginResult = await login(email, password);
       if (loginResult.error) {

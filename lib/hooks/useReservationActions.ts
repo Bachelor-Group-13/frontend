@@ -25,7 +25,7 @@ interface UseReservationActionsProps {
 /**
  * A hook that manages parking spot reservation actions.
  *
- * @returns {Object} An object containing:
+ * @returns An object containing:
  *   - selectedLicensePlate: The currently selected license plate
  *   - setSelectedLicensePlate: Function to update selected license plate
  *   - estimatedDeparture: The estimated departure time

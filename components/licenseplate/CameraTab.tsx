@@ -8,12 +8,12 @@ import Webcam from "react-webcam";
  * Props for the CameraTab component.
  * @param webcamRef - Reference to the webcam component
  * @param processing - Whether the camera is currently processing an image
- * @param onCapture - Function to call when the capture button is clicked
+ * @param onCaptureAction - Function to call when the capture button is clicked
  */
 interface CameraTabProps {
   webcamRef: React.RefObject<Webcam>;
   processing: boolean;
-  onCapture: () => void;
+  onCaptureAction: () => void;
 }
 
 /**
@@ -25,7 +25,7 @@ interface CameraTabProps {
 export function CameraTab({
   webcamRef,
   processing,
-  onCapture,
+  onCaptureAction,
 }: CameraTabProps) {
   return (
     <div className="space-y-4">
@@ -45,7 +45,7 @@ export function CameraTab({
         {/* Capture button overlay */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-4">
           <Button
-            onClick={onCapture}
+            onClick={onCaptureAction}
             disabled={processing}
             className="mx-auto flex w-full max-w-xs items-center justify-center gap-2 bg-white
               text-neutral-900 hover:bg-gray-100"
