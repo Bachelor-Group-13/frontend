@@ -1,41 +1,112 @@
-# Inneparkert - Frontend
+# Inneparkert Frontend
 
-## Setup Instructions
+The frontend application for Inneparkert, a smart parking management system developed as a bachelor project in collaboration with Twoday.
 
-1.  **Clone the repository:**
+## Overview
 
-    ```bash
-    git clone <repository_url>
-    cd <project_directory>
-    ```
+This is the frontend part of the Inneparkert system, built with Next.js and TypeScript. The application provides a modern, user-friendly interface for managing parking operations.
 
-2.  **Install pnpm (if you don't have it):**
+## Features
+- **User Interface**
+  - Modern, responsive design using Tailwind CSS 
+  - Intuitive navigation and user flows
+  - Real-time updates and feedback
 
-    ```bash
-    npm install -g pnpm@latest
-    ```
+- **User Management**
+  - Secure authentication system
+  - Profile management with license plate handling
+  - User settings and preferences
 
-    See [https://pnpm.io/installation](https://pnpm.io/installation) for more details.
+- **Parking Management**
+  - Real-time parking spot visualization
+  - License plate validation and management
 
-3.  **Install dependencies:**
+## Technical Details
 
-    ```bash
-    pnpm install
-    ```
+### Built With
 
-4.  **Create a `.env` file:**
+- **Framework**: Next.js
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: Shadcn/ui
+- **Package Manager**: pnpm
 
-    Create a `.env` file in the project root directory with the following variables:
+### Project Structure
 
-    ```
-    NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
-    ```
+```
+frontend/
+├── app/              # Next.js app router pages
+├── components/       # Reusable UI components
+│   ├── auth/        # Authentication components
+│   ├── profile/     # Profile management
+│   └── ui/          # Shadcn UI components
+├── lib/             # Utilities and hooks
+│   ├── hooks/       # Custom React hooks
+│   ├── services/    # API services
+│   └── utils/       # Helper functions
+└── public/          # Static assets
+```
 
-5.  **Run the application:**
+## Getting Started
 
-    ```bash
-    pnpm dev
-    ```
+### Prerequisites
 
-    The application will start on `http://localhost:3000`.
+- Node.js 
+- pnpm (package manager)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Bachelor-Group-13/frontend.git
+cd frontend
+```
+
+2. Install dependencies:
+```bash
+pnpm install
+```
+
+3. Set up environment variables:
+Create a `.env` file with:
+```env
+NEXT_PUBLIC_API_URL=backend_api_url
+NEXT_PUBLIC_VISION_API_URL=vision_api_url
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=vapid_public_key
+NEXT_PUBLIC_VAPID_PRIVATE_KEY=vapid_private_key
+```
+
+4. Start the development server:
+```bash
+pnpm dev
+```
+
+The application will be available at `http://localhost:3000`
+
+## Development
+
+### Code Style
+
+- ESLint for code quality
+- Prettier for consistent formatting
+- TypeScript for type safety
+
+### Available Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm lint` - Run ESLint
+- `pnpm format` - Format code with Prettier
+
+## Project Status
+
+This project is part of a bachelor project. The frontend application is designed to work when set up with:
+- A Spring Boot backend API service
+- A Python vision API service
+
+## Team
+
+- Viljar Hoem-Olsen 
+- Thomas Åkre
+- Sander Grimstad
+
