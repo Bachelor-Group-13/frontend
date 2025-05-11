@@ -12,11 +12,11 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Camera, Car, ChevronDown, LogOut, User } from "lucide-react";
+import { Car, ChevronDown, LogOut, User } from "lucide-react";
 import { logout } from "@/lib/api/auth";
 import { useAuth } from "../auth/AuthContext";
 import { cn } from "@/lib/utils/utils";
-import { subscribeToPush } from "@/lib/utils/push";
+import { NotificationToggle } from "../garage/NotificationToggle";
 
 /*
  * Navbar component:
@@ -146,6 +146,16 @@ export function Navbar() {
                     <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator />
+
+                  <DropdownMenuItem asChild>
+                    <NotificationToggle
+                      user={user}
+                      className="flex w-full cursor-pointer justify-start"
+                    />
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
                   <DropdownMenuItem asChild>
                     <Link
                       href="/profile"

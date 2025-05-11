@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
-import { Switch } from "@/components/ui/switch";
 import { subscribeToPush } from "@/lib/utils/push";
+import { Button } from "../ui/button";
+import { Bell, BellOff } from "lucide-react";
+import { cn } from "@/lib/utils/utils";
 
 interface NotificationToggleProps {
-  user: any;
+  user: { id: string } | null;
+  className?: string;
 }
 
-export function NotificationToggle({ user }: NotificationToggleProps) {
+export function NotificationToggle({
+  user,
+  className,
+}: NotificationToggleProps) {
   const [subscribed, setSubscribed] = useState(false);
 
   useEffect(() => {
@@ -47,18 +53,21 @@ export function NotificationToggle({ user }: NotificationToggleProps) {
   };
 
   return (
-    <div className="flex items-center space-x-4">
-      <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-500">Push Notifications</span>
-        <Switch
-          onCheckedChange={handleSubscribeClick}
-          checked={subscribed}
-          aria-label="Toggle notifications"
-        />
-        <span className="text-xs text-gray-500">
-          {subscribed ? "On" : "Off"}
-        </span>
-      </div>
-    </div>
+    <Button
+      onClick={handleSubscribeClick}
+      variant="ghost"
+      size="sm"
+      className={cn("flex gap-2", "px-0 py-0", className)}
+    >
+      {subscribed ? (
+        <Bell className="h-4 w-4 text-white" />
+      ) : (
+        <BellOff className="h-4 w-4" />
+      )}
+      <span className="text-sm">
+        {subscribed ? "Notifications On" : "Notifications Off"}
+      </span>
+      <div />
+    </Button>
   );
 }

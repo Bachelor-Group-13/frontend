@@ -72,15 +72,16 @@ export default function AuthPage() {
             </TabsList>
             <TabsContent value="signin">
               <SignInForm
-                onSuccess={() => setAlert(null)}
-                onError={handleAlert}
+                onSuccessAction={() => setAlert(null)}
+                onErrorAction={handleAlert}
               />
             </TabsContent>
 
             <TabsContent value="signup">
               <SignUpForm
-                onSuccess={handleSignUpSuccess}
-                onError={handleAlert}
+                onSuccessAction={handleSignUpSuccess}
+                onErrorAction={handleAlert}
+                setIsSignUpAction={setIsSignUp}
               />
             </TabsContent>
           </Tabs>

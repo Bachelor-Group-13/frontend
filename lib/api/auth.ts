@@ -12,7 +12,9 @@ export const api = axios.create({
 
 export const login = async (email: string, password: string) => {
   try {
-    console.log("Attempting to login with", { email });
+    console.log("Attempting to login with", { email, password });
+    const payload = { email, password };
+    console.log("Login payload", payload);
     const response = await api.post(`${API_URL}signin`, {
       email,
       password,

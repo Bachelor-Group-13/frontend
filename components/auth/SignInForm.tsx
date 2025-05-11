@@ -9,15 +9,18 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 interface SignInFormProps {
-  onSuccess: () => void;
-  onError: (
+  onSuccessAction: (userData?: any) => void;
+  onErrorAction: (
     type: "default" | "destructive",
     title: string,
     description: string
   ) => void;
 }
 
-export default function SignInForm({ onSuccess, onError }: SignInFormProps) {
+export default function SignInForm({
+  onSuccessAction,
+  onErrorAction,
+}: SignInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +32,7 @@ export default function SignInForm({ onSuccess, onError }: SignInFormProps) {
     setIsSubmitting(true);
 
     if (!email || !password) {
-      onError(
+      onErrorAction(
         "destructive",
         "Missing Fields",
         "Email and password are required."
@@ -42,15 +45,16 @@ export default function SignInForm({ onSuccess, onError }: SignInFormProps) {
       const { data, error } = await login(email, password);
 
       if (error) {
-        onError("destructive", "Sign In Failed", error.message);
+        onErrorAction("destructive", "Sign In Failed", error.message);
         setIsSubmitting(false);
         return;
       }
 
-      onSuccess();
+      console.log("Login successful:", data);
+      onSuccessAction(data);
       router.push("/garage");
     } catch (error: any) {
-      onError(
+      onErrorAction(
         "destructive",
         "Error",
         error.message || "An unknown error occured."

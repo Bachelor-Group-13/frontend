@@ -1,9 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ParkingSpot } from "@/lib/utils/types";
 import { ParkingSpotCard } from "./ParkingSpotCard";
-import { Button } from "@/components/ui/button";
-import { Camera } from "lucide-react";
-import Link from "next/link";
 
 interface GarageMapProps {
   parkingSpots: ParkingSpot[];
@@ -19,15 +16,6 @@ export function GarageMap({
   return (
     <Card className="border-0 bg-gray-50 shadow-sm">
       <CardContent className="p-6">
-        <div className="mb-4 flex w-full max-w-md justify-center space-x-4">
-          <Link href="/plate-recognition" className="w-full">
-            <Button variant="outline" className="w-full">
-              <Camera className="mr-2 h-4 w-4" />
-              Detect License Plate
-            </Button>
-          </Link>
-        </div>
-
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-12 grid grid-cols-2 gap-4 md:col-span-6">
             {parkingSpots.map((spot) => (

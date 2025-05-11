@@ -69,8 +69,8 @@ export default function PlateRecognitionPage() {
               <TabsContent className="mt-0" value="manual">
                 <ManualSearchTab
                   manualPlate={manualPlate}
-                  onManualPlateChange={setManualPlate}
-                  onSearch={handleManualSearch}
+                  onManualPlateChangeAction={setManualPlate}
+                  onSearchAction={handleManualSearch}
                 />
               </TabsContent>
 

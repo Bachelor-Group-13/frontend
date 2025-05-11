@@ -1,7 +1,7 @@
 "use client";
 
 import { login, register } from "@/lib/api/auth";
-import { handleLicensePlateChange } from "@/lib/utils/helpers";
+import { handleLicensePlateChange } from "@/lib/utils/plate-helpers";
 import { useState } from "react";
 import { Label } from "../ui/label";
 import { Car, Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";
@@ -9,19 +9,19 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
 interface SignUpFormProps {
-  onSuccess: () => void;
-  onError: (
+  onSuccessAction: () => void;
+  onErrorAction: (
     type: "default" | "destructive",
     title: string,
     description: string
   ) => void;
-  setIsSignUp: (value: boolean) => void;
+  setIsSignUpAction: (value: boolean) => void;
 }
 
 export default function SignUpForm({
-  onSuccess,
-  onError,
-  setIsSignUp,
+  onSuccessAction,
+  onErrorAction,
+  setIsSignUpAction,
 }: SignUpFormProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -45,13 +45,17 @@ export default function SignUpForm({
     setIsSubmitting(true);
 
     if (!email || !name || !password || !licensePlate || !phoneNumber) {
-      onError("destructive", "Missing fields", "Please fill in all fields.");
+      onErrorAction(
+        "destructive",
+        "Missing fields",
+        "Please fill in all fields."
+      );
       setIsSubmitting(false);
       return;
     }
 
     if (password.length < 6) {
-      onError(
+      onErrorAction(
         "destructive",
         "Weak password",
         "Password must be at least 6 characters long."
@@ -61,7 +65,7 @@ export default function SignUpForm({
     }
 
     if (licensePlateError) {
-      onError("destructive", "Invalid license plate", licensePlateError);
+      onErrorAction("destructive", "Invalid license plate", licensePlateError);
       setIsSubmitting(false);
       return;
     }
@@ -76,7 +80,7 @@ export default function SignUpForm({
       );
 
       if (error) {
-        onError("destructive", "Sign Up Failed", error.message);
+        onErrorAction("destructive", "Sign Up Failed", error.message);
         setIsSubmitting(false);
         return;
       }
@@ -84,17 +88,17 @@ export default function SignUpForm({
       // After successful registration, try to sign in
       const loginResult = await login(email, password);
       if (loginResult.error) {
-        onError(
+        onErrorAction(
           "destructive",
           "Sign Up Successful",
           "Account created but automatic sign in failed. Please sign in manually."
         );
-        setIsSignUp(false);
+        setIsSignUpAction(false);
       } else {
-        onSuccess();
+        onSuccessAction();
       }
     } catch (error: any) {
-      onError(
+      onErrorAction(
         "destructive",
         "Error",
         error.message || "An unknown error occurred."
@@ -115,6 +119,7 @@ export default function SignUpForm({
             id="signup-email"
             type="email"
             value={email}
+            placeholder="email@email.com"
             onChange={(e) => setEmail(e.target.value)}
             className="pl-10"
           />

@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface ReservationDialogProps {
   selectedSpot: ParkingSpot;
@@ -98,12 +99,12 @@ export function ReservationDialog({
           </AlertDialogDescription>
           {(!isOccupied || isAnonymous) && user && (
             <div className="mt-4">
-              <label
+              <Label
                 htmlFor="license-plate-select"
                 className="mt-2 block text-sm font-medium text-gray-700"
               >
                 Select License Plate
-              </label>
+              </Label>
               <Select
                 value={selectedLicensePlate || ""}
                 onValueChange={setSelectedLicensePlate}
@@ -122,10 +123,10 @@ export function ReservationDialog({
                   )}
                 </SelectContent>
               </Select>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+              <div className="mt-4">
+                <Label className="mt-2 block text-sm font-medium text-gray-700">
                   Estimated Departure Time (Optional)
-                </label>
+                </Label>
                 <div className="relative">
                   <input
                     type="time"
