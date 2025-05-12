@@ -10,6 +10,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Create production env file
+        run: |
+          cat > .env.production <<EOF
+          NEXT_PUBLIC_API_URL=http://backend:8080
+          NEXT_PUBLIC_VISION_API_URL=http://detection-api:8000
+          NEXT_PUBLIC_VAPID_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_VAPID_PUBLIC_KEY }}
+          NEXT_PUBLIC_VAPID_PRIVATE_KEY=${{ secrets.NEXT_PUBLIC_VAPID_PRIVATE_KEY }}
+          EOF
+
 
       - name: Log in to GHCR
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
