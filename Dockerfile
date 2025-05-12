@@ -9,6 +9,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
+COPY .env.production .env
+
 # Copy source and build
 COPY . .
 RUN pnpm build
