@@ -1,14 +1,31 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Install dependencies
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Copy source and build
+COPY . .
+RUN pnpm build
+
+# Production image
 FROM node:20-alpine
 
 WORKDIR /app
 
+# Enable pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+# Copy built files and dependencies
+COPY --from=builder /app/ ./
 
-COPY . .
-
+# Expose port
 EXPOSE 3000
 
-CMD ["pnpm", "dev"]
+# Start the production server on 0.0.0.0
+CMD ["pnpm", "start", "-H", "0.0.0.0", "-p", "3000"]
