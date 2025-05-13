@@ -143,7 +143,9 @@ export default function SignUpForm({
             type="email"
             value={email}
             placeholder="email@email.com"
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.toLowerCase())}
+            autoCapitalize="none"
+            autoCorrect="off"
             className="pl-10"
           />
         </div>

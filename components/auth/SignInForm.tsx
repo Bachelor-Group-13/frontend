@@ -93,7 +93,9 @@ export default function SignInForm({
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.toLowerCase())}
+            autoCapitalize="none"
+            autoCorrect="off"
             placeholder="email@example.com"
             className="pl-10"
             required
