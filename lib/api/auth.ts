@@ -22,15 +22,10 @@ export const api = axios.create({
  */
 export const login = async (email: string, password: string) => {
   try {
-    console.log("Attempting to login with", { email, password });
-    const payload = { email, password };
-    console.log("Login payload", payload);
     const response = await api.post(`${API_URL}signin`, {
       email,
       password,
     });
-    console.log("Login response", response.data);
-
     try {
       const userResponse = await api.get(`${API_URL}me`);
       window.dispatchEvent(
