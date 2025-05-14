@@ -54,65 +54,58 @@ export default function PlateRecognitionPage() {
 
   return (
     <PlateRecognitionLayout>
-      <div className="mx-auto max-w-3xl">
-        {/* Card container for the recognition interface */}
-        <Card className="overflow-hidden shadow-lg">
-          <CardHeader className="pb-8">
-            <CardTitle className="flex items-center gap-2 text-2xl">
-              License Plate Recognition
-            </CardTitle>
-            <CardDescription>
-              Find vehicle owners by license plate using one of the methods
-              below.
-            </CardDescription>
-          </CardHeader>
+      {/* Card container for the recognition interface */}
+      <Card className="overflow-hidden shadow-lg">
+        <CardHeader className="pb-8">
+          <CardTitle className="flex items-center gap-2 text-2xl">
+            License Plate Recognition
+          </CardTitle>
+          <CardDescription>
+            Find vehicle owners by license plate using one of the methods below.
+          </CardDescription>
+        </CardHeader>
 
-          {/* Tabs for the different methods */}
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            {/* Tab navigation */}
-            <PlateRecognitionTabs
-              activeTab={activeTab}
-              onTabChangeAction={setActiveTab}
-            />
+        {/* Tabs for the different methods */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          {/* Tab navigation */}
+          <PlateRecognitionTabs
+            activeTab={activeTab}
+            onTabChangeAction={setActiveTab}
+          />
 
-            <CardContent className="p-6">
-              {/* Manual search tab */}
-              <TabsContent className="mt-0" value="manual">
-                <ManualSearchTab
-                  manualPlate={manualPlate}
-                  onManualPlateChangeAction={setManualPlate}
-                  onSearchAction={handleManualSearch}
+          <CardContent className="p-6">
+            {/* Manual search tab */}
+            <TabsContent className="mt-0" value="manual">
+              <ManualSearchTab
+                manualPlate={manualPlate}
+                onManualPlateChangeAction={setManualPlate}
+                onSearchAction={handleManualSearch}
+              />
+            </TabsContent>
+
+            {/* Camera capture tab */}
+            <TabsContent value="camera" className="mt-0">
+              <CameraTab
+                webcamRef={webcamRef as React.RefObject<Webcam>}
+                processing={processing}
+                onCaptureAction={handleCapture}
+              />
+            </TabsContent>
+
+            {/* Image upload tab (developer only) */}
+            {user && user?.role === "ROLE_DEVELOPER" && (
+              <TabsContent value="upload" className="mt-0">
+                <LicensePlateUpload
+                  onLicensePlatesDetected={handleLicensePlatesDetected}
                 />
               </TabsContent>
+            )}
 
-              {/* Camera capture tab */}
-              <TabsContent value="camera" className="mt-0">
-                <CameraTab
-                  webcamRef={webcamRef as React.RefObject<Webcam>}
-                  processing={processing}
-                  onCaptureAction={handleCapture}
-                />
-              </TabsContent>
-
-              {/* Image upload tab (developer only) */}
-              {user && user?.role === "ROLE_DEVELOPER" && (
-                <TabsContent value="upload" className="mt-0">
-                  <LicensePlateUpload
-                    onLicensePlatesDetected={handleLicensePlatesDetected}
-                  />
-                </TabsContent>
-              )}
-
-              {/* Results display */}
-              <DetectedPlates platesInfo={platesInfo} />
-            </CardContent>
-          </Tabs>
-        </Card>
-      </div>
+            {/* Results display */}
+            <DetectedPlates platesInfo={platesInfo} />
+          </CardContent>
+        </Tabs>
+      </Card>
     </PlateRecognitionLayout>
   );
 }

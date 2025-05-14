@@ -35,7 +35,7 @@ interface VehicleSettingsProps {
  */
 export default function VehicleSettings({
   primaryLicensePlate,
-   onPrimaryLicensePlateChangeAction,
+  onPrimaryLicensePlateChangeAction,
   secondLicensePlate,
   onSecondLicensePlateChangeAction,
   licensePlateError,
@@ -62,7 +62,9 @@ export default function VehicleSettings({
               id="license-plate"
               type="text"
               value={primaryLicensePlate}
-              onChange={(e) => onPrimaryLicensePlateChangeAction(e.target.value)}
+              onChange={(e) =>
+                onPrimaryLicensePlateChangeAction(e.target.value)
+              }
               placeholder="AB12345"
               className={licensePlateError ? "border-red-500" : ""}
               minLength={7}
@@ -97,7 +99,9 @@ export default function VehicleSettings({
                 id="second-license-plate"
                 type="text"
                 value={secondLicensePlate}
-                onChange={(e) => onSecondLicensePlateChangeAction(e.target.value)}
+                onChange={(e) =>
+                  onSecondLicensePlateChangeAction(e.target.value)
+                }
                 placeholder="Second license plate"
                 minLength={7}
                 maxLength={7}
