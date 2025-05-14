@@ -44,63 +44,64 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12 pt-8">
-      {/* Header section  */}
-      <div className="container mx-auto px-4">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto max-w-2xl px-4">
+        {/* Header section  */}
+        <div className="mb-8">
           <Link
             href="/garage"
-            className="rounded-full p-2 transition-colors hover:bg-gray-200"
+            className="inline-flex items-center rounded-full px-3 py-2 text-gray-700 transition
+              hover:bg-gray-200"
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
+            <span className="ml-2 font-medium">Back to Garage</span>
           </Link>
-          <h1 className="text-2xl font-bold">Profile</h1>
-          <div className="w-5" />
+          <h1 className="mt-4 text-2xl font-bold">Profile</h1>
         </div>
 
         {/* Main profile content */}
-        <div className="mx-auto max-w-2xl">
-          <ProfileCard
-            name={formData.name}
-            email={formData.userEmail}
-            onUpdate={handleUpdate}
-            isSubmitting={uiState.isSubmitting}
+        <ProfileCard
+          name={formData.name}
+          email={formData.userEmail}
+          onUpdate={handleUpdate}
+          isSubmitting={uiState.isSubmitting}
+          licensePlateError={uiState.licensePlateError}
+        >
+          {/* Vehicle settings section */}
+          <VehicleSettings
+            primaryLicensePlate={formData.licensePlate}
+            onPrimaryLicensePlateChangeAction={handlePrimaryLicensePlateChange}
+            secondLicensePlate={formData.secondLicensePlate}
+            onSecondLicensePlateChangeAction={(value) =>
+              handleFieldChange("secondLicensePlate", value)
+            }
             licensePlateError={uiState.licensePlateError}
-          >
-            {/* Vehicle settings section */}
-            <VehicleSettings
-              primaryLicensePlate={formData.licensePlate}
-              onPrimaryLicensePlateChangeAction={handlePrimaryLicensePlateChange}
-              secondLicensePlate={formData.secondLicensePlate}
-              onSecondLicensePlateChangeAction={(value) =>
-                handleFieldChange("secondLicensePlate", value)
-              }
-              licensePlateError={uiState.licensePlateError}
-              showSecondLicensePlate={uiState.showSecondLicensePlate}
-              onShowSecondLicensePlateAction={() =>
-                setUiState((prev) => ({
-                  ...prev,
-                  showSecondLicensePlate: true,
-                }))
-              }
-            />
-            {/* Contact settings section */}
-            <ContactSettings
-              phoneNumber={formData.phoneNumber}
-              onPhoneNumberChangeAction={(value) =>
-                handleFieldChange("phoneNumber", value)
-              }
-            />
-            {/* Security settings section */}
-            <SecuritySettings
-              password={formData.password}
-              onPasswordChangeAction={(value) => handleFieldChange("password", value)}
-              confirmPassword={formData.confirmPassword}
-              onConfirmPasswordChangeAction={(value) =>
-                handleFieldChange("confirmPassword", value)
-              }
-            />
-          </ProfileCard>
-        </div>
+            showSecondLicensePlate={uiState.showSecondLicensePlate}
+            onShowSecondLicensePlateAction={() =>
+              setUiState((prev) => ({
+                ...prev,
+                showSecondLicensePlate: true,
+              }))
+            }
+          />
+          {/* Contact settings section */}
+          <ContactSettings
+            phoneNumber={formData.phoneNumber}
+            onPhoneNumberChangeAction={(value) =>
+              handleFieldChange("phoneNumber", value)
+            }
+          />
+          {/* Security settings section */}
+          <SecuritySettings
+            password={formData.password}
+            onPasswordChangeAction={(value) =>
+              handleFieldChange("password", value)
+            }
+            confirmPassword={formData.confirmPassword}
+            onConfirmPasswordChangeAction={(value) =>
+              handleFieldChange("confirmPassword", value)
+            }
+          />
+        </ProfileCard>
       </div>
 
       {/* Success dialog for profile updates */}
