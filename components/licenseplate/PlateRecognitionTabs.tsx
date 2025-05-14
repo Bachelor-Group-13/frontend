@@ -47,18 +47,18 @@ export function PlateRecognitionTabs({
           {/* Manual search tab */}
           <TabsTrigger value="manual" className="flex items-center gap-2">
             <Search className="h-4 w-4" />
-            Search License Plate
+            Search
           </TabsTrigger>
           {/* Camera tab */}
           <TabsTrigger value="camera" className="flex items-center gap-2">
             <Camera className="h-4 w-4" />
-            Use Camera
+            Camera
           </TabsTrigger>
           {/* Upload tab (developer only) */}
           {user && user?.role === "ROLE_DEVELOPER" && (
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
-              Upload Image
+              Upload
             </TabsTrigger>
           )}
         </TabsList>
