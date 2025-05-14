@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { FormEvent } from "react";
 
 /**
  * Props for the ManualSearchTab component.
@@ -27,6 +28,11 @@ export function ManualSearchTab({
   onManualPlateChangeAction,
   onSearchAction,
 }: ManualSearchTabProps) {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSearchAction();
+  };
+
   return (
     <div className="space-y-4">
       {/* Input section */}
@@ -35,7 +41,7 @@ export function ManualSearchTab({
           License Plate Number
         </Label>
         {/* Input and search button */}
-        <div className="flex gap-2">
+        <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             id="license-plate"
             value={manualPlate}
@@ -46,14 +52,14 @@ export function ManualSearchTab({
             className="flex-1"
           />
           <Button
-            onClick={onSearchAction}
+            type="submit"
             disabled={!manualPlate.trim()}
             className="bg-neutral-900 hover:bg-neutral-800"
           >
             <Search className="mr-2 h-4 w-4" />
             Search
           </Button>
-        </div>
+        </form>
         <p className="text-xs text-gray-500">
           Enter the license plate number in the format "AB12345"
         </p>

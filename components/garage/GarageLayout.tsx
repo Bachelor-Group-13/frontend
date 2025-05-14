@@ -113,12 +113,12 @@ export function GarageLayout() {
             </TabsTrigger>
             <TabsTrigger value="garage" className="flex items-center">
               <CircleParking className="mr-2 h-4 w-4" />
-              Garage Layout
+              Layout
             </TabsTrigger>
             {user && user.role === "ROLE_DEVELOPER" && (
               <TabsTrigger value="detection" className="flex items-center">
                 <Camera className="mr-2 h-4 w-4" />
-                Detect Spots
+                Detect
               </TabsTrigger>
             )}
           </TabsList>
