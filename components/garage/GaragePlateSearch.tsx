@@ -20,8 +20,17 @@ export interface GaragePlateSearchProps {
 export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
   const [plate, setPlate] = useState("");
 
+  // Function to handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = plate.trim().toUpperCase();
+    if (trimmed) {
+      onSearch(trimmed);
+    }
+  };
+
   return (
-    <div className="max-w-xs">
+    <form onSubmit={handleSubmit} className="max-w-xs">
       {/* License plate input field */}
       <div
         className="flex h-12 overflow-hidden rounded-md border-2 transition
@@ -59,10 +68,7 @@ export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
 
         {/* Search button */}
         <Button
-          onClick={() => {
-            const trimmed = plate.trim().toUpperCase();
-            if (trimmed) onSearch(trimmed);
-          }}
+          type="submit"
           variant="ghost"
           className="mt-1 p-3 hover:bg-transparent"
           disabled={!plate.trim()}
@@ -70,6 +76,6 @@ export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
           <ArrowRight className="h-10 w-auto" />
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
