@@ -37,17 +37,12 @@ export function VehicleInfoDialog({
   onOpenChangeAction,
   plateInfo,
 }: VehicleInfoDialogProps) {
-
-
   return (
     <AlertDialog open={open} onOpenChange={onOpenChangeAction}>
       <AlertDialogTrigger className="hidden" />
       <AlertDialogContent className="max-w-md border-0 p-0 shadow-lg sm:rounded-2xl">
         {/* Dialog header with gradient background */}
-        <div
-          className="relative overflow-hidden rounded-t-2xl bg-neutral-900
-            to-blue-700 p-6 text-white"
-        >
+        <div className="relative overflow-hidden rounded-t-2xl bg-neutral-900 to-blue-700 p-6 text-white">
           <AlertDialogHeader className="items-start space-y-1 text-left">
             <div className="flex items-center justify-between">
               <AlertDialogTitle className="text-2xl font-bold tracking-tight text-white">

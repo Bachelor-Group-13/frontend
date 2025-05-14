@@ -93,7 +93,7 @@ export function ParkedInBy({ user, parkingSpots }: ParkedInByProps) {
             </div>
           </div>
           {/* Contact and departure time information */}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             {blockingSpot.occupiedBy.phone_number && (
               <a
                 href={`tel:${blockingSpot.occupiedBy.phone_number}`}

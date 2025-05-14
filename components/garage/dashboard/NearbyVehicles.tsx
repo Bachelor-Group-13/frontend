@@ -1,4 +1,4 @@
-import { Clock, Mail, MessageCircle, Phone, Users } from "lucide-react";
+import { Mail, MessageCircle, Phone, Users } from "lucide-react";
 import { format } from "date-fns";
 import { ParkingSpot } from "@/lib/utils/types";
 import { isBlockingCar } from "@/lib/utils/parking";
@@ -74,6 +74,7 @@ export function NearbyVehicles({ user, parkingSpots }: NearbyVehiclesProps) {
                   <TooltipTrigger asChild>
                     <div
                       className={`relative rounded-md border p-3 ${isBlocking ? "border-red-500 bg-red-50" : ""}`}
+                      style={{ minHeight: "4.5rem" }}
                     >
                       {/* Vehicle owner details */}
                       <div className="flex items-center justify-between">
@@ -99,7 +100,7 @@ export function NearbyVehicles({ user, parkingSpots }: NearbyVehiclesProps) {
                               Spot {spot.spotNumber}
                             </p>
                             {spot.occupiedBy?.estimatedDeparture && (
-                              <p className="tex-xs text-gray-500">
+                              <p className="text-xs text-gray-500">
                                 Leaving at{" "}
                                 {format(
                                   new Date(spot.occupiedBy.estimatedDeparture),
@@ -110,7 +111,7 @@ export function NearbyVehicles({ user, parkingSpots }: NearbyVehiclesProps) {
                           </div>
                         </div>
                         {/* Contact and departure time information */}
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                           {spot.occupiedBy?.phone_number && (
                             <a
                               href={`tel:${spot.occupiedBy.phone_number}`}

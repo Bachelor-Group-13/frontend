@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AlertCircle, Car, Mail, MessageCircle, Phone, User } from "lucide-react";
+import {
+  AlertCircle,
+  Car,
+  Mail,
+  MessageCircle,
+  Phone,
+  User,
+} from "lucide-react";
 
 /**
  * Information about a license plate and its associated user.
@@ -41,9 +48,9 @@ export function PlateInfoCard({ info }: PlateInfoCardProps) {
           {info.plate}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 space-y-4">
+      <CardContent className="space-y-4 p-4">
         {hasOwner ? (
-           <>
+          <>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-gray-500" />

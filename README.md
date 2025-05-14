@@ -7,12 +7,15 @@ The frontend application for Inneparkert, a smart parking management system deve
 This is the frontend part of the Inneparkert system, built with Next.js and TypeScript. The application provides a modern, user-friendly interface for managing parking operations.
 
 ## Features
+
 - **User Interface**
-  - Modern, responsive design using Tailwind CSS 
+
+  - Modern, responsive design using Tailwind CSS
   - Intuitive navigation and user flows
   - Real-time updates and feedback
 
 - **User Management**
+
   - Secure authentication system
   - Profile management with license plate handling
   - User settings and preferences
@@ -51,24 +54,27 @@ frontend/
 
 ### Prerequisites
 
-- Node.js 
+- Node.js
 - pnpm (package manager)
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/Bachelor-Group-13/frontend.git
 cd frontend
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Set up environment variables:
-Create a `.env` file with:
+   Create a `.env` file with:
+
 ```env
 NEXT_PUBLIC_API_URL=backend_api_url
 NEXT_PUBLIC_VISION_API_URL=vision_api_url
@@ -77,6 +83,7 @@ NEXT_PUBLIC_VAPID_PRIVATE_KEY=vapid_private_key
 ```
 
 4. Start the development server:
+
 ```bash
 pnpm dev
 ```
@@ -101,12 +108,12 @@ The application will be available at `http://localhost:3000`
 ## Project Status
 
 This project is part of a bachelor project. The frontend application is designed to work when set up with:
+
 - A Spring Boot backend API service
 - A Python vision API service
 
 ## Team
 
-- Viljar Hoem-Olsen 
+- Viljar Hoem-Olsen
 - Thomas Åkre
 - Sander Grimstad
-
