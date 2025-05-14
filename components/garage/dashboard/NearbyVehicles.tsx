@@ -78,7 +78,10 @@ export function NearbyVehicles({ user, parkingSpots }: NearbyVehiclesProps) {
                       {/* Vehicle owner details */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white">
+                          <div
+                            className="hidden h-8 w-8 items-center justify-center rounded-full bg-neutral-900
+                              text-white sm:flex"
+                          >
                             {spot.occupiedBy?.anonymous
                               ? "?"
                               : spot.occupiedBy?.name
@@ -95,22 +98,19 @@ export function NearbyVehicles({ user, parkingSpots }: NearbyVehiclesProps) {
                             <p className="text-xs text-gray-500">
                               Spot {spot.spotNumber}
                             </p>
-                          </div>
-                        </div>
-                        {/* Contact and departure time information */}
-                        <div className="flex gap-2">
-                          {spot.occupiedBy?.estimatedDeparture && (
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <Clock className="h-4 w-4" />
-                              <span>
+                            {spot.occupiedBy?.estimatedDeparture && (
+                              <p className="tex-xs text-gray-500">
                                 Leaving at{" "}
                                 {format(
                                   new Date(spot.occupiedBy.estimatedDeparture),
                                   "HH:mm"
                                 )}
-                              </span>
-                            </div>
-                          )}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {/* Contact and departure time information */}
+                        <div className="flex gap-2">
                           {spot.occupiedBy?.phone_number && (
                             <a
                               href={`tel:${spot.occupiedBy.phone_number}`}

@@ -1,4 +1,4 @@
-import { Clock, Mail, MessageCircle, Phone, Car } from "lucide-react";
+import { Mail, MessageCircle, Phone, Car } from "lucide-react";
 import { format } from "date-fns";
 import { ParkingSpot } from "@/lib/utils/types";
 import { isParkedIn } from "@/lib/utils/parking";
@@ -61,7 +61,10 @@ export function ParkedInBy({ user, parkingSpots }: ParkedInByProps) {
         <div className="flex items-center justify-between">
           {/* Vehicle owner details */}
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white">
+            <div
+              className="hidden h-8 w-8 items-center justify-center rounded-full bg-neutral-900
+                text-white sm:flex"
+            >
               {blockingSpot.occupiedBy.anonymous
                 ? "?"
                 : blockingSpot.occupiedBy.name
@@ -78,22 +81,19 @@ export function ParkedInBy({ user, parkingSpots }: ParkedInByProps) {
               <p className="text-xs text-gray-500">
                 Spot {blockingSpot.spotNumber}
               </p>
-            </div>
-          </div>
-          {/* Contact and departure time information */}
-          <div className="flex gap-2">
-            {blockingSpot.occupiedBy.estimatedDeparture && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Clock className="h-4 w-4" />
-                <span>
+              {blockingSpot.occupiedBy.estimatedDeparture && (
+                <p className="text-xs text-gray-500">
                   Leaving at{" "}
                   {format(
                     new Date(blockingSpot.occupiedBy.estimatedDeparture),
                     "HH:mm"
                   )}
-                </span>
-              </div>
-            )}
+                </p>
+              )}
+            </div>
+          </div>
+          {/* Contact and departure time information */}
+          <div className="flex gap-2">
             {blockingSpot.occupiedBy.phone_number && (
               <a
                 href={`tel:${blockingSpot.occupiedBy.phone_number}`}
