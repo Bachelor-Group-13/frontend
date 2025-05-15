@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { subscribeToPush } from "@/lib/utils/push";
 import { Button } from "../ui/button";
 import { Bell, BellOff } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { api } from "@/lib/api/auth";
+import { subscribeToPush } from "@/lib/utils/push";
 
 /**
  * Props for the NotificationToggle component.
@@ -26,48 +27,33 @@ export function NotificationToggle({
 }: NotificationToggleProps) {
   const [subscribed, setSubscribed] = useState(false);
 
-  // Check if user is already subscribed to notifications
   useEffect(() => {
-    const checkSubscription = async () => {
-      if (!user?.id) return;
-      try {
-        const registration = await navigator.serviceWorker.getRegistration();
-        const subscription = await registration?.pushManager.getSubscription();
-        setSubscribed(!!subscription);
-      } catch (error) {
-        console.error("Error checking subscription:", error);
-      }
-    };
-    checkSubscription();
-  }, [user?.id]);
+    navigator.serviceWorker
+      .getRegistration()
+      .then((reg) =>
+        reg?.pushManager.getSubscription().then((sub) => setSubscribed(!!sub))
+      );
+  }, []);
 
-  // Handle subscription toggle
-  const handleSubscribeClick = async () => {
-    if (!user?.id) {
-      alert("You need to be logged in to enable notifications");
-      return;
-    }
-    try {
-      const registration = await navigator.serviceWorker.getRegistration();
-      const existingSubscription =
-        await registration?.pushManager.getSubscription();
+  const toggle = async () => {
+    if (!user?.id) return alert("Log in first to enable notifications");
 
-      if (existingSubscription) {
-        await existingSubscription.unsubscribe();
-        setSubscribed(false);
-      } else {
-        await subscribeToPush(user.id);
-        setSubscribed(true);
-      }
-    } catch (error) {
-      console.error("Error managing push notifications:", error);
-      alert("Failed to manage notification settings");
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+
+    if (existing) {
+      await existing.unsubscribe();
+      setSubscribed(false);
+      await api.post("/api/push/unsubscribe", { endpoint: existing.endpoint });
+    } else {
+      await subscribeToPush(user.id);
+      setSubscribed(true);
     }
   };
 
   return (
     <Button
-      onClick={handleSubscribeClick}
+      onClick={toggle}
       variant="ghost"
       size="sm"
       className={cn("flex gap-2", "px-0 py-0", className)}
