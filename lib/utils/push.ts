@@ -14,6 +14,13 @@ export function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
+function toBase64Url(uint8Array: Uint8Array): string {
+  let base64 = btoa(
+    String.fromCharCode.apply(null, [...new Uint8Array(uint8Array)])
+  );
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 /**
  * Subscribes a user to push notifications.
  * Handles the entire subscription process
@@ -78,12 +85,8 @@ export async function subscribeToPush(userId: string) {
 
     const subscriptionData = {
       endpoint: subscription.endpoint,
-      p256dh: btoa(
-        String.fromCharCode.apply(null, [...new Uint8Array(rawKey)])
-      ),
-      auth: btoa(
-        String.fromCharCode.apply(null, [...new Uint8Array(rawAuthSecret)])
-      ),
+      p256dh: toBase64Url(new Uint8Array(rawKey)),
+      auth: toBase64Url(new Uint8Array(rawAuthSecret)),
       userId: userId,
     };
     console.log("Constructed subscription data for backend:", subscriptionData);
