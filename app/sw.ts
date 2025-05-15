@@ -28,11 +28,21 @@ const serwist = new Serwist({
 serwist.addEventListeners();
 
 self.addEventListener("push", (event) => {
-  if (!event.data) return;
+  console.log("Push event received", event);
+
+  if (!event.data) {
+    console.error("No data in push event");
+    return;
+  }
+
   let payload: { title: string; body: string };
   try {
+    const data = event.data.text();
+    console.log("Raw push data:", data);
     payload = event.data.json();
-  } catch {
+    console.log("Parsed payload:", payload);
+  } catch (error) {
+    console.error("Error parsing push data:", error);
     payload = { title: "Parking Alert", body: event.data.text() || "" };
   }
 
@@ -43,5 +53,11 @@ self.addEventListener("push", (event) => {
     requireInteraction: true,
   };
 
-  event.waitUntil(self.registration.showNotification(payload.title, options));
+  console.log("Showing notification with options:", options);
+  event.waitUntil(
+    self.registration
+      .showNotification(payload.title, options)
+      .then(() => console.log("Notification shown successfully"))
+      .catch((err) => console.error("Error showing notification:", err))
+  );
 });
