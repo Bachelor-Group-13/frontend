@@ -23,6 +23,7 @@ import {
   PlateInfo,
   PlateInfoCard,
 } from "@/components/licenseplate/PlateInfoCard";
+import { VehicleInfoDialog } from "./VehicleInfoDialog";
 
 /**
  * Props for the ReservationDialog component.
@@ -128,15 +129,21 @@ export function ReservationDialog({
           {/* Show occupant info when spot is occupied */}
           {isOccupied && selectedSpot.occupiedBy && !isAnonymous && (
             <div className="mt-4">
-              <PlateInfoCard
-                info={{
-                  plate: selectedSpot.occupiedBy.license_plate || "",
-                  name: selectedSpot.occupiedBy.name || undefined,
-                  email: selectedSpot.occupiedBy.email || undefined,
-                  phone_number:
-                    selectedSpot.occupiedBy.phone_number || undefined,
-                }}
-              />
+              {isUserSpot ? (
+                <div />
+              ) : (
+                <VehicleInfoDialog
+                  open={true}
+                  onOpenChangeAction={() => setSelectedSpot(null)}
+                  plateInfo={{
+                    plate: selectedSpot.occupiedBy.license_plate || "",
+                    name: selectedSpot.occupiedBy.name || undefined,
+                    email: selectedSpot.occupiedBy.email || undefined,
+                    phone_number:
+                      selectedSpot.occupiedBy.phone_number || undefined,
+                  }}
+                />
+              )}
             </div>
           )}
           {/* License plate selection and departure time */}
