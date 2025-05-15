@@ -74,7 +74,7 @@ export function NotificationToggle({
     >
       {/* Toggle button with icon and text */}
       {subscribed ? (
-        <Bell className="h-4 w-4 text-white" />
+        <Bell className="h-4 w-4" />
       ) : (
         <BellOff className="h-4 w-4" />
       )}

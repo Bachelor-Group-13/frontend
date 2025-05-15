@@ -22,17 +22,17 @@ export default function PlateRecognitionLayout({
 }: PlateRecognitionLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 pb-12 pt-8">
-      <div className="container mx-auto px-4">
+      <div className="mx-auto max-w-3xl px-4">
         {/* Header section with back button and title */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8">
           <Link
             href="/garage"
-            className="rounded-full p-2 transition-colors hover:bg-gray-200"
+            className="inline-flex items-center rounded-full px-3 py-2 text-gray-700 transition
+              hover:bg-gray-200"
           >
-            <ArrowLeft className="h-6 w-6 text-gray-600" />
+            <ArrowLeft className="h-6 w-6" />
+            <span className="ml-2 font-medium">Back to Garage</span>
           </Link>
-          <h1 className="text-2xl font-bold">License Plate Recognition</h1>
-          <div className="w-5" />
         </div>
         {/* Main content area */}
         {children}

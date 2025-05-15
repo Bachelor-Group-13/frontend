@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AlertCircle, Car, Mail, Phone, User } from "lucide-react";
+import {
+  AlertCircle,
+  Car,
+  Mail,
+  MessageCircle,
+  Phone,
+  User,
+} from "lucide-react";
 
 /**
  * Information about a license plate and its associated user.
@@ -41,22 +48,48 @@ export function PlateInfoCard({ info }: PlateInfoCardProps) {
           {info.plate}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="space-y-4 p-4">
         {hasOwner ? (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-500" />
-              <span className="text-sm">{info.name}</span>
+          <>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-gray-500" />
+                <span className="text-sm">{info.name}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <span className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  {info.email}
+                </span>
+                <a
+                  href={`mailto:${info.email}`}
+                  className="text-neutral-900 hover:text-blue-700"
+                >
+                  <Mail className="h-5 w-5" />
+                </a>
+              </div>
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <span className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  {info.phone_number}
+                </span>
+                <div className="flex space-x-2">
+                  <a
+                    href={`tel:${info.phone_number}`}
+                    className="text-neutral-900 hover:text-blue-700"
+                  >
+                    <Phone className="h-5 w-5" />
+                  </a>
+                  <a
+                    href={`sms:${info.phone_number}`}
+                    className="text-neutral-900 hover:text-green-700"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </a>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-gray-500" />
-              <span className="text-sm">{info.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-gray-500" />
-              <span className="text-sm">{info.phone_number}</span>
-            </div>
-          </div>
+          </>
         ) : (
           <div className="flex items-center gap-2 text-amber-600">
             <AlertCircle className="h-4 w-4" />
