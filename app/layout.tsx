@@ -71,19 +71,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <head>
-        {process.env.NODE_ENV === "production" && (
-          <script
-            suppressHydrationWarning
-            dangerouslySetInnerHTML={{
-              __html: `
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(console.error);
-        }`,
-            }}
-          />
-        )}
-      </head>
       <body>
         <AuthProvider>
           <Navbar />
