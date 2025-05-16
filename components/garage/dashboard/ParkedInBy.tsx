@@ -27,10 +27,38 @@ export function ParkedInBy({ user, parkingSpots }: ParkedInByProps) {
   const { toast } = useToast();
   const hasToasted = useRef(false);
 
+  useEffect(() => {
+    const mySpot = user?.current_reservation?.spotNumber;
+    if (!mySpot) return;
+
+    if (!isParkedIn(mySpot, parkingSpots)) {
+      hasToasted.current = false;
+      return;
+    }
+
+    const row = mySpot.slice(0, -1);
+    const blockingSpot = parkingSpots.find(
+      (s) => s.spotNumber === `${row}B` && !!s.occupiedBy
+    );
+
+    if (!blockingSpot || !blockingSpot.occupiedBy) return;
+
+    if (!hasToasted.current) {
+      const driverName = blockingSpot.occupiedBy?.anonymous
+        ? "an unknown driver"
+        : blockingSpot.occupiedBy?.name;
+      toast({
+        variant: "destructive",
+        title: "You've been parked in!",
+        description: `You were parked in by ${driverName}.`,
+      });
+      hasToasted.current = true;
+    }
+  }, [parkingSpots, toast, user]);
+
   const mySpot = user?.current_reservation?.spotNumber;
   if (!mySpot) return null;
   if (!isParkedIn(mySpot, parkingSpots)) {
-    hasToasted.current = false;
     return null;
   }
 
@@ -39,20 +67,6 @@ export function ParkedInBy({ user, parkingSpots }: ParkedInByProps) {
     (s) => s.spotNumber === `${row}B` && !!s.occupiedBy
   );
   if (!blockingSpot || !blockingSpot.occupiedBy) return null;
-
-  useEffect(() => {
-    if (!hasToasted.current) {
-      const driverName = blockingSpot.occupiedBy?.anonymous
-        ? "an unknown driver"
-        : blockingSpot.occupiedBy?.name;
-      toast({
-        variant: "destructive",
-        title: "You’ve been parked in!",
-        description: `You were parker in by ${driverName}.`,
-      });
-      hasToasted.current = true;
-    }
-  }, [blockingSpot, toast]);
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
