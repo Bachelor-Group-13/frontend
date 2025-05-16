@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, Dispatch, SetStateAction } from "react";
 import { api } from "@/lib/api/auth";
 import { ParkingSpot, ParkingSpotBoundary, Vehicle } from "@/lib/utils/types";
+import { useToast } from "@/lib/hooks/use-toast";
 
 /**
  * Props for the useReservationActions hook.
@@ -15,7 +16,7 @@ import { ParkingSpot, ParkingSpotBoundary, Vehicle } from "@/lib/utils/types";
 interface UseReservationActionsProps {
   user: any;
   parkingSpots: ParkingSpot[];
-  setParkingSpots: React.Dispatch<React.SetStateAction<ParkingSpot[]>>;
+  setParkingSpots: Dispatch<SetStateAction<ParkingSpot[]>>;
   fetchUserAndReservations: () => Promise<void>;
   setSelectedSpot: (spot: ParkingSpot | null) => void;
   setActiveTab: (tab: string) => void;
@@ -44,6 +45,7 @@ export function useReservationActions({
   setActiveTab,
   setShowUnauthorizedAlert,
 }: UseReservationActionsProps) {
+  const { toast } = useToast();
   const [selectedLicensePlate, setSelectedLicensePlate] = useState<
     string | null
   >(null);
@@ -101,6 +103,20 @@ export function useReservationActions({
         console.log("Creating reservation with:", reservationData);
 
         await api.post("/api/reservations", reservationData);
+        if (selectedSpot.spotNumber.endsWith("B")) {
+          const row = selectedSpot.spotNumber.slice(0, -1);
+          const aSpot = parkingSpots.find((s) => s.spotNumber === `${row}A`);
+          const occupant = aSpot?.occupiedBy?.name ?? "an unknown driver";
+          toast({
+            title: "You parked someone in!",
+            description: `You parked in ${occupant}.`,
+          });
+        } else {
+          toast({
+            title: "Spot reserved",
+            description: `You reserved spot ${selectedSpot.spotNumber}.`,
+          });
+        }
       } else if (actionType === "unreserve") {
         console.log(`Deleting reservation for spot ${selectedSpot.spotNumber}`);
 
@@ -117,6 +133,10 @@ export function useReservationActions({
 
         if (reservation) {
           await api.delete(`/api/reservations/${reservation.id}`);
+          toast({
+            title: "Spot unreserved",
+            description: `You have successfully unreserved spot ${selectedSpot.spotNumber}.`,
+          });
         } else {
           throw new Error("Reservation not found");
         }
@@ -128,11 +148,11 @@ export function useReservationActions({
       setActiveTab("dashboard");
     } catch (error) {
       console.error("Failed to reserve/unreserve spot", error);
-      if (error instanceof Error) {
-        alert(`Failed to reserve/unreserve spot: ${error.message}`);
-      } else {
-        alert("Failed to reserve/unreserve spot: An unknown error occurred.");
-      }
+      toast({
+        variant: "destructive",
+        title: "Failed to reserve/unreserve spot",
+        description: `Failed to ${actionType} spot ${selectedSpot.spotNumber}.`,
+      });
     }
   };
 

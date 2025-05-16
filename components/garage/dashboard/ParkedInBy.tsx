@@ -2,6 +2,8 @@ import { Mail, MessageCircle, Phone, Car } from "lucide-react";
 import { format } from "date-fns";
 import { ParkingSpot } from "@/lib/utils/types";
 import { isParkedIn } from "@/lib/utils/parking";
+import { useEffect, useRef } from "react";
+import { useToast } from "@/lib/hooks/use-toast";
 
 /**
  * Props for the ParkedInBy component.
@@ -21,32 +23,33 @@ interface ParkedInByProps {
  * @param {ParkedInByProps} props - The props for the ParkedInBy component
  */
 export function ParkedInBy({ user, parkingSpots }: ParkedInByProps) {
-  // Return null if user has no active reservation
-  if (!user?.current_reservation) {
-    return null;
+  const { toast } = useToast()
+  const hasToasted = useRef(false)
+
+  const mySpot = user?.current_reservation?.spotNumber
+  if (!mySpot) return null
+  if (!isParkedIn(mySpot, parkingSpots)) {
+    hasToasted.current = false
+    return null
   }
 
-  // Check if user is currently parked in their spot
-  const isParkedInSpot = isParkedIn(
-    user.current_reservation.spotNumber,
-    parkingSpots
-  );
-
-  // Return null if user is not parked in their spot
-  if (!isParkedInSpot) {
-    return null;
-  }
-
-  // Find the blocking spot (B spot in the same row)
-  const rowNumber = user.current_reservation.spotNumber.slice(0, -1);
+  const row = mySpot.slice(0, -1)
   const blockingSpot = parkingSpots.find(
-    (spot) => spot.spotNumber === `${rowNumber}B`
-  );
+    (s) => s.spotNumber === `${row}B` && !!s.occupiedBy
+  )
+  if (!blockingSpot || !blockingSpot.occupiedBy) return null
 
-  // Return null if no blocking vehicle is found
-  if (!blockingSpot?.occupiedBy) {
-    return null;
-  }
+  useEffect(() => {
+    if (!hasToasted.current) {
+      const driverName = blockingSpot.occupiedBy?.anonymous ? "an unknown driver" : blockingSpot.occupiedBy?.name
+      toast({
+        variant: "destructive",
+        title: "You’ve been parked in!",
+        description: `You were parker in by ${driverName}.`,
+      })
+      hasToasted.current = true
+    }
+  }, [blockingSpot, toast])
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">

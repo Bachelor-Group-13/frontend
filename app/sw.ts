@@ -26,8 +26,7 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
-console.log('[SW] 🎉 sw.js loaded (module)')
-
+console.log("[SW] 🎉 sw.js loaded (module)");
 
 self.addEventListener("push", (event) => {
   console.log("Push event received", event);
