@@ -1,6 +1,7 @@
 "use client";
 import { GarageLayout } from "@/components/garage/GarageLayout";
 import { ToastProvider, ToastViewport } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
 
 /**
  * Garage page component.
@@ -20,6 +21,7 @@ export default function GaragePage() {
           </div>
         </div>
       </div>
+      <Toaster />
       <ToastViewport className="fixed right-4 top-4 z-50" />
     </ToastProvider>
   );
