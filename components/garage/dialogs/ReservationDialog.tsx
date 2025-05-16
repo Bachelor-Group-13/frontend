@@ -19,6 +19,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import {
+  PlateInfo,
+  PlateInfoCard,
+} from "@/components/licenseplate/PlateInfoCard";
+import { VehicleInfoDialog } from "./VehicleInfoDialog";
 
 /**
  * Props for the ReservationDialog component.
@@ -42,6 +47,7 @@ interface ReservationDialogProps {
   setEstimatedDeparture: (date: Date | null) => void;
   handleReservation: () => Promise<void>;
   handleClaimSpot: () => Promise<void>;
+  plateInfo: PlateInfo | null;
 }
 
 /**
@@ -60,6 +66,7 @@ export function ReservationDialog({
   setEstimatedDeparture,
   handleReservation,
   handleClaimSpot,
+  plateInfo,
 }: ReservationDialogProps) {
   const isAnonymous =
     selectedSpot.isOccupied && selectedSpot.occupiedBy?.anonymous;
@@ -119,6 +126,26 @@ export function ReservationDialog({
           <AlertDialogDescription>
             {getDialogDescription()}
           </AlertDialogDescription>
+          {/* Show occupant info when spot is occupied */}
+          {isOccupied && selectedSpot.occupiedBy && !isAnonymous && (
+            <div className="mt-4">
+              {isUserSpot ? (
+                <div />
+              ) : (
+                <VehicleInfoDialog
+                  open={true}
+                  onOpenChangeAction={() => setSelectedSpot(null)}
+                  plateInfo={{
+                    plate: selectedSpot.occupiedBy.license_plate || "",
+                    name: selectedSpot.occupiedBy.name || undefined,
+                    email: selectedSpot.occupiedBy.email || undefined,
+                    phone_number:
+                      selectedSpot.occupiedBy.phone_number || undefined,
+                  }}
+                />
+              )}
+            </div>
+          )}
           {/* License plate selection and departure time */}
           {(!isOccupied || isAnonymous) && user && (
             <div className="mt-4">

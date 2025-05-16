@@ -167,6 +167,16 @@ export function GarageLayout() {
             )
           }
           handleClaimSpot={() => handleClaimSpot(selectedSpot)}
+          plateInfo={
+            selectedLicensePlate
+              ? {
+                  plate: selectedLicensePlate,
+                  name: user?.name,
+                  email: user?.email,
+                  phone_number: user?.phone_number,
+                }
+              : null
+          }
         />
       )}
 
