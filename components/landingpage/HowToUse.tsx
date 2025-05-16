@@ -20,7 +20,7 @@ export function HowToUseSection() {
             {/* Image */}
             <div className="relative h-[400px] overflow-hidden rounded-xl shadow-lg">
               <Image
-                src="/parking-lot3.jpg"
+                src="/parking-lot3.png"
                 alt="Parking garage illustration"
                 fill
                 className="object-cover"
