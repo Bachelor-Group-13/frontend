@@ -23,33 +23,35 @@ interface ParkedInByProps {
  * @param {ParkedInByProps} props - The props for the ParkedInBy component
  */
 export function ParkedInBy({ user, parkingSpots }: ParkedInByProps) {
-  const { toast } = useToast()
-  const hasToasted = useRef(false)
+  const { toast } = useToast();
+  const hasToasted = useRef(false);
 
-  const mySpot = user?.current_reservation?.spotNumber
-  if (!mySpot) return null
+  const mySpot = user?.current_reservation?.spotNumber;
+  if (!mySpot) return null;
   if (!isParkedIn(mySpot, parkingSpots)) {
-    hasToasted.current = false
-    return null
+    hasToasted.current = false;
+    return null;
   }
 
-  const row = mySpot.slice(0, -1)
+  const row = mySpot.slice(0, -1);
   const blockingSpot = parkingSpots.find(
     (s) => s.spotNumber === `${row}B` && !!s.occupiedBy
-  )
-  if (!blockingSpot || !blockingSpot.occupiedBy) return null
+  );
+  if (!blockingSpot || !blockingSpot.occupiedBy) return null;
 
   useEffect(() => {
     if (!hasToasted.current) {
-      const driverName = blockingSpot.occupiedBy?.anonymous ? "an unknown driver" : blockingSpot.occupiedBy?.name
+      const driverName = blockingSpot.occupiedBy?.anonymous
+        ? "an unknown driver"
+        : blockingSpot.occupiedBy?.name;
       toast({
         variant: "destructive",
         title: "You’ve been parked in!",
         description: `You were parker in by ${driverName}.`,
-      })
-      hasToasted.current = true
+      });
+      hasToasted.current = true;
     }
-  }, [blockingSpot, toast])
+  }, [blockingSpot, toast]);
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
