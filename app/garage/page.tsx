@@ -1,3 +1,4 @@
+"use client";
 import { GarageLayout } from "@/components/garage/GarageLayout";
 import { ToastProvider, ToastViewport } from "@/components/ui/toast";
 

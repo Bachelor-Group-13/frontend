@@ -1,3 +1,4 @@
+"use client";
 import { Mail, MessageCircle, Phone, Car } from "lucide-react";
 import { format } from "date-fns";
 import { ParkingSpot } from "@/lib/utils/types";
