@@ -22,7 +22,7 @@ export default function GaragePage() {
         </div>
       </div>
       <Toaster />
-      <ToastViewport className="fixed right-4 top-4 z-50" />
+      <ToastViewport />
     </ToastProvider>
   );
 }
