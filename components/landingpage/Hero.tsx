@@ -17,7 +17,7 @@ export function HeroSection() {
       {/* Background image with opacity */}
       <div className="absolute inset-0 z-0 opacity-20">
         <Image
-          src="/parking-lot3.jpg"
+          src="/parking-lot3.png"
           alt="Background"
           fill
           sizes="(max-width: 640px) 100vw, 50vw"
