@@ -38,16 +38,23 @@ This is the frontend part of the Inneparkert system, built with Next.js and Type
 
 ```
 frontend/
-├── app/              # Next.js app router pages
-├── components/       # Reusable UI components
-│   ├── auth/        # Authentication components
-│   ├── profile/     # Profile management
-│   └── ui/          # Shadcn UI components
-├── lib/             # Utilities and hooks
-│   ├── hooks/       # Custom React hooks
-│   ├── services/    # API services
-│   └── utils/       # Helper functions
-└── public/          # Static assets
+├── .github/workflows/
+│   └── build.yml
+├── app/
+├── components/
+│   ├── auth
+│   ├── garage
+│   ├── landingpage
+│   ├── licenseplate
+│   ├── navbar
+│   ├── profile
+│   └── ui
+├── lib/
+│   ├── api
+│   ├── hooks
+│   ├── services
+│   └── utils
+└── Dockerfile
 ```
 
 ## Getting Started
