@@ -56,7 +56,7 @@ export function GarageLayout() {
 
   /**
    * Handles the manual search of a license plate.
-   * Updates selected plate, fetches user/reservation data and opens a dialog.
+   * Updates the selected plate, fetches user/reservation data, and opens a dialog.
    * @param {string} plate - The license plate to search for
    */
   const onManualSearch = (plate: string) => {

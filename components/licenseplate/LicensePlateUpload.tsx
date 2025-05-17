@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import axios from "axios";
+import { ChangeEvent, FC, useRef, useState, DragEvent } from "react";
+import { api } from "@/lib/api/auth";
 import { Button } from "@/components/ui/button";
 import { detectLicensePlates } from "@/lib/api/vision";
 import { cn } from "@/lib/utils/utils";
@@ -26,7 +26,7 @@ interface LicensePlateUploadProps {
  * - License plate detection
  * - Loading states and error handling
  */
-const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
+const LicensePlateUpload: FC<LicensePlateUploadProps> = ({
   onLicensePlatesDetected,
 }) => {
   const [image, setImage] = useState<File | null>(null);
@@ -37,7 +37,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Handles changes to the image input field
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       processSelectedFile(file);
@@ -46,7 +46,6 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
 
   // Processes the selected file and sets the image state
   const processSelectedFile = (file: File) => {
-    // Check if the file is an image
     if (!file.type.match("image.*")) {
       setError("Please select a valid image file.");
       return;
@@ -64,7 +63,7 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   };
 
   // Handles drag events for the image input field
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -76,12 +75,12 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
   };
 
   // Handles the drop event for the image input field
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer?.files && e.dataTransfer.files[0]) {
       processSelectedFile(e.dataTransfer.files[0]);
     }
   };
@@ -124,16 +123,12 @@ const LicensePlateUpload: React.FC<LicensePlateUploadProps> = ({
         return;
       }
 
-      const fallbackResponse = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/license-plate`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-          },
-        }
-      );
+      const fallbackResponse = await api.post(`/license-plate`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Accept: "application/json",
+        },
+      });
 
       const fallbackPlates = fallbackResponse.data.license_plates || [];
       if (fallbackPlates.length > 0) {

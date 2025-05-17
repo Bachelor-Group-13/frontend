@@ -26,9 +26,11 @@ type PlateUserInfo = {
 export function useLicensePlateDetection() {
   const [platesInfo, setPlatesInfo] = useState<PlateUserInfo[]>([]);
 
-  // Processes detected license plates and fetches associated user information
+  // Processes detected license plates and fetched associated user information
   const handleLicensePlatesDetected = async (plates: string[]) => {
-    const cleanedPlates = plates.map((p) => p.replace(/\s/g, ""));
+    const cleanedPlates = plates
+      .filter((p): p is string => typeof p === "string")
+      .map((p) => p.replace(/\s/g, ""));
     const results = await Promise.all(
       cleanedPlates.map(async (plate) => {
         const userInfo = await fetchLicensePlateInfo(plate);
