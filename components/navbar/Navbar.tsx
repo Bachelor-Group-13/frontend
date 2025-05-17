@@ -22,7 +22,7 @@ import { NotificationToggle } from "../garage/NotificationToggle";
  * A navigation bar component that provides user authentication and navigation.
  *
  * Handles user authentication state, displays user profile information,
- * and provides access to user settings and sign out functionality.
+ * and provides access to user settings and sign-out functionality.
  */
 export function Navbar() {
   const { user, setUser } = useAuth();
@@ -50,7 +50,7 @@ export function Navbar() {
     router.push("/");
   };
 
-  // Extracts initials from user's name or email for avatar fallback
+  // Extracts initials from the user's name or email for avatar fallback
   const getInitials = () => {
     if (user?.name) {
       const nameParts = user.name.split(" ");

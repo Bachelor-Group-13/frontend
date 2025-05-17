@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { RefObject, useState } from "react";
 import {
   Card,
   CardContent,
@@ -86,7 +86,7 @@ export default function PlateRecognitionPage() {
             {/* Camera capture tab */}
             <TabsContent value="camera" className="mt-0">
               <CameraTab
-                webcamRef={webcamRef as React.RefObject<Webcam>}
+                webcamRef={webcamRef as RefObject<Webcam>}
                 processing={processing}
                 onCaptureAction={handleCapture}
               />
@@ -101,7 +101,7 @@ export default function PlateRecognitionPage() {
               </TabsContent>
             )}
 
-            {/* Results display */}
+            {/* Result display */}
             <DetectedPlates platesInfo={platesInfo} />
           </CardContent>
         </Tabs>

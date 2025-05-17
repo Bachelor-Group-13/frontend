@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { Navbar } from "@/components/navbar/Navbar";
+import { ReactNode } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,13 +62,13 @@ export const viewport: Viewport = {
  * Handles service worker registration in production.
  *
  * @param {Object} props - Component props
- * @param {React.ReactNode} props.children - Child components to render
+ * @param {ReactNode} props.children - Child components to render
  * @returns The rendered root layout
  */
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
