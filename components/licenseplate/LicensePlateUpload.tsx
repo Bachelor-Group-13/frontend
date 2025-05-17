@@ -1,9 +1,9 @@
 "use client";
 
 import { ChangeEvent, FC, useRef, useState, DragEvent } from "react";
-import { api } from "@/lib/api/auth";
 import { Button } from "@/components/ui/button";
 import { detectLicensePlates } from "@/lib/api/vision";
+import { uploadLicensePlateImage } from "@/lib/api/api";
 import { cn } from "@/lib/utils/utils";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
@@ -110,26 +110,20 @@ const LicensePlateUpload: FC<LicensePlateUploadProps> = ({
     setLoading(true);
     setError(null);
 
+    const platesFromOpenCV = await detectLicensePlates(image);
+    console.log("Plates from OpenCV:", platesFromOpenCV);
+
+    if (platesFromOpenCV.length > 0) {
+      const texts = platesFromOpenCV.map((plate) => plate.text);
+      onLicensePlatesDetected(texts);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("image", image);
 
     try {
-      const platesFromOpenCV = await detectLicensePlates(image);
-      console.log("Plates from OpenCV:", platesFromOpenCV);
-
-      if (platesFromOpenCV.length > 0) {
-        const texts = platesFromOpenCV.map((plate) => plate.text);
-        onLicensePlatesDetected(texts);
-        return;
-      }
-
-      const fallbackResponse = await api.post(`/license-plate`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-        },
-      });
-
+      const fallbackResponse = await uploadLicensePlateImage(formData);
       const fallbackPlates = fallbackResponse.data.license_plates || [];
       if (fallbackPlates.length > 0) {
         onLicensePlatesDetected(fallbackPlates);
