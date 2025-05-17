@@ -16,8 +16,8 @@ export const visionApi = axios.create({
  * Axios instance configured for Azure API requests.
  * Uses the AzureCV URL for license plate detection.
  */
-export const azureApi = axios.create({
-  baseURL: `${API_URL}/license-plate`,
+export const baseUrl = axios.create({
+  baseURL: `${API_URL}`,
 });
 
 /**
@@ -48,7 +48,7 @@ export const detectLicensePlates = async (file: File): Promise<PlateDto[]> => {
   formData.append("image", file);
 
   try {
-    const response = await azureApi.post("/", formData, {
+    const response = await baseUrl.post("/license-plate", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         Accept: "application/json",

@@ -110,11 +110,11 @@ const LicensePlateUpload: FC<LicensePlateUploadProps> = ({
     setLoading(true);
     setError(null);
 
-    const platesFromOpenCV = await detectLicensePlates(image);
-    console.log("Plates from OpenCV:", platesFromOpenCV);
+    const platesFromAzure = await detectLicensePlates(image);
+    console.log("Plates from Azure:", platesFromAzure);
 
-    if (platesFromOpenCV.length > 0) {
-      const texts = platesFromOpenCV.map((plate) => plate.text);
+    if (platesFromAzure.length > 0) {
+      const texts = platesFromAzure.map((plate) => plate.text);
       onLicensePlatesDetected(texts);
       return;
     }
