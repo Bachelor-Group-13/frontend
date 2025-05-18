@@ -55,18 +55,18 @@ export function Navbar() {
     if (user?.name) {
       const nameParts = user.name.split(" ");
       const initials = nameParts
-        .filter(part => part.length > 0)
+        .filter((part) => part.length > 0)
         .slice(0, 2)
-        .map(part => part.charAt(0).toUpperCase())
+        .map((part) => part.charAt(0).toUpperCase())
         .join("");
       return initials;
     } else if (user?.email) {
       const localPart = user.email.split("@")[0];
       const parts = localPart.split(/[\W_]+/);
       const initials = parts
-        .filter(part => part.length > 0)
+        .filter((part) => part.length > 0)
         .slice(0, 2)
-        .map(part => part.charAt(0).toUpperCase())
+        .map((part) => part.charAt(0).toUpperCase())
         .join("");
       return initials || "U";
     }

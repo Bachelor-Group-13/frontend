@@ -2,7 +2,7 @@
 
 import { login, register } from "@/lib/api/auth";
 import { handleLicensePlateChange } from "@/lib/utils/plate-helpers";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Label } from "../ui/label";
 import { Car, Eye, EyeOff, Lock, Mail, Phone, User } from "lucide-react";
 import { Input } from "../ui/input";
@@ -55,7 +55,7 @@ export default function SignUpForm({
   };
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -99,7 +99,7 @@ export default function SignUpForm({
       );
 
       if (error) {
-        onErrorAction("destructive", "Sign Up Failed", error.message);
+        onErrorAction("destructive", "Sign Up Failed", error);
         setIsSubmitting(false);
         return;
       }

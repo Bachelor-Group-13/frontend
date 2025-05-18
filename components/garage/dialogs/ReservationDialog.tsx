@@ -43,6 +43,12 @@ interface ReservationDialogProps {
   setEstimatedDeparture: (date: Date | null) => void;
   handleReservation: () => Promise<void>;
   handleClaimSpot: () => Promise<void>;
+  plateInfo?: {
+    plate: string;
+    name: string | undefined;
+    email: string | undefined;
+    phone_number: string | undefined;
+  } | null;
 }
 
 /**
@@ -61,6 +67,7 @@ export function ReservationDialog({
   setEstimatedDeparture,
   handleReservation,
   handleClaimSpot,
+  plateInfo,
 }: ReservationDialogProps) {
   const isAnonymous =
     selectedSpot.isOccupied && selectedSpot.occupiedBy?.anonymous;

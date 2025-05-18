@@ -134,10 +134,8 @@ const LicensePlateUpload: FC<LicensePlateUploadProps> = ({
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response?.data?.error) {
         setError(err.response.data.error);
-
       } else if (err instanceof Error) {
         setError(err.message);
-
       } else {
         setError(String(err) || "Failed to detect license plate.");
       }

@@ -82,10 +82,7 @@ export const register = async (
 
     return {
       data: null,
-      error:
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to sign up",
+      error: err.response?.data?.message || err.message || "Failed to sign up",
     };
   }
 };

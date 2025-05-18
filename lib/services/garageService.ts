@@ -2,17 +2,17 @@ import { api } from "@/lib/api/auth";
 import { ParkingSpot } from "@/lib/utils/types";
 
 type Reservation = {
-   id?: number;
-   spotNumber: string;
-   licensePlate: string;
-   userName?: string | null;
-   userEmail?: string | null;
-   userPhoneNumber?: string | null;
-   userId: number;
-   estimatedDeparture?: string | null;
-   anonymous?: boolean;
-   blockedSpot?: boolean;
-}
+  id?: number;
+  spotNumber: string;
+  licensePlate: string;
+  userName?: string | null;
+  userEmail?: string | null;
+  userPhoneNumber?: string | null;
+  userId: number;
+  estimatedDeparture?: string | null;
+  anonymous?: boolean;
+  blockedSpot?: boolean;
+};
 
 /**
  * Fetches the current user's details from the API.
@@ -31,7 +31,9 @@ export async function fetchUserDetails() {
  * @returns Array of reservations for the specified date
  */
 export async function fetchReservations(date: string): Promise<Reservation[]> {
-  const reservationsRes = await api.get<Reservation[]>(`/api/reservations/date/${date}`);
+  const reservationsRes = await api.get<Reservation[]>(
+    `/api/reservations/date/${date}`
+  );
   return reservationsRes.data;
 }
 
@@ -41,13 +43,17 @@ export async function fetchReservations(date: string): Promise<Reservation[]> {
  * @param {Reservation[]} reservations - Array of current reservations
  * @returns {ParkingSpot[]} Array of parking spots with reservation data
  */
-export function createInitialParkingSpots(reservations: Reservation[]): ParkingSpot[] {
+export function createInitialParkingSpots(
+  reservations: Reservation[]
+): ParkingSpot[] {
   return Array.from({ length: 10 }, (_, i) => {
     const row = Math.floor(i / 2) + 1;
     const col = i % 2 === 0 ? "A" : "B";
     const spotNumber = `${row}${col}`;
 
-    const reservation = reservations.find(res => res.spotNumber === spotNumber)
+    const reservation = reservations.find(
+      (res) => res.spotNumber === spotNumber
+    );
 
     return {
       id: i + 1,
@@ -81,10 +87,12 @@ export function updateParkingSpotsWithReservations(
   reservations: Reservation[]
 ): ParkingSpot[] {
   return currentSpots.map((spot) => {
-    const reservation = reservations.find((res) => res.spotNumber === spot.spotNumber);
+    const reservation = reservations.find(
+      (res) => res.spotNumber === spot.spotNumber
+    );
 
     if (reservation) {
-      const isAnonymous    = reservation.anonymous ?? false;
+      const isAnonymous = reservation.anonymous ?? false;
       const isBlocked = reservation.blockedSpot ?? false;
 
       return {
@@ -98,13 +106,16 @@ export function updateParkingSpotsWithReservations(
           license_plate: reservation.licensePlate,
           second_license_plate: null,
 
-          name: isAnonymous ? null : reservation.userName ?? null,
-          email: isAnonymous ? null : reservation.userEmail ?? null,
-          phone_number: isAnonymous ? null : reservation.userPhoneNumber ?? null,
-
-          user_id: isAnonymous || reservation.userId == null
+          name: isAnonymous ? null : (reservation.userName ?? null),
+          email: isAnonymous ? null : (reservation.userEmail ?? null),
+          phone_number: isAnonymous
             ? null
-            : reservation.userId.toString(),
+            : (reservation.userPhoneNumber ?? null),
+
+          user_id:
+            isAnonymous || reservation.userId == null
+              ? null
+              : reservation.userId.toString(),
 
           estimatedDeparture: reservation.estimatedDeparture ?? null,
         },

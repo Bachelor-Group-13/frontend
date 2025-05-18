@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { User } from "@/lib/utils/types";
 import { ParkingSpot } from "@/lib/utils/types";
 import { ParkingStatus } from "./dashboard/ParkingStatus";
 import { GarageStats } from "./dashboard/GarageStats";
@@ -11,7 +12,7 @@ import { ParkedInBy } from "./dashboard/ParkedInBy";
  * @param parkingSpots - The list of parking spots in the garage
  */
 interface GarageDashboardProps {
-  user: unknown;
+  user: User | null;
   parkingSpots: ParkingSpot[];
 }
 

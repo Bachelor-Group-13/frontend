@@ -9,29 +9,29 @@ import {
 
 /**
  * Represents a user with their personal and vehicle information.
- * @property {number} id - The unique identifier for the user
- * @property {string|null} license_plate - The user's primary license plate
- * @property {string|null} second_license_plate - The user's secondary license plate
+ * @property {string} id - The unique identifier for the user
+ * @property {string} [license_plate] - The user's primary license plate
+ * @property {string} [second_license_plate] - The user's secondary license plate
  * @property {string} email - The user's email address
  * @property {string} phone_number - The user's phone number
  * @property {string} name - The user's full name
  * @property {string} role - The user's role in the system
- * @property {Object|null} current_reservation - The user's active parking reservation
- * @property {Vehicle|null} vehicle - Additional vehicle information
+ * @property {Object} [current_reservation] - The user's active parking reservation
+ * @property {Vehicle} [vehicle] - Additional vehicle information
  */
 interface User {
-  id: number;
-  license_plate: string | null;
-  second_license_plate: string | null;
+  id: string;
+  license_plate?: string;
+  second_license_plate?: string;
   email: string;
   phone_number: string;
   name: string;
   role: string;
-  current_reservation: {
+  current_reservation?: {
     spotNumber: string;
     licensePlate: string;
   } | null;
-  vehicle: Vehicle | null;
+  vehicle?: Vehicle | null;
 }
 
 /**
@@ -65,11 +65,9 @@ export function useGarageReservations() {
       );
 
       const userReservation = reservations.find(
-        (res: { userId: string; spotNumber: string; licensePlate: string }) =>
-          res.userId === userDetails.id
+        (res) => res.userId === userDetails.id
       );
       console.log("User reservation found:", userReservation);
-
 
       setUser({
         id: userDetails.id,

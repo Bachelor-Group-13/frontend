@@ -171,4 +171,3 @@ export interface ReservationResponse {
   anonymous?: boolean;
   reservationDate: string;
 }
-

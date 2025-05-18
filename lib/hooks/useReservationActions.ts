@@ -1,6 +1,11 @@
 import { useState, useCallback, Dispatch, SetStateAction } from "react";
 import { api } from "@/lib/api/auth";
-import { ParkingSpot, ParkingSpotBoundary, ReservationResponse, User } from "@/lib/utils/types";
+import {
+  ParkingSpot,
+  ParkingSpotBoundary,
+  ReservationResponse,
+  User,
+} from "@/lib/utils/types";
 import { useToast } from "@/lib/hooks/use-toast";
 
 /**
@@ -132,7 +137,8 @@ export function useReservationActions({
 
         const reservation = reservations.find(
           (res: { spotNumber: string; userId: number }) =>
-            res.spotNumber === selectedSpot.spotNumber && res.userId === Number(user.id)
+            res.spotNumber === selectedSpot.spotNumber &&
+            res.userId === Number(user.id)
         );
 
         if (reservation) {
@@ -270,7 +276,7 @@ export function useReservationActions({
 
       try {
         const today = new Date().toISOString().split("T")[0];
-        const reservationPromises = [] as Promise<unknown>[]
+        const reservationPromises = [] as Promise<unknown>[];
 
         for (const b of boundaries) {
           if (b.isOccupied && b.vehicle?.licensePlate) {

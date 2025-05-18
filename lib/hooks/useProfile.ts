@@ -93,16 +93,16 @@ export function useProfile() {
 
     try {
       const userData = await profileService.fetchUserData(user.id);
-        setFormData((prev) => ({
-          ...prev,
-          licensePlate: userData.licensePlate || "",
-          secondLicensePlate: userData.secondLicensePlate || "",
-          phoneNumber: userData.phoneNumber || "",
-          userEmail: userData.email || "",
-          name: userData.name || "",
-        }));
+      setFormData((prev) => ({
+        ...prev,
+        licensePlate: userData.licensePlate || "",
+        secondLicensePlate: userData.secondLicensePlate || "",
+        phoneNumber: userData.phoneNumber || "",
+        userEmail: userData.email || "",
+        name: userData.name || "",
+      }));
 
-        if (userData.secondLicensePlate) {
+      if (userData.secondLicensePlate) {
         setUiState((prev) => ({ ...prev, showSecondLicensePlate: true }));
       }
     } catch (error: unknown) {

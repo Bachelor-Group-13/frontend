@@ -60,7 +60,7 @@ export default function SignInForm({
       const { data, error } = await login(email, password);
 
       if (error) {
-        onErrorAction("destructive", "Sign In Failed", error.message);
+        onErrorAction("destructive", "Sign In Failed", error);
         setIsSubmitting(false);
         return;
       }
