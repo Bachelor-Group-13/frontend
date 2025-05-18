@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { Clock } from "lucide-react";
-import { ParkingSpot } from "@/lib/utils/types";
+import { ParkingSpot, User } from "@/lib/utils/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,10 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import {
-  PlateInfo,
-  PlateInfoCard,
-} from "@/components/licenseplate/PlateInfoCard";
 import { VehicleInfoDialog } from "./VehicleInfoDialog";
 
 /**
@@ -40,14 +36,13 @@ import { VehicleInfoDialog } from "./VehicleInfoDialog";
 interface ReservationDialogProps {
   selectedSpot: ParkingSpot;
   setSelectedSpot: (spot: ParkingSpot | null) => void;
-  user: any;
+  user: User | null;
   selectedLicensePlate: string | null;
   setSelectedLicensePlate: (plate: string | null) => void;
   estimatedDeparture: Date | null;
   setEstimatedDeparture: (date: Date | null) => void;
   handleReservation: () => Promise<void>;
   handleClaimSpot: () => Promise<void>;
-  plateInfo: PlateInfo | null;
 }
 
 /**
@@ -66,7 +61,6 @@ export function ReservationDialog({
   setEstimatedDeparture,
   handleReservation,
   handleClaimSpot,
-  plateInfo,
 }: ReservationDialogProps) {
   const isAnonymous =
     selectedSpot.isOccupied && selectedSpot.occupiedBy?.anonymous;
@@ -74,7 +68,7 @@ export function ReservationDialog({
     selectedSpot.isOccupied && selectedSpot.occupiedBy?.user_id === user?.id;
   const isOccupied = selectedSpot.isOccupied;
 
-  // Get dialog title based on spot status
+  // Get a dialog title based on spot status
   const getDialogTitle = () => {
     if (isAnonymous) return `Claim Spot ${selectedSpot.spotNumber}?`;
     if (isUserSpot) return `Unreserve Spot ${selectedSpot.spotNumber}?`;
@@ -126,7 +120,7 @@ export function ReservationDialog({
           <AlertDialogDescription>
             {getDialogDescription()}
           </AlertDialogDescription>
-          {/* Show occupant info when spot is occupied */}
+          {/* Show occupant info when the spot is occupied */}
           {isOccupied && selectedSpot.occupiedBy && !isAnonymous && (
             <div className="mt-4">
               {isUserSpot ? (
@@ -163,9 +157,11 @@ export function ReservationDialog({
                   <SelectValue placeholder="Select a license plate" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={user.license_plate}>
-                    {user.license_plate}
-                  </SelectItem>
+                  {user.license_plate && (
+                    <SelectItem value={user.license_plate}>
+                      {user.license_plate}
+                    </SelectItem>
+                  )}
                   {user.second_license_plate && (
                     <SelectItem value={user.second_license_plate}>
                       {user.second_license_plate}

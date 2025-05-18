@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Car } from "lucide-react";
-import { ParkingSpot } from "@/lib/utils/types";
+import { ParkingSpot, User } from "@/lib/utils/types";
 import { isParkedIn } from "@/lib/utils/parking";
 
 /**
@@ -9,7 +9,7 @@ import { isParkedIn } from "@/lib/utils/parking";
  * @param parkingSpots - List of all parking spots in the garage
  */
 interface ParkingStatusProps {
-  user: any;
+  user: User | null;
   parkingSpots: ParkingSpot[];
 }
 
@@ -29,7 +29,7 @@ export function ParkingStatus({ user, parkingSpots }: ParkingStatusProps) {
           <Badge className="bg-green-500">Available</Badge>
         </div>
         <p className="mt-2 text-sm text-gray-600">
-          You currently don't have any active parking reservations
+          {`You currently don't have any active parking reservations`}
         </p>
       </div>
     );

@@ -5,15 +5,15 @@ import { HowToUseSection } from "@/components/landingpage/HowToUse";
 import { LandingPageFooter } from "@/components/landingpage/Footer";
 
 /**
- * The main landing page component.
- * Displays the application's hero section, how-to-use guide, and footer.
+ * The landing page.
+ * Displays the landing page's hero section, how-to-use guide, and footer.
  *
  * @returns The rendered landing page
  */
 export default function LandingPage() {
   const { isLoading } = useAuth();
 
-  // Renders a loading spinner while authentication state is being determined.
+  // Renders a loading spinner while the authentication state is being determined.
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">

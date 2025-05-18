@@ -3,18 +3,18 @@ import Image from "next/image";
 /**
  * Props for the CarspotVisuals component.
  * @param isAvailable - Whether the parking spot is available
- * @param [key: string] - Additional props that can be passed to the component
- */
+ * @param {unknown} [key] – Additional props that can be passed to the component */
 interface CarspotVisualsProps {
   isAvailable: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
  * A component that displays a visual representation of a parking spot.
  *
  * Shows either an empty spot or a car icon based on availability.
- * @param {CarspotVisualsProps} props - The props for the CarspotVisuals component
+ * @param isAvailable
+ * @param props
  */
 const CarspotVisuals = ({ isAvailable, ...props }: CarspotVisualsProps) => {
   return (

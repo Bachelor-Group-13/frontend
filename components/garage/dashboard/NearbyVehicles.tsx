@@ -1,6 +1,6 @@
 import { Mail, MessageCircle, Phone, Users } from "lucide-react";
 import { format } from "date-fns";
-import { ParkingSpot } from "@/lib/utils/types";
+import { ParkingSpot, User } from "@/lib/utils/types";
 import { isBlockingCar } from "@/lib/utils/parking";
 import {
   Tooltip,
@@ -15,7 +15,7 @@ import {
  * @param parkingSpots - List of all parking spots in the garage
  */
 interface NearbyVehiclesProps {
-  user: any;
+  user: User | null;
   parkingSpots: ParkingSpot[];
 }
 
@@ -37,7 +37,7 @@ export function NearbyVehicles({ user, parkingSpots }: NearbyVehiclesProps) {
       return false;
     }
 
-    // Filter out the blocking spot (B spot) if user has a reservation
+    // Filter out the blocking spot (B spot) if the user has a reservation
     if (user?.current_reservation) {
       const rowNumber = user.current_reservation.spotNumber.slice(0, -1);
       if (spot.spotNumber === `${rowNumber}B`) {

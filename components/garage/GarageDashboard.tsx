@@ -11,7 +11,7 @@ import { ParkedInBy } from "./dashboard/ParkedInBy";
  * @param parkingSpots - The list of parking spots in the garage
  */
 interface GarageDashboardProps {
-  user: any;
+  user: unknown;
   parkingSpots: ParkingSpot[];
 }
 

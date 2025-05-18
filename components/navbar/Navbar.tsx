@@ -51,21 +51,22 @@ export function Navbar() {
   };
 
   // Extracts initials from the user's name or email for avatar fallback
-  const getInitials = () => {
+  const getInitials = (): string => {
     if (user?.name) {
       const nameParts = user.name.split(" ");
       const initials = nameParts
-        .filter((part: any) => part.length > 0)
+        .filter(part => part.length > 0)
         .slice(0, 2)
-        .map((part: any) => part.charAt(0).toUpperCase())
+        .map(part => part.charAt(0).toUpperCase())
         .join("");
       return initials;
     } else if (user?.email) {
-      const parts = user.email.split("@")[0].split(/[\W_]+/);
+      const localPart = user.email.split("@")[0];
+      const parts = localPart.split(/[\W_]+/);
       const initials = parts
-        .filter((part: any) => part.length > 0)
+        .filter(part => part.length > 0)
         .slice(0, 2)
-        .map((part: any) => part.charAt(0).toUpperCase())
+        .map(part => part.charAt(0).toUpperCase())
         .join("");
       return initials || "U";
     }

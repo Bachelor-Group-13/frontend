@@ -7,6 +7,7 @@ import { uploadLicensePlateImage } from "@/lib/api/api";
 import { cn } from "@/lib/utils/utils";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
+import axios from "axios";
 
 /**
  * Props for the LicensePlateUpload component.
@@ -130,12 +131,16 @@ const LicensePlateUpload: FC<LicensePlateUploadProps> = ({
       } else {
         setError("No license plate detected in either systems.");
       }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error ||
-          err.message ||
-          "Failed to detect license plate."
-      );
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.data?.error) {
+        setError(err.response.data.error);
+
+      } else if (err instanceof Error) {
+        setError(err.message);
+
+      } else {
+        setError(String(err) || "Failed to detect license plate.");
+      }
     } finally {
       setLoading(false);
     }
