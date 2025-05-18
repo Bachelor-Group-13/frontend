@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { ParkingSpot } from "@/lib/utils/types";
+import { ParkingSpot, Vehicle } from "@/lib/utils/types";
 import {
   fetchUserDetails,
   fetchReservations,
@@ -17,7 +17,7 @@ import {
  * @property {string} name - The user's full name
  * @property {string} role - The user's role in the system
  * @property {Object|null} current_reservation - The user's active parking reservation
- * @property {any} vehicle - Additional vehicle information
+ * @property {Vehicle|null} vehicle - Additional vehicle information
  */
 interface User {
   id: number;
@@ -31,7 +31,7 @@ interface User {
     spotNumber: string;
     licensePlate: string;
   } | null;
-  vehicle: any;
+  vehicle: Vehicle | null;
 }
 
 /**
@@ -65,9 +65,11 @@ export function useGarageReservations() {
       );
 
       const userReservation = reservations.find(
-        (res: any) => res.userId === userDetails.id
+        (res: { userId: string; spotNumber: string; licensePlate: string }) =>
+          res.userId === userDetails.id
       );
       console.log("User reservation found:", userReservation);
+
 
       setUser({
         id: userDetails.id,

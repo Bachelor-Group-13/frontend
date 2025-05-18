@@ -95,7 +95,7 @@ export default function SecuritySettings({
             </button>
           </div>
           <p className="text-xs text-gray-500">
-            Leave blank if you don't want to change your password
+            {`Leave blank if you don't want to change your password`}
           </p>
         </div>
       </div>

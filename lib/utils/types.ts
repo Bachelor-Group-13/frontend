@@ -155,3 +155,20 @@ export interface PlateDto {
   text: string;
   bbox: number[];
 }
+
+/**
+ * Represents the reservation response from the API.
+ * @property {number} id - The unique identifier for the reservation
+ * @property {string} spotNumber - The parking spot number
+ * @property {number} userId - The unique identifier for the user
+ * @property {boolean} [anonymous] - Whether the reservation is anonymous
+ * @property {string} reservationDate - The date and time of the reservation
+ */
+export interface ReservationResponse {
+  id: number;
+  spotNumber: string;
+  userId: number;
+  anonymous?: boolean;
+  reservationDate: string;
+}
+

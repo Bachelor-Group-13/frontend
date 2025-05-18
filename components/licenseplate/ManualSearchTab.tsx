@@ -61,7 +61,7 @@ export function ManualSearchTab({
           </Button>
         </form>
         <p className="text-xs text-gray-500">
-          Enter the license plate number in the format "AB12345"
+          {`Enter the license plate number in the format "AB12345%"`}
         </p>
       </div>
     </div>

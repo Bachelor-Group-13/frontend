@@ -1,7 +1,7 @@
 "use client";
 import { Mail, MessageCircle, Phone, Car } from "lucide-react";
 import { format } from "date-fns";
-import { ParkingSpot } from "@/lib/utils/types";
+import { ParkingSpot, User } from "@/lib/utils/types";
 import { isParkedIn } from "@/lib/utils/parking";
 import { useEffect, useRef } from "react";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -12,7 +12,7 @@ import { useToast } from "@/lib/hooks/use-toast";
  * @param parkingSpots - List of all parking spots in the garage
  */
 interface ParkedInByProps {
-  user: any;
+  user: User | null;
   parkingSpots: ParkingSpot[];
 }
 

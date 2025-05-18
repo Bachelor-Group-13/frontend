@@ -2,7 +2,7 @@
 
 import { login } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Label } from "../ui/label";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Input } from "../ui/input";
@@ -14,7 +14,7 @@ import { Button } from "../ui/button";
  * @param onErrorAction - Function to call when an error occurs, takes type, title, and description
  */
 interface SignInFormProps {
-  onSuccessAction: (userData?: any) => void;
+  onSuccessAction: (userData?: unknown) => void;
   onErrorAction: (
     type: "default" | "destructive",
     title: string,
@@ -40,7 +40,7 @@ export default function SignInForm({
   const router = useRouter();
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -69,11 +69,11 @@ export default function SignInForm({
       console.log("Login successful:", data);
       onSuccessAction(data);
       router.push("/garage");
-    } catch (error: any) {
+    } catch (error: unknown) {
       onErrorAction(
         "destructive",
         "Error",
-        error.message || "An unknown error occured."
+        error instanceof Error ? error.message : "An unknown error occurred."
       );
     } finally {
       setIsSubmitting(false);

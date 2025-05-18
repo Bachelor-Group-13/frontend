@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthContext";
 import { handleLicensePlateChange } from "@/lib/utils/plate-helpers";
@@ -64,7 +64,7 @@ export function useProfile() {
     (value: string) => {
       handleFieldChange("licensePlate", value);
       handleLicensePlateChange(
-        { target: { value } } as React.ChangeEvent<HTMLInputElement>,
+        { target: { value } } as ChangeEvent<HTMLInputElement>,
         () => {},
         (value: string | null | ((prev: string | null) => string | null)) => {
           if (typeof value === "function") {
@@ -93,24 +93,25 @@ export function useProfile() {
 
     try {
       const userData = await profileService.fetchUserData(user.id);
-      setFormData({
-        ...formData,
-        licensePlate: userData.licensePlate || "",
-        secondLicensePlate: userData.secondLicensePlate || "",
-        phoneNumber: userData.phoneNumber || "",
-        userEmail: userData.email || "",
-        name: userData.name || "",
-      });
+        setFormData((prev) => ({
+          ...prev,
+          licensePlate: userData.licensePlate || "",
+          secondLicensePlate: userData.secondLicensePlate || "",
+          phoneNumber: userData.phoneNumber || "",
+          userEmail: userData.email || "",
+          name: userData.name || "",
+        }));
 
-      if (userData.secondLicensePlate) {
+        if (userData.secondLicensePlate) {
         setUiState((prev) => ({ ...prev, showSecondLicensePlate: true }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching user data:", error);
+      const err = error as { response?: { data?: { message?: string } } };
       setUiState((prev) => ({
         ...prev,
         errorMessage:
-          error.response?.data?.message || "Failed to fetch user data",
+          err.response?.data?.message || "Failed to fetch user data",
         showErrorAlert: true,
       }));
     } finally {
@@ -182,12 +183,17 @@ export function useProfile() {
 
       setUiState((prev) => ({ ...prev, showSuccessAlert: true }));
       setFormData((prev) => ({ ...prev, password: "", confirmPassword: "" }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating user profile:", error);
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       setUiState((prev) => ({
         ...prev,
         errorMessage:
-          error.response?.data?.message ||
+          err.response?.data?.message ||
+          err.message ||
           "An unknown error occurred during update.",
         showErrorAlert: true,
       }));

@@ -26,8 +26,8 @@ const AuthContext = createContext<AuthContextType>({
  * Provider component that wraps the application and provides authentication context.
  *
  * Manages authentication state, checks user session on mount and route changes,
- * and redirects to auth page when needed.
- * @param {ReactNode} props.children - Child components to be wrapped
+ * and redirects to the auth page when needed.
+ * @param {ReactNode} children - Child components to be wrapped
  */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -44,8 +44,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await api.get("/api/auth/me");
         setUser(response.data);
         setIsAuthenticated(true);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Handle authentication error
+        console.error("Failed to fetch user data:", error);
         setIsAuthenticated(false);
         setUser(null);
         if (pathname !== "/auth" && pathname !== "/") {

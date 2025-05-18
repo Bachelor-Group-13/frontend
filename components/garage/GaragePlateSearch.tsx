@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 /**
  * Props for the GaragePlateSearch component.
@@ -21,7 +21,7 @@ export function GaragePlateSearch({ onSearch }: GaragePlateSearchProps) {
   const [plate, setPlate] = useState("");
 
   // Function to handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const trimmed = plate.trim().toUpperCase();
     if (trimmed) {
