@@ -31,7 +31,7 @@ export const login = async (email: string, password: string) => {
       window.dispatchEvent(
         new CustomEvent("userAuthChange", { detail: userResponse.data })
       );
-    } catch (meError: any) {
+    } catch (meError: unknown) {
       console.error("Error fetching user details:", meError);
       window.dispatchEvent(
         new CustomEvent("userAuthChange", { detail: response.data })
@@ -39,11 +39,12 @@ export const login = async (email: string, password: string) => {
     }
 
     return { data: response.data, error: null };
-  } catch (error: any) {
-    console.error("Login error:", error.response?.data || error);
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: { message?: string } } };
+    console.error("Login error:", axiosError.response?.data || error);
     return {
       data: null,
-      error: error.response?.data?.message || "Login failed",
+      error: axiosError.response?.data?.message || "Login failed",
     };
   }
 };
@@ -73,15 +74,23 @@ export const register = async (
       phoneNumber,
     });
     return { data: response.data, error: null };
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as {
+      response?: { data?: { message?: string } };
+      message?: string;
+    };
+
     return {
       data: null,
-      error: error.response?.data?.message || "Failed to sign up",
+      error:
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to sign up",
     };
   }
 };
 
-// Logs out the current user and redirects to home page.
+// Logs out the current user and redirects to the home page.
 export const logout = async () => {
   try {
     await api.post(`${API_URL}logout`, {}, { withCredentials: true });

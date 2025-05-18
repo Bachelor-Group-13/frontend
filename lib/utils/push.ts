@@ -15,7 +15,7 @@ export function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 function toBase64Url(uint8Array: Uint8Array): string {
-  let base64 = btoa(
+  const base64 = btoa(
     String.fromCharCode.apply(null, [...new Uint8Array(uint8Array)])
   );
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");

@@ -1,11 +1,11 @@
 import { useState, useCallback, Dispatch, SetStateAction } from "react";
 import { api } from "@/lib/api/auth";
-import { ParkingSpot, ParkingSpotBoundary, Vehicle } from "@/lib/utils/types";
+import { ParkingSpot, ParkingSpotBoundary, ReservationResponse, User } from "@/lib/utils/types";
 import { useToast } from "@/lib/hooks/use-toast";
 
 /**
  * Props for the useReservationActions hook.
- * @property {any} user - The current user
+ * @property {User|null} user - The current user
  * @property {ParkingSpot[]} parkingSpots - Array of parking spots
  * @property {Function} setParkingSpots - Function to update parking spots
  * @property {Function} fetchUserAndReservations - Function to refresh user and reservation data
@@ -14,13 +14,17 @@ import { useToast } from "@/lib/hooks/use-toast";
  * @property {Function} setShowUnauthorizedAlert - Function to show unauthorized alert
  */
 interface UseReservationActionsProps {
-  user: any;
+  user: User | null;
   parkingSpots: ParkingSpot[];
   setParkingSpots: Dispatch<SetStateAction<ParkingSpot[]>>;
   fetchUserAndReservations: () => Promise<void>;
   setSelectedSpot: (spot: ParkingSpot | null) => void;
   setActiveTab: (tab: string) => void;
   setShowUnauthorizedAlert: (show: boolean) => void;
+}
+
+interface AnonymousReservation extends ReservationResponse {
+  anonymous: boolean;
 }
 
 /**
@@ -128,7 +132,7 @@ export function useReservationActions({
 
         const reservation = reservations.find(
           (res: { spotNumber: string; userId: number }) =>
-            res.spotNumber === selectedSpot.spotNumber && res.userId === user.id
+            res.spotNumber === selectedSpot.spotNumber && res.userId === Number(user.id)
         );
 
         if (reservation) {
@@ -165,11 +169,11 @@ export function useReservationActions({
       const reservationsResponse = await api.get(
         `/api/reservations/date/${today}`
       );
-      const reservations = reservationsResponse.data;
+      const reservations: AnonymousReservation[] = reservationsResponse.data;
 
       const anonymousReservation = reservations.find(
-        (res: any) =>
-          res.spotNumber === selectedSpot.spotNumber && res.anonymous === true
+        (res: AnonymousReservation) =>
+          res.spotNumber === selectedSpot.spotNumber && res.anonymous
       );
 
       if (anonymousReservation) {
@@ -200,9 +204,9 @@ export function useReservationActions({
     }
   };
 
-  // Processes detected parking spots and updates their status
+  // Processes detected parking spots and updated their status
   const handleSpotsDetected = useCallback(
-    async (boundaries: ParkingSpotBoundary[], _vehicles: Vehicle[]) => {
+    async (boundaries: ParkingSpotBoundary[]) => {
       setIsUpdating(true);
 
       setParkingSpots((currentSpots: ParkingSpot[]) =>
@@ -266,7 +270,7 @@ export function useReservationActions({
 
       try {
         const today = new Date().toISOString().split("T")[0];
-        const reservationPromises: Promise<any>[] = [];
+        const reservationPromises = [] as Promise<unknown>[]
 
         for (const b of boundaries) {
           if (b.isOccupied && b.vehicle?.licensePlate) {
@@ -277,7 +281,7 @@ export function useReservationActions({
             if (u?.id) {
               const existing = await api.get(`/api/reservations/user/${u.id}`);
               const hasToday = existing.data.some(
-                (r: any) => r.reservationDate === today
+                (r: { reservationDate: string }) => r.reservationDate === today
               );
               if (!hasToday) {
                 reservationPromises.push(
