@@ -47,17 +47,16 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-2xl px-4">
         {/* Header section  */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="relative flex items-center justify-center">
             <Link
               href="/garage"
-              className="inline-flex items-center rounded-full px-3 py-2 text-gray-700 transition
+              className="absolute left-0 inline-flex items-center rounded-full px-3 py-2 text-gray-700 transition
                 hover:bg-gray-200"
             >
               <ArrowLeft className="h-5 w-5 text-gray-600" />
               <span className="ml-2 font-medium">Back to Garage</span>
             </Link>
             <h1 className="text-2xl font-bold">Profile</h1>
-            <div className="w-0 sm:w-auto" />
           </div>
         </div>
 
