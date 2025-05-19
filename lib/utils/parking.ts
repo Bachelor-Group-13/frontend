@@ -149,7 +149,7 @@ export async function detectParkingSpots(imageFile: File) {
  */
 export function convertToParkingSpotBoundaries(detectionResults: {
   mappedSpots: DetectedSpot[];
-  rawDetection?: { vehicles: Vehicle[]; prcessedImage?: string };
+  rawDetection?: { vehicles: Vehicle[]; processedImage?: string };
 }): ParkingSpotBoundary[] {
   return detectionResults.mappedSpots.map((spot, index) => ({
     id: index,

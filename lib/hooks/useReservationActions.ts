@@ -136,9 +136,9 @@ export function useReservationActions({
         const reservations = reservationsResponse.data;
 
         const reservation = reservations.find(
-          (res: { spotNumber: string; userId: number }) =>
+          (res: { spotNumber: string; userId: string }) =>
             res.spotNumber === selectedSpot.spotNumber &&
-            res.userId === Number(user.id)
+            res.userId === user.id
         );
 
         if (reservation) {

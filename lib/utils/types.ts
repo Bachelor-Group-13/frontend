@@ -167,7 +167,7 @@ export interface PlateDto {
 export interface ReservationResponse {
   id: number;
   spotNumber: string;
-  userId: number;
+  userId: string;
   anonymous?: boolean;
   reservationDate: string;
 }
