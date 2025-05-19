@@ -8,7 +8,7 @@ type Reservation = {
   userName?: string | null;
   userEmail?: string | null;
   userPhoneNumber?: string | null;
-  userId: number;
+  userId: string;
   estimatedDeparture?: string | null;
   anonymous?: boolean;
   blockedSpot?: boolean;
@@ -66,7 +66,7 @@ export function createInitialParkingSpots(
             name: reservation.userName || null,
             email: reservation.userEmail ?? null,
             phone_number: reservation.userPhoneNumber ?? null,
-            user_id: reservation.userId.toString(),
+            user_id: reservation.userId,
             estimatedDeparture: reservation.estimatedDeparture ?? null,
           }
         : null,
@@ -102,21 +102,14 @@ export function updateParkingSpotsWithReservations(
         blockedSpot: isBlocked,
         occupiedBy: {
           anonymous: isAnonymous,
-
           license_plate: reservation.licensePlate,
           second_license_plate: null,
-
           name: isAnonymous ? null : (reservation.userName ?? null),
           email: isAnonymous ? null : (reservation.userEmail ?? null),
           phone_number: isAnonymous
             ? null
             : (reservation.userPhoneNumber ?? null),
-
-          user_id:
-            isAnonymous || reservation.userId == null
-              ? null
-              : reservation.userId.toString(),
-
+          user_id: isAnonymous ? null : reservation.userId,
           estimatedDeparture: reservation.estimatedDeparture ?? null,
         },
         vehicle: null,

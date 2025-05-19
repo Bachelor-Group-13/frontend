@@ -134,7 +134,7 @@ export function GarageLayout() {
           <GarageMap
             parkingSpots={parkingSpots}
             onSpotSelect={setSelectedSpot}
-            currentUserId={user?.id?.toString() || null}
+            currentUserId={user?.id ? user.id.toString() : null}
           />
         </TabsContent>
 

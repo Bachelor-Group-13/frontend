@@ -57,6 +57,13 @@ export function useGarageReservations() {
       const userDetails = await fetchUserDetails();
       console.log("User details from API:", userDetails);
 
+      // Only proceed if we have valid user details
+      if (!userDetails || !userDetails.id) {
+        console.warn("Invalid user details received");
+        setUser(null);
+        return;
+      }
+
       const today = new Date().toISOString().split("T")[0];
       const reservations = await fetchReservations(today);
       console.log(
@@ -94,6 +101,7 @@ export function useGarageReservations() {
       });
     } catch (err) {
       console.error("Error fetching reservations:", err);
+      setUser(null);
     }
   }, []);
 
