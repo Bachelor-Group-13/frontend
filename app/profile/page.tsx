@@ -50,11 +50,13 @@ export default function ProfilePage() {
           <div className="relative flex items-center justify-center">
             <Link
               href="/garage"
-              className="absolute left-0 inline-flex items-center rounded-full px-3 py-2 text-gray-700 transition
-                hover:bg-gray-200"
+              className="absolute left-0 inline-flex items-center rounded-full px-3 py-2 text-gray-700
+                transition hover:bg-gray-200"
             >
               <ArrowLeft className="h-5 w-5 text-gray-600" />
-              <span className="ml-2 font-medium hidden sm:inline">Back to Garage</span>
+              <span className="ml-2 hidden font-medium sm:inline">
+                Back to Garage
+              </span>
             </Link>
             <h1 className="text-2xl font-bold">Profile</h1>
           </div>
