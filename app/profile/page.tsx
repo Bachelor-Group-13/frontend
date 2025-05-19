@@ -54,7 +54,7 @@ export default function ProfilePage() {
                 hover:bg-gray-200"
             >
               <ArrowLeft className="h-5 w-5 text-gray-600" />
-              <span className="ml-2 font-medium">Back to Garage</span>
+              <span className="ml-2 font-medium hidden sm:inline">Back to Garage</span>
             </Link>
             <h1 className="text-2xl font-bold">Profile</h1>
           </div>
